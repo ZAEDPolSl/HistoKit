@@ -1,5 +1,7 @@
 import numpy as np
 from scipy.stats import norm
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
 
 def GaMRed_hist(x, y, K, draw, SW):
     """
@@ -13,10 +15,126 @@ def GaMRed_hist(x, y, K, draw, SW):
 
     Matalab implementation: Michal Marczyk (Michal.Marczyk@polsl.pl)
     """
-    pass
+    ind = np.argsort(x)
+    x = np.sort(x)
+    y = y[ind]
+    N = np.sum(y) #nb of measurments
+    bic = np.inf
+
+    # remove no signal at the beginning or the end
+    y[0] = 0
+    y[-1] = 0
+
+    # initial conditions
+    if K == 1:
+        alpha_init = 1
+        mi_init = np.mean(x)
+        sigma_init = np.std(x)
+    else:
+        alpha_init, mi_init, sigma_init = gmm_init_dp_hist(x, y, K)
+
+    if draw:
+        print("Starting values")
+        print(f"alpha_init: {alpha_init}, mi_init: {mi_init}, sigma_init: {sigma_init}")
+
+    while bic == np.inf or bic == 0:
+        # EM algorithm
+        alpha, mi, sigma, logL = EM_iter_hist(x, y, alpha_init, mi_init, sigma_init, SW)
+
+        # calculating BIC
+        bic = -2*logL + (3*K-1)*np.log(N)
+        if bic == np.inf or bic == 0:
+            raise ValueError("EM crash. Repeat calculations.")
+
+    ind = np.argsort(mi)
+    mi  = np.sort(mi)
+    alpha = alpha[ind]
+    sigma = sigma[ind]
+
+    if draw:
+        print("Final values")
+        print(f"alpha: {alpha}, mi: {mi}, sigma: {sigma}")
+
+    # find threshold between components
+    if K == 1:
+        thr = np.min(x) - 1e-10
+    elif K == 2:
+        thr = find_thr(x, alpha, mi, sigma, np.array([0, 1]), draw)
+    else:
+        temp = np.column_stack((alpha, mi, sigma))
+        kmeans = KMeans(n_clusters=2, n_init=50, random_state=0).fit(temp)
+        idx = kmeans.labels_
+        thr = find_thr(x, alpha, mi, sigma,idx-1, draw)
+
+    try:
+        thr
+    except NameError:
+        thr = np.nan
+
+    stats = {
+        "thr": thr,
+        "alpha": alpha,
+        "mu": mi,
+        "K": K,
+        "sigma": sigma,
+        "logL": logL,
+    }
+
+    return thr, bic, stats
 
 def EM_iter_hist(x, y, alpha, mu, sig, SW):
-    pass
+    """
+    Expectation maximisation algorithm iteration.
+    :param x: binned data (bins)
+    :param y: binned data (counts)
+    :param alpha: GMM components' weights
+    :param mu: GMM components' means
+    :param sig: GMM components' standard deviations
+    :param SW:
+    :return: alpha - updated weights, mu - updated means, sigma - updated standard deviations, logL - loglikelihood
+    """
+
+    N = len(y)
+    n = np.sum(y)
+    sig2 = np.maximum(sig ** 2, SW ** 2)
+    change = np.inf
+    count = 1
+    SW = SW ** 2
+    eps_change = 1e-6
+    KS = len(alpha)
+
+    while change > eps_change and count < 10000:
+        old_alpha = alpha.copy()
+        old_sig2 = sig2.copy()
+
+        f = np.zeros((KS, N))
+        sig = np.sqrt(sig2)
+
+        for a in range(KS):
+            f[a, :] = norm_pdf(x, mu[a], sig[a])
+
+        px = alpha @ f
+        px[np.isnan(px) | (px == 0)] = 5e-324
+
+        for a in range(KS):
+            pk = ((alpha[a] * f[a, :]) * y) / px
+            denom = np.sum(pk)
+            mu[a] = (pk @ x) / denom
+            sig2num = np.sum(pk @ ((x - mu[a]) ** 2))
+            sig2[a] = np.maximum(SW, sig2num / denom)
+            alpha[a] = denom / n
+
+        change = np.sum(np.abs(alpha - old_alpha)) + np.sum(np.abs(sig2 - old_sig2) / sig2) / len(alpha)
+        count += 1
+
+    # return results
+    logL = np.sum(np.log(px) * y)
+    mu_est = np.sort(mu)
+    ind = np.argsort(mu)
+    sig_est = np.sqrt(sig2[ind])
+    pp_est = alpha[ind]
+
+    return pp_est, mu_est, sig_est, logL
 
 def gmm_init_dp_hist(x, y, K):
     """
@@ -103,7 +221,7 @@ def gmm_init_dp_hist(x, y, K):
         sigma[a] = np.sqrt(np.sum(((invec - np.sum(invec * wwec)) ** 2) * wwec) - s_corr)
 
 
-    return alpha.reshape(1, -1), mu.reshape(1, -1), sigma.reshape(1, -1)
+    return alpha, mu, sigma
 
 def norm_pdf(x, mu, sigma):
     """
@@ -118,7 +236,70 @@ def norm_pdf(x, mu, sigma):
     return y.reshape(1, -1)
 
 def find_thr(data, alpha, mi, sigma, idx, draw):
-    pass
+    """
+    Find threshold
+    :param data: data
+    :param alpha: GMM component weights
+    :param mi: GMM component means
+    :param sigma: GMM component standard deviations
+    :param idx: index for informative/non-informative components
+    :param draw: draw plot or not
+    :return: thr - threshold value
+    """
+    idx = idx.astype(bool)
+
+    # generate data with better precision
+    K = len(mi)
+    f_temp=np.zeros((int(1e7), K))
+    x_temp=np.linspace(np.min(data), np.max(data), int(1e7))
+
+    for k in range(K):
+        f_temp[:, k] = alpha[k]*norm_pdf(x_temp, mi[k], sigma[k])
+
+    # find GMM for informative and non-informative components
+    f1 = np.sum(f_temp[:, ~idx], axis=1)
+    f2 = np.sum(f_temp[:, idx], axis=1)
+
+    # calculate difference of f1 and f2 and find its global minimum
+    f_diff = np.abs(f1 - f2)
+    ind1 = np.argmax(f1)
+    ind2 = np.argmax(f2)
+    ind = np.argsort(f_diff)
+
+    ind = ind[(ind<ind1) & (ind>ind2)]
+
+    if len(ind) == 0:
+        ind = np.argsort(f_diff)
+        a=0
+        thr_ind = ind[a]
+
+        while thr_ind<ind1 or thr_ind>ind2:
+            a+=1
+            if a>=len(ind):
+                raise ValueError("Missing index")
+            thr_ind = ind[a]
+    else:
+        thr_ind = ind[0]
+
+    thr = x_temp[thr_ind]
+
+    if draw:
+        fig, axes = plt.subplots(2, 1, figsize=(8, 6))
+        axes[0].plot(x_temp, f1, 'g', linewidth=2, label='f1')
+        axes[0].plot(x_temp, f2, 'r', linewidth=2, label='f2')
+        axes[0].set_xlabel("Variable")
+        axes[0].set_ylabel("Model", fontsize=14)
+        axes[0].legend()
+
+        axes[1].plot(x_temp, f_diff, 'r', linewidth=2, label='f_diff')
+        axes[1].set_xlabel("Variable")
+        axes[1].set_ylabel("Models difference", fontsize=14)
+        axes[1].set_title(f"Threshold: {thr:.4f}")
+
+        plt.tight_layout()
+        plt.show()
+
+    return thr
 
 def get_pixel_distribution(img):
     """

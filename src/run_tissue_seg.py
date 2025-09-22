@@ -88,14 +88,7 @@ for slide in slides:
     # get the distribution of pixel values per color channel
     img_np = np.array(region)
     bins = np.arange(-0.5, 255.5, 1)
-    R, _ = np.histogram(img_np[:, :, 0], bins=bins)
-    G, _ = np.histogram(img_np[:, :, 1], bins=bins)
-    B, _ = np.histogram(img_np[:, :, 2], bins=bins)
 
-    # remove counts from artificial white pixels and lines
-    R[255:] = 0
-    G[255:] = 0
-    B[255:] = 0
 
     bins = np.arange(0, 255, 1)
     fig, axs = plt.subplots(3, 1, figsize=(8, 15))
