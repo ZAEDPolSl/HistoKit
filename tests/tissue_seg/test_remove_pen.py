@@ -1,12 +1,10 @@
 import numpy as np
 import pytest
 from matplotlib import pyplot as plt
-from scipy.io import loadmat, savemat
+from scipy.io import loadmat
 from PIL import Image
-from numpy.testing import assert_array_equal, assert_allclose
-from src.tissue_seg.find_thr import get_pixel_distribution, norm_pdf, gmm_init_dp_hist, EM_iter_hist, find_thr, \
-    GaMRed_hist, get_thr_image
-from src.tissue_seg.remove_pen import remove_pen
+from numpy.testing import assert_array_equal
+from src.tissue_seg.remove_pen import remove_pen, get_strel_disk
 
 
 @pytest.mark.parametrize("img_path, thr, mat_file", [
@@ -34,4 +32,24 @@ def test_remove_black_pen(img_path, thr, mat_file):
 
     plt.show()
     diff_fraction = np.mean(mask.astype(int)!=mat_res["mask"])
+    diff_num = np.sum(mask.astype(int)!=mat_res["mask"])
+    print(f" Fraction of mismatched elements: {diff_fraction:.8f} - Number of pixels mismatched: {diff_num}")
     assert diff_fraction < 10e-5
+
+
+def test_get_strel_disk():
+
+    strel = get_strel_disk(5)
+
+    strel_gt = np.array([
+    [False, False, True,  True,  True,  True,  True,  False, False],
+    [False, True,  True,  True,  True,  True,  True,  True,  False],
+    [True,  True,  True,  True,  True,  True,  True,  True,  True ],
+    [True,  True,  True,  True,  True,  True,  True,  True,  True ],
+    [True,  True,  True,  True,  True,  True,  True,  True,  True ],
+    [True,  True,  True,  True,  True,  True,  True,  True,  True ],
+    [True,  True,  True,  True,  True,  True,  True,  True,  True ],
+    [False, True,  True,  True,  True,  True,  True,  True,  False],
+    [False, False, True,  True,  True,  True,  True,  False, False],
+])
+    assert_array_equal(strel, strel_gt)
