@@ -4,7 +4,7 @@ from scipy.io import loadmat, savemat
 from PIL import Image
 from numpy.testing import assert_array_equal, assert_allclose
 from src.tissue_seg.find_thr import get_pixel_distribution, norm_pdf, gmm_init_dp_hist, EM_iter_hist, find_thr, \
-    GaMRed_hist
+    GaMRed_hist, get_thr_image, two_step_otsu
 
 
 @pytest.mark.parametrize("image_path, mat_file", [
@@ -18,9 +18,9 @@ def test_find_pixel_distribution(image_path, mat_file):
     R, G, B = get_pixel_distribution(img_np)
     mat_res = loadmat(mat_file)
 
-    assert_array_equal(R, mat_res["R"])
-    assert_array_equal(G, mat_res["G"])
-    assert_array_equal(B, mat_res["B"])
+    assert_array_equal(R.reshape(1, -1), mat_res["R"])
+    assert_array_equal(G.reshape(1, -1), mat_res["G"])
+    assert_array_equal(B.reshape(1, -1), mat_res["B"])
 
 
 @pytest.mark.parametrize("channel, K, draw, SW, mat_file", [
@@ -36,7 +36,7 @@ def test_GaMRed_hist(channel, K, draw, SW, mat_file):
                 "G": distribution[1],
                 "B": distribution[2]}
     x = np.arange(256)
-    y = channels[channel].squeeze()
+    y = channels[channel]
     thr, bic, stats = GaMRed_hist(x, y, K, draw, SW)
     mat_res = loadmat(mat_file)
 
@@ -64,7 +64,7 @@ def test_EM_iter_hist(channel, alpha, mu, sig, SW, mat_file):
                 "G": distribution[1],
                 "B": distribution[2]}
     x = np.arange(256)
-    y = channels[channel].squeeze()
+    y = channels[channel]
     pp_est, mu_est, sig_est, logL = EM_iter_hist(x, y, alpha, mu, sig, SW)
     mat_res = loadmat(mat_file)
     assert_allclose(np.sort(pp_est.reshape(1, -1)), np.sort(mat_res["pp_est"]))
@@ -87,7 +87,7 @@ def test_gmm_init_dp_hist(channel, K, mat_file):
                 "B": distribution[2]}
 
     x = np.arange(256)
-    y = channels[channel].squeeze()
+    y = channels[channel]
     alpha, mu, sigma = gmm_init_dp_hist(x, y, K)
     mat_res = loadmat(mat_file)
     assert_allclose(alpha.reshape(1, -1), mat_res["alpha"])
@@ -114,4 +114,39 @@ def test_norm_pdf(x, mu, sigma, mat_file):
 def test_find_thr(data, alpha, mi, sigma, idx, draw, thr_gt):
     thr = find_thr(data, alpha, mi, sigma, idx, draw)
     assert_allclose(thr, thr_gt)
+
+@pytest.mark.parametrize("img_path, mat_file", [
+    ("../../test_data/test_find_thr/region_1.tif", "../../test_data/test_find_thr/get_thr_image_1.mat"),
+    ("../../test_data/test_find_thr/region_2.tif", "../../test_data/test_find_thr/get_thr_image_2.mat"),
+    ("../../test_data/test_find_thr/region_3.tif", "../../test_data/test_find_thr/get_thr_image_3.mat")
+])
+def test_get_thr_image(img_path, mat_file):
+    img = Image.open(img_path)
+    img_np = np.array(img)
+    thr = get_thr_image(img_np)
+
+    mat_res = loadmat(mat_file)
+    assert_allclose(thr["R"], mat_res["R"])
+    assert_allclose(thr["G"], mat_res["G"])
+    assert_allclose(thr["B"], mat_res["B"])
+
+@pytest.mark.parametrize("img_path, mat_file", [
+    ("../../test_data/test_find_thr/region_1.tif", "../../test_data/test_find_thr/two_step_otsu_1.mat"),
+    ("../../test_data/test_find_thr/region_2.tif", "../../test_data/test_find_thr/two_step_otsu_2.mat"),
+    ("../../test_data/test_find_thr/region_3.tif", "../../test_data/test_find_thr/two_step_otsu_3.mat")
+])
+def test_two_step_otsu(img_path, mat_file):
+    img = Image.open(img_path)
+    img_np = np.array(img)
+    R, G, B = get_pixel_distribution(img_np)
+
+    thr= {"R": two_step_otsu(R), "G": two_step_otsu(G),
+          "B": two_step_otsu(B)}
+    mat_res = loadmat(mat_file)
+
+    assert_allclose(thr["R"], mat_res["R"][0, 0])
+    assert_allclose(thr["G"], mat_res["G"][0, 0])
+    assert_allclose(thr["B"], mat_res["B"][0, 0])
+
+
 
