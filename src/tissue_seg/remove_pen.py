@@ -2,7 +2,7 @@ import numpy as np
 from scipy.ndimage import binary_fill_holes
 from skimage.color import rgb2hsv
 from skimage.morphology import disk, opening, closing
-
+from scipy import ndimage as ndi
 
 def remove_pen(img, pen_color, thr_low, thr_high, thr_back, radius):
     """
@@ -17,7 +17,17 @@ def remove_pen(img, pen_color, thr_low, thr_high, thr_back, radius):
     """
 
     # set structuring element for morphology
-    SE = disk(radius)
+    SE = np.array([
+    [False, False, True,  True,  True,  True,  True,  False, False],
+    [False, True,  True,  True,  True,  True,  True,  True,  False],
+    [True,  True,  True,  True,  True,  True,  True,  True,  True ],
+    [True,  True,  True,  True,  True,  True,  True,  True,  True ],
+    [True,  True,  True,  True,  True,  True,  True,  True,  True ],
+    [True,  True,  True,  True,  True,  True,  True,  True,  True ],
+    [True,  True,  True,  True,  True,  True,  True,  True,  True ],
+    [False, True,  True,  True,  True,  True,  True,  True,  False],
+    [False, False, True,  True,  True,  True,  True,  False, False],
+])
 
     # choose thresholds based on color
     if pen_color == 'black':
@@ -43,8 +53,8 @@ def remove_pen(img, pen_color, thr_low, thr_high, thr_back, radius):
                    ((G > thr_back["G"]) & (B > thr_back["B"])))
 
     if np.any(mask):
-        mask = opening(mask, SE)
-        mask = closing(mask, SE)
-        mask = binary_fill_holes(mask)
+        mask = ndi.binary_opening(mask, SE)
+        mask = ndi.binary_closing(mask, SE)
+        #mask = binary_fill_holes(mask)
 
     return mask
