@@ -362,8 +362,8 @@ def get_thr_image(img, thr_min = 0.7*255, verbose=False):
 def two_step_otsu(hist):
     """
     Two-step Otsu algorithm implementation.
-    :param hist:
-    :return:
+    :param hist: array with pixel counts
+    :return: thr - threshold value
     """
     tmp, _ = otsuthresh(hist)
     tmp = int(tmp*255)
@@ -373,9 +373,9 @@ def two_step_otsu(hist):
 
 def otsuthresh(counts):
     """
-    Python implementation of Otsu's method, based on matlab's implementation.'
+    Python implementation of Otsu's method, based on matlab's implementation.
     :param counts: array with pixel counts
-    :return: t -threshold, em - effectiveness metric
+    :return: t - threshold, em - effectiveness metric
     """
     counts = np.asarray(counts, dtype=np.float128).ravel()
     num_bins = counts.size
