@@ -2,6 +2,7 @@ import numpy as np
 from scipy.stats import norm
 import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
+from skimage import io, color, filters
 
 def GaMRed_hist(x, y, K, draw, SW):
     """
@@ -324,12 +325,89 @@ def get_pixel_distribution(img):
     G[254:] = 0
     B[254:] = 0
 
-    # reshape to ndarray of size 1x256
-    R = R.reshape(1, -1)
-    G = G.reshape(1, -1)
-    B = B.reshape(1, -1)
     return R, G, B
 
+def get_thr_image(img, thr_min = 0.7*255, verbose=False):
+    """
+    Get thresholds for RGB image calculated using GaMRed algorithm.
+    When threshold is lower than thr_min threshold is calculated using
+    Otsu method.
+    :param img: numpy ndarray with RGB image
+    :param thr_min: if threshold calculated with GaMRed is lower than thr_min, use Otsu instead.
+    :param verbose: print communicates or not
+    :return: thr - threshold value for each color channel (dictionary)
+    """
+    x = np.arange(256)
+    K = 2
+    SW = 5
+    draw = False
 
-def otsu_thresh():
-    pass
+    R, G, B = get_pixel_distribution(img)
+    hist = {"R": R,
+            "G": G,
+            "B": B}
+
+    thr = {"R": GaMRed_hist(x, hist["R"], K, draw, SW)[0],
+           "G": GaMRed_hist(x, hist["G"], K, draw, SW)[0],
+           "B": GaMRed_hist(x, hist["B"], K, draw, SW)[0]}
+
+    for k, v in thr.items():
+        if v < thr_min:
+            thr[k] = two_step_otsu(hist=hist[k])
+            if verbose:
+                print(f"Too low threshold for {k} channel, use Otsu instead.")
+
+    return thr
+
+def two_step_otsu(hist):
+    """
+    Two-step Otsu algorithm implementation.
+    :param hist:
+    :return:
+    """
+    tmp, _ = otsuthresh(hist)
+    tmp = int(tmp*255)
+    tmp2, _ = otsuthresh(hist[tmp-1:])
+    thr = np.round(tmp+(255-tmp)*tmp2)
+    return thr
+
+def otsuthresh(counts):
+    """
+    Python implementation of Otsu's method, based on matlab's implementation.'
+    :param counts: array with pixel counts
+    :return: t -threshold, em - effectiveness metric
+    """
+    counts = np.asarray(counts, dtype=np.float128).ravel()
+    num_bins = counts.size
+
+    # Probabilities
+    p = counts / counts.sum()
+
+    # Cumulative sums
+    omega = np.cumsum(p)
+    mu = np.cumsum(p * np.arange(1, num_bins+1))
+    mu_t = mu[-1]
+
+    # Between-class variance
+    sigma_b_squared = (mu_t * omega - mu) ** 2 / (omega * (1 - omega))
+
+    # Handle NaNs (avoid division by zero cases)
+    sigma_b_squared = np.nan_to_num(sigma_b_squared, nan=-np.inf)
+
+    maxval = sigma_b_squared.max()
+
+    if np.isfinite(maxval) and maxval > 0:
+        idx = np.mean(np.where(sigma_b_squared == maxval)[0]) + 1
+        # Normalize threshold
+        t = (idx - 1) / (num_bins - 1)
+    else:
+        t = 0.0
+
+    # Effectiveness metric
+    if np.isfinite(maxval) and maxval > 0:
+        em = maxval / (np.sum(p * (np.arange(1, num_bins + 1) ** 2)) - mu_t ** 2)
+    else:
+        em = 0.0
+
+    return t, em
+
