@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import PIL.Image as Image
 import numpy as np
 
+from src.tissue_seg.find_thr import get_pixel_distribution, GaMRed_hist
+
 """
 Script for tissue region detection 
 
@@ -87,6 +89,18 @@ for slide in slides:
 
     # get the distribution of pixel values per color channel
     img_np = np.array(region)
+    R, G, B = get_pixel_distribution(img_np)
+
+    x = np.arange(256)
+    K= 2
+    SW = 5
+    draw = False
+
+    thr = np.zeros(3)
+    thr[0] = GaMRed_hist(x, R, K, draw, SW)[0]
+    thr[1] = GaMRed_hist(x, G, K, draw, SW)[0]
+    thr[2] = GaMRed_hist(x, B, K, draw, SW)[0]
+
     bins = np.arange(-0.5, 255.5, 1)
 
 
