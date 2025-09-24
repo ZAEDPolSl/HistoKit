@@ -40,13 +40,13 @@ def test_GaMRed_hist(channel, K, draw, SW, mat_file):
     thr, bic, stats = GaMRed_hist(x, y, K, draw, SW)
     mat_res = loadmat(mat_file)
 
-    assert_allclose(thr, mat_res["thr"])
-    assert_allclose(bic, mat_res["bic"])
-    assert_allclose(stats['alpha'].reshape(1, -1), mat_res["alpha"])
-    assert_allclose(stats['mu'].reshape(1, -1), mat_res["mu"])
-    assert_allclose(stats['K'], mat_res["K"])
-    assert_allclose(stats['sigma'].reshape(1, -1), mat_res["sigma"])
-    assert_allclose(stats['logL'], mat_res["logL"])
+    assert_allclose(thr, mat_res["thr"], rtol=1e-7)
+    assert_allclose(bic, mat_res["bic"], rtol=1e-7)
+    assert_allclose(stats['alpha'].reshape(1, -1), mat_res["alpha"], rtol=1e-7)
+    assert_allclose(stats['mu'].reshape(1, -1), mat_res["mu"], rtol=1e-7)
+    assert_allclose(stats['K'], mat_res["K"], rtol=1e-7)
+    assert_allclose(stats['sigma'].reshape(1, -1), mat_res["sigma"], rtol=1e-7)
+    assert_allclose(stats['logL'], mat_res["logL"], rtol=1e-7)
 
 
 
