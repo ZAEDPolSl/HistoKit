@@ -4,7 +4,8 @@ from matplotlib import pyplot as plt
 from scipy.io import loadmat
 from PIL import Image
 from numpy.testing import assert_array_equal
-from src.tissue_seg.utils import remove_pen, get_strel_disk, apply_mask, remove_gray_stains
+from src.tissue_seg.utils import remove_pen, get_strel_disk, apply_mask, remove_gray_stains, remove_small_objects
+
 
 @pytest.mark.parametrize("img_path, thr, mat_file", [
 ("../../test_data/test_utils/region_1.tif", {'B': 235.34549053454907, 'G': 233.32283033228305, 'R': 235.17701201770123}, "../../test_data/test_utils/remove_black_pen_1.mat"),
@@ -146,8 +147,16 @@ def test_apply_mask(img_path, inv, mat_file):
     img_res = apply_mask(img_np, mat_res['mask'], inv)
     assert_array_equal(img_res, mat_res["img_res"])
 
-def test_remove_small_objects():
-    pass
+@pytest.mark.parametrize("mat_file", [
+    "../../test_data/test_utils/remove_small_objects_1.mat",
+    "../../test_data/test_utils/remove_small_objects_2.mat",
+    "../../test_data/test_utils/remove_small_objects_3.mat",
+])
+@pytest.mark.repeat(5)
+def test_remove_small_objects(mat_file):
+    mat_res = loadmat(mat_file)
+    mask_res = remove_small_objects(mat_res['mask'])
+    assert_array_equal(mask_res, mat_res["mask_res"].astype(bool))
 
 @pytest.mark.parametrize("img_path, mat_file", [
 ("../../test_data/test_utils/region_1.tif", "../../test_data/test_utils/remove_grey_stains_1.mat"),
