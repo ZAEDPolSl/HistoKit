@@ -335,7 +335,7 @@ def get_thr_image(img, thr_min = 0.7*255, verbose=False):
     :param img: numpy ndarray with RGB image
     :param thr_min: if threshold calculated with GaMRed is lower than thr_min, use Otsu instead.
     :param verbose: print communicates or not
-    :return: thr - threshold value for each color channel (dictionary)
+    :return: thr - threshold value for each color channel (dictionary) R, G, B - arrays with pixel counts.
     """
     x = np.arange(256)
     K = 2
@@ -357,7 +357,7 @@ def get_thr_image(img, thr_min = 0.7*255, verbose=False):
             if verbose:
                 print(f"Too low threshold for {k} channel, use Otsu instead.")
 
-    return thr
+    return thr, R, G, B
 
 def two_step_otsu(hist):
     """

@@ -156,6 +156,17 @@ def test_apply_mask(img_path, inv, mat_file):
 def test_remove_small_objects(mat_file):
     mat_res = loadmat(mat_file)
     mask_res = remove_small_objects(mat_res['mask'])
+
+    plt.figure(figsize=(6, 6))
+    plt.imshow(mask_res)
+    plt.axis('off')
+    plt.show()
+
+    plt.figure(figsize=(6, 6))
+    plt.imshow(mat_res["mask_res"])
+    plt.axis('off')
+    plt.show()
+
     assert_array_equal(mask_res, mat_res["mask_res"].astype(bool))
 
 @pytest.mark.parametrize("img_path, mat_file", [
