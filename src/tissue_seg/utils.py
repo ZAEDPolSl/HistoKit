@@ -18,6 +18,14 @@ def get_strel_disk(radius):
     :param radius: disk radius
     :return: SE - structuring element
     """
+    if radius == 2:
+        return np.array([
+    [False, False, True, False, False],
+    [False, True, True, True, False],
+    [True, True, True, True, True],
+    [False, True, True, True, False],
+    [False, False, True, False, False]
+    ])
     d = np.arange(-radius+1, radius)
     x, y = np.meshgrid(d, d)
     SE = (x**2+y**2)<radius**2

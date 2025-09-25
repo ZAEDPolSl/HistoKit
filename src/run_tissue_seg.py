@@ -1,6 +1,5 @@
 import os
 import argparse
-
 import cv2
 import numpy as np
 import pandas as pd
@@ -8,14 +7,11 @@ import glob
 from openslide import OpenSlide
 import matplotlib.pyplot as plt
 import PIL.Image as Image
-from skimage import measure
-
-from src.tissue_seg.tissue_seg import tissue_seg, plot_rgb_hist
+from src.tissue_seg.tissue_seg import wsi_tissue_seg, plot_rgb_hist
 from src.tissue_seg.utils import apply_mask
 
 """
 Script for tissue region detection 
-
 Original matlab implementation is available in: github.com/WSI_TissueSeg
 """
 
@@ -88,7 +84,7 @@ for slide in slides:
     thumbnail.save(os.path.join(RAW_SMALL, f'{basename}.png'))
 
     region = region.convert('RGB')
-    res_dict = tissue_seg(region)
+    res_dict = wsi_tissue_seg(region)
 
     # save histograms with thresholds
     fig, ax = plot_rgb_hist(res_dict['R'], res_dict['G'], res_dict['B'], res_dict['thr'])
