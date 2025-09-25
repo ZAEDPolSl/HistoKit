@@ -38,6 +38,13 @@ def test_remove_black_pen(img_path, thr, mat_file):
 
 
 @pytest.mark.parametrize("radius, strel_gt", [
+(2, np.array([
+    [False, False, True, False, False],
+    [False, True, True, True, False],
+    [True, True, True, True, True],
+    [False, True, True, True, False],
+    [False, False, True, False, False]
+])),
 (5, np.array([
     [False, False, True,  True,  True,  True,  True,  False, False],
     [False, True,  True,  True,  True,  True,  True,  True,  False],
