@@ -4,7 +4,7 @@ from src.tissue_seg.find_thr import get_thr_image
 from src.tissue_seg.utils import apply_mask, remove_pen, remove_gray_stains, get_strel_disk, remove_small_objects
 from scipy import ndimage as ndi
 
-def tissue_seg(region, fill_holes=False):
+def wsi_tissue_seg(region, fill_holes=False):
     img_np = np.array(region)
 
     # get thresholds for each channel (GaMRed or Otsu when threshold is too low)
