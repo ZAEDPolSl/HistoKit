@@ -64,7 +64,7 @@ def slide_process_single(model, tis_det, slide, num_patches_width, num_patches_h
     model_size = (model_patch_size, model_patch_size)
     preprocessing_fn = smp.encoders.get_preprocessing_fn(encoder_model, encoder_weights)
 
-    for he in tqdm(range(num_patches_height), total=num_patches_height):
+    for he in range(num_patches_height):
         h = he * org_patch_size + 1
         if he == 0:
             h = 0

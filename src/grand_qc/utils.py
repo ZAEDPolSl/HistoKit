@@ -3,7 +3,7 @@ from PIL import Image
 import cv2
 
 
-def make_overlay(slide, wsi_heatmap_im, overlay_factor=20):
+def make_overlay(slide, wsi_heatmap_im, vis_size):
     """
 
     :param slide:
@@ -11,7 +11,8 @@ def make_overlay(slide, wsi_heatmap_im, overlay_factor=20):
     :param overlay_factor:
     :return:
     """
-    slide_reduced = slide.resize((int(slide.size[0]/overlay_factor),int(slide.size[1]/overlay_factor)), Image.Resampling.NEAREST)
+    slide = Image.fromarray(slide)
+    slide_reduced = slide.resize(vis_size, Image.Resampling.NEAREST)
     heatmap_temp = wsi_heatmap_im.resize(slide_reduced.size, Image.Resampling.NEAREST)
     overlay = cv2.addWeighted(np.array(slide_reduced), 0.3, np.array(heatmap_temp), 0.7, 0)
     heatmap_np = np.array(heatmap_temp)
@@ -20,9 +21,10 @@ def make_overlay(slide, wsi_heatmap_im, overlay_factor=20):
     return overlay
 
 
-def slide_info(slide, model_patch_size, mpp_model, mpp_slide):
+def slide_info(slide, model_patch_size, mpp_model, mpp_slide, verbose=False):
     """
 
+    :param verbose:
     :param slide:
     :param model_patch_size:
     :param mpp_model:
@@ -56,19 +58,20 @@ def slide_info(slide, model_patch_size, mpp_model, mpp_slide):
     down_levels = slide.level_downsamples
 
     # Output BASIC DATA
-    print("")
-    print("Basic data about processed whole-slide image")
-    print("")
-    print("Vendor: ", vendor)
-    print("Scan magnification: ", obj_power)
-    print("Number of levels: ", num_level)
-    print("Level downsamples: ", down_levels)
-    print("Microns per pixel (slide) estimated from slide magnification:", mpp_slide)
-    print("Height: ", height_level_0)
-    print("Width: ", width_level_0)
-    print("Model patch size at slide MPP: ", patch_size, "x", patch_size)
-    print("Width - number of patches: ", num_patches_width)
-    print("Height - number of patches: ", num_patches_height)
-    print("Overall number of patches / slide (without tissue detection): ", num_patches_width * num_patches_height)
+    if verbose:
+        print("")
+        print("Basic data about processed whole-slide image")
+        print("")
+        print("Vendor: ", vendor)
+        print("Scan magnification: ", obj_power)
+        print("Number of levels: ", num_level)
+        print("Level downsamples: ", down_levels)
+        print("Microns per pixel (slide) estimated from slide magnification:", mpp_slide)
+        print("Height: ", height_level_0)
+        print("Width: ", width_level_0)
+        print("Model patch size at slide MPP: ", patch_size, "x", patch_size)
+        print("Width - number of patches: ", num_patches_width)
+        print("Height - number of patches: ", num_patches_height)
+        print("Overall number of patches / slide (without tissue detection): ", num_patches_width * num_patches_height)
 
     return patch_size, num_patches_width, num_patches_height, width_level_0, height_level_0, obj_power
