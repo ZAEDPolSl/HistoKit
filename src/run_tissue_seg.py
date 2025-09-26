@@ -15,6 +15,7 @@ from src.tissue_seg.utils import apply_mask, get_wsi_ind_matlab, list2cell
 from grand_qc.config import config
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
+from tqdm import tqdm
 """
 Script for tissue region detection 
 Original matlab implementation is available in: github.com/WSI_TissueSeg
@@ -31,7 +32,7 @@ parser.add_argument('--save_mask_formats', nargs='+',help='File formats to save 
 parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu', choices=["cuda", "cpu"],default="cpu")
 parser.add_argument('--overlay_factor', help='Factor used for creating image overlay', default=0.60, type=float)
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="grand_qc/models/GrandQC_MPP1.pth", type=str)
-parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=4, type=int,choices=range(1, os.cpu_count() + 1))
+parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=8, type=int,choices=range(1, os.cpu_count() + 1))
 args = parser.parse_args()
 
 MAG_BG_DET = 2.5  # magnification for tissue detection
@@ -43,8 +44,6 @@ BG_CLASS = 7  # background class
 MPP_MODEL = 1  # mpp for grand qc model (mpp=1 corresponds to magnification 10x)
 scale_thumbnail = 0.25  # factor used to scale small thumbnails to show algorithms results (scaled from magnification for tissue detection)
 
-model_grandQC = torch.load(args.grandqc_model, map_location=args.device)  # load grandQC model
-
 # Create folders for results
 BG_MASK_DIR = os.path.join(args.out_dir, 'masks')  # masks with detected tissues and grandQC results (saved as npy arrays, mat files or both)
 BG_MASK_VIS_DIR = os.path.join(args.out_dir, 'bg_masks_vis')  # masks with detected tissue regions [small PNG thumbnails]
@@ -55,7 +54,6 @@ REMOVAL_VIS = os.path.join(args.out_dir, 'bg_removal_vis')  # results of bg remo
 GRANDQC_MAP_VIS = os.path.join(args.out_dir,'grandqc_map_vis')  # results of artifacts detection with GrandQC (color maps) [small PNG thumbnails]
 GRANDQC_OVERLAY_VIS = os.path.join(args.out_dir, 'grandqc_overlay_vis')  # results of artifacts detection with GrandQC (map overlay on tissue regions) [small PNG thumbnails]
 REGION_GRANDQC_VIS = os.path.join(args.out_dir, 'grandqc_vis_region')  # results of artifacts detection with GrandQC for each region (color maps) [small PNG thumbnails]
-
 
 if not os.path.exists(BG_MASK_DIR): os.makedirs(BG_MASK_DIR)
 if not os.path.exists(BG_MASK_VIS_DIR): os.makedirs(BG_MASK_VIS_DIR)
@@ -71,7 +69,7 @@ if not os.path.exists(REGION_GRANDQC_VIS) and args.split_regions: os.makedirs(RE
 slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
 
 # Process WSIs
-print(f"Found {len(slides)} WSIs in {WSI_DIR} directory.\n")
+print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Starting processing with {args.workers} workers...")
 
 def process_slide(slide_file):
     start = time.time()
@@ -147,7 +145,7 @@ def process_slide(slide_file):
     ############################################################################################################
     # RUN GRAND QC FOR ARTIFACTS DETECTION
     ############################################################################################################
-
+    model_grandQC = torch.load(args.grandqc_model, map_location=args.device)  # load grandQC model
     p_s, patch_n_w_l0, patch_n_h_l0, w_l0, h_l0, obj_power = slide_info(slide, PATCH_SIZE_MODEL, MPP_MODEL, mpp_slide)
 
     h, w = res_dict["mask"].shape
@@ -235,14 +233,17 @@ if __name__ == "__main__":
     with ThreadPoolExecutor(args.workers) as executor:
         futures = {executor.submit(process_slide, s): s for s in slides}
 
-        for fut in as_completed(futures):
-            src = futures[fut]
-            try:
-                basename, elapsed = fut.result()
-                print(f"Processed slide: {src} in time: {elapsed/60:.2f} min")
-            except Exception as e:
-                print(f"There was an error during processing slide: {src}")
-                print(e)
+        with tqdm(total=len(futures)) as pbar:
+            for fut in as_completed(futures):
+                src = futures[fut]
+                try:
+                    basename, elapsed = fut.result()
+                    print(f"Processed slide: {src} in time: {elapsed/60:.2f} min")
+                except Exception as e:
+                    print(f"There was an error during processing slide: {src}")
+                    print(e)
+                finally:
+                    pbar.update(1)
     print("Finished in time: {:.2f} min".format((time.time() - time_start)/60))
 
 
