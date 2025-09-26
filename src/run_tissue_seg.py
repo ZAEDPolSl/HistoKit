@@ -1,6 +1,7 @@
 import os
 import argparse
 import cv2
+import matplotlib.pyplot as plt
 import numpy as np
 import glob
 import scipy.io
@@ -16,6 +17,7 @@ from grand_qc.config import config
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 from tqdm import tqdm
+
 """
 Script for tissue region detection 
 Original matlab implementation is available in: github.com/WSI_TissueSeg
@@ -32,7 +34,7 @@ parser.add_argument('--save_mask_formats', nargs='+',help='File formats to save 
 parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu', choices=["cuda", "cpu"],default="cpu")
 parser.add_argument('--overlay_factor', help='Factor used for creating image overlay', default=0.60, type=float)
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="grand_qc/models/GrandQC_MPP1.pth", type=str)
-parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=8, type=int,choices=range(1, os.cpu_count() + 1))
+parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=4, type=int,choices=range(1, os.cpu_count() + 1))
 args = parser.parse_args()
 
 MAG_BG_DET = 2.5  # magnification for tissue detection
@@ -116,7 +118,9 @@ def process_slide(slide_file):
 
     # save histograms with thresholds
     fig, ax = plot_rgb_hist(res_dict['R'], res_dict['G'], res_dict['B'], res_dict['thr'])
+    plt.show()
     fig.savefig(os.path.join(BG_THRESH_DIR, f'{basename}_thr.png'))
+    plt.close()
 
     # save marker removal effect results
     mask_pen = Image.fromarray(apply_mask(np.array(region), res_dict['mask_pen'], inv=False))
