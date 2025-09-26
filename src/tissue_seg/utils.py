@@ -117,6 +117,12 @@ def remove_small_objects(mask):
     props = measure.regionprops(label(mask.astype(bool)))
     areas = np.array([p.area for p in props])
     area_tmp = areas[areas > thr_area]
+
+    if len(area_tmp) < 2:
+        thr_area = area_tmp[0]
+        mask_res = morphology.remove_small_objects(mask.astype(bool), min_size=thr_area, connectivity=2)
+        return mask_res
+
     kmeans = KMeans(n_clusters=2)
     idx = kmeans.fit_predict(np.log10(area_tmp).reshape(-1, 1))
     centers = kmeans.cluster_centers_.flatten()
@@ -147,3 +153,9 @@ def get_wsi_ind_matlab(path):
             if t_width is not None:
                 ind.append(i+1) #matlab indexing
     return ind
+
+def list2cell(list):
+    cell = np.empty((len(list), ), dtype=object)
+    for i, v in enumerate(list):
+        cell[i]=v
+    return cell
