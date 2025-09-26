@@ -4,6 +4,7 @@ from skimage import measure, morphology
 from scipy import ndimage as ndi
 from skimage.measure import label
 from sklearn.cluster import KMeans
+import tifffile
 
 
 def get_strel_disk(radius):
@@ -137,3 +138,12 @@ def remove_small_objects(mask):
 
     mask_res = morphology.remove_small_objects(mask.astype(bool), min_size=thr_area, connectivity=2)
     return mask_res
+
+def get_wsi_ind_matlab(path):
+    ind = []
+    with tifffile.TiffFile(path) as tif:
+        for i, l in enumerate(tif.pages):
+            t_width = l.tags.get("TileWidth")
+            if t_width is not None:
+                ind.append(i+1) #matlab indexing
+    return ind

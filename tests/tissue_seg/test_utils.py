@@ -4,7 +4,8 @@ from matplotlib import pyplot as plt
 from scipy.io import loadmat
 from PIL import Image
 from numpy.testing import assert_array_equal
-from src.tissue_seg.utils import remove_pen, get_strel_disk, apply_mask, remove_gray_stains, remove_small_objects
+from src.tissue_seg.utils import remove_pen, get_strel_disk, apply_mask, remove_gray_stains, remove_small_objects, \
+    get_wsi_ind_matlab
 
 
 @pytest.mark.parametrize("img_path, thr, mat_file", [
@@ -195,3 +196,10 @@ def test_remove_grey_stains(img_path, mat_file):
     diff_num = np.sum(mask_res != mat_res["mask"])
     print(f" Fraction of mismatched elements: {diff_fraction:.8f} - Number of pixels mismatched: {diff_num}")
     assert diff_fraction < 10e-7
+
+@pytest.mark.parametrize("svs_path, ind_gt", [
+("../../test_data/wsi/wsi_1.svs", [1, 3, 4, 5]),
+])
+def test_get_wsi_ind_matlab(svs_path, ind_gt):
+    ind = get_wsi_ind_matlab(svs_path)
+    assert_array_equal(ind, ind_gt)
