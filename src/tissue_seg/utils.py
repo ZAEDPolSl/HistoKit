@@ -1,4 +1,6 @@
 import numpy as np
+import os
+from threadpoolctl import threadpool_limits
 from skimage.color import rgb2hsv, rgb2lab
 from skimage import measure, morphology
 from scipy import ndimage as ndi
@@ -106,6 +108,7 @@ def apply_mask(img, mask, inv):
         img[:,:,c] = tmp
     return img
 
+
 def remove_small_objects(mask):
     """
     Remove objects with small area (smaller than 5% of image area)
@@ -123,17 +126,18 @@ def remove_small_objects(mask):
         mask_res = morphology.remove_small_objects(mask.astype(bool), min_size=thr_area, connectivity=2)
         return mask_res
 
-    kmeans = KMeans(n_clusters=2)
-    idx = kmeans.fit_predict(np.log10(area_tmp).reshape(-1, 1))
-    centers = kmeans.cluster_centers_.flatten()
 
-    if centers[0] > centers[1]:
-        thr_area = min(area_tmp[idx == 0]) - 1
-    else:
-        thr_area = min(area_tmp[idx == 1]) - 1
+    with threadpool_limits(user_api="openmp", limits=1):
+        kmeans = KMeans(n_clusters=2)
+        idx = kmeans.fit_predict(np.log10(area_tmp).reshape(-1, 1))
+        centers = kmeans.cluster_centers_.flatten()
 
+        if centers[0] > centers[1]:
+            thr_area = min(area_tmp[idx == 0]) - 1
+        else:
+            thr_area = min(area_tmp[idx == 1]) - 1
 
-    if np.sum(areas > thr_area) < 1:
+        if np.sum(areas > thr_area) < 1:
             kmeans = KMeans(n_clusters=2)
             idx = kmeans.fit_predict(areas.reshape(-1, 1))
             centers = kmeans.cluster_centers_.flatten()

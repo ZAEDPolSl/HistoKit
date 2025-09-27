@@ -24,8 +24,8 @@ Original matlab implementation is available in: github.com/WSI_TissueSeg
 """
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='../test_data/wsi/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res/')
+parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/HE_data/Labaj_UCEC/SVS/05_2024/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res5/')
 parser.add_argument('--split_regions', type=bool, help='If there are multiple regions on the slide save each of them to a separate file.', default=True)
 parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not', default=True)
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
@@ -68,13 +68,32 @@ if not os.path.exists(GRANDQC_OVERLAY_VIS): os.makedirs(GRANDQC_OVERLAY_VIS)
 if not os.path.exists(REGION_GRANDQC_VIS) and args.split_regions: os.makedirs(REGION_GRANDQC_VIS)
 
 # get slides names
-slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
+slides = glob.glob(os.path.join(WSI_DIR, 'SS45212_R0A10F2A_190425.svs'))
 
 # Process WSIs
 print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Starting processing with {args.workers} workers...")
 
-def process_slide(slide_file):
-    start = time.time()
+def process_slides(slide_arr):
+    error_slides = []
+    error_msgs = []
+    deltas = []
+    processed = []
+    for slide_file in slide_arr:
+        try:
+            start = time.time()
+            process_single_slide(slide_file)
+            delta = time.time() - start
+            deltas.append(delta)
+            processed.append(slide_file)
+        except Exception as e:
+            error_slides.append(slide_file)
+            error_msgs.append(str(e))
+            deltas.append(0)
+    return error_slides, error_msgs, deltas, processed
+
+
+def process_single_slide(slide_file):
+
     # slide basename
     basename = os.path.basename(slide_file).split('.')[0]
 
@@ -118,9 +137,8 @@ def process_slide(slide_file):
 
     # save histograms with thresholds
     fig, ax = plot_rgb_hist(res_dict['R'], res_dict['G'], res_dict['B'], res_dict['thr'])
-    plt.show()
     fig.savefig(os.path.join(BG_THRESH_DIR, f'{basename}_thr.png'))
-    plt.close()
+    plt.close(fig)
 
     # save marker removal effect results
     mask_pen = Image.fromarray(apply_mask(np.array(region), res_dict['mask_pen'], inv=False))
@@ -157,9 +175,8 @@ def process_slide(slide_file):
     tis_det = np.array(tis_det.resize((int(w * 4), int(h * 4)), Image.Resampling.NEAREST))
 
     map_tiss, full_mask = slide_process_single(model_grandQC, tis_det, slide, patch_n_w_l0, patch_n_h_l0, p_s,
-                                               PATCH_SIZE_MODEL, config.colors, ENCODER_MODEL,
-                                               ENCODER_MODEL_WEIGHTS, args.device, BG_CLASS, MPP_MODEL, mpp_slide, w_l0,
-                                               h_l0, vis_size)
+                                               PATCH_SIZE_MODEL, config.colors, ENCODER_MODEL,ENCODER_MODEL_WEIGHTS,
+                                               args.device, BG_CLASS, MPP_MODEL, mpp_slide, w_l0, h_l0, vis_size)
 
     # save color grandQC artifacts map
     map_path = os.path.join(GRANDQC_MAP_VIS, basename + "_grandqc-small.png")
@@ -177,6 +194,8 @@ def process_slide(slide_file):
     full_mask = Image.fromarray(full_mask)
     full_mask = full_mask.resize((int(region.shape[1]), int(region.shape[0])), Image.Resampling.NEAREST)
     full_mask = np.array(full_mask)
+
+
     if not args.split_regions:
         save_dict = {
             'basename': basename,
@@ -210,7 +229,7 @@ def process_slide(slide_file):
         for n, region in enumerate(props):
             region_mask_bg = region.image.astype(np.uint8)  # 0/1
             bbox = region.bbox
-            region_mask_grandqc = full_mask[bbox[0]:bbox[2], bbox[1]:bbox[3]]
+            region_mask_grandqc = full_mask[bbox[0]:bbox[2], bbox[1]:bbox[3]] * region_mask_bg
 
             save_dict['mask_all'].append(region_mask_bg.astype(bool))
             save_dict['mask_art'].append(region_mask_grandqc)
@@ -229,25 +248,31 @@ def process_slide(slide_file):
             np.savez(os.path.join(BG_MASK_DIR, f'{basename}_mask_all.npz'), **save_dict)
 
     del full_mask
-    delta = time.time() - start
-    return basename, delta
 
 if __name__ == "__main__":
     time_start = time.time()
+    process_single_slide(slides[0])
     with ThreadPoolExecutor(args.workers) as executor:
-        futures = {executor.submit(process_slide, s): s for s in slides}
+        k, m = divmod(len(slides), args.workers)
+        slides_arr = [slides[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(args.workers)]
+        futures = {executor.submit(process_slides, s): s for s in slides_arr}
 
-        with tqdm(total=len(futures)) as pbar:
+        with tqdm(total=len(slides)) as pbar:
             for fut in as_completed(futures):
                 src = futures[fut]
-                try:
-                    basename, elapsed = fut.result()
-                    print(f"Processed slide: {src} in time: {elapsed/60:.2f} min")
-                except Exception as e:
-                    print(f"There was an error during processing slide: {src}")
-                    print(e)
-                finally:
-                    pbar.update(1)
+                e_s, e_m, d, p = fut.result()
+                pbar.update(len(src))
+                print(f"\nProcessed {len(p)} slides:")
+                print("Slide names:")
+                for name in p:
+                    print(name)
+
+                if len(e_s)>0:
+                    print(f"There was an error during processing {len(e_s)} slides: ")
+                    for s, m in zip(e_s, e_m):
+                        print(f"Slide: {s} - error message: {m}")
+
+
     print("Finished in time: {:.2f} min".format((time.time() - time_start)/60))
 
 
