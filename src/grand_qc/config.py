@@ -5,7 +5,7 @@ class Config:
     def __init__(self):
 
         self.colors = [
-    [128, 128, 128],     #ART_NORM: white
+    [128, 128, 128],     #ART_NORM: gray
     [255, 99, 71],     #ART_FOLD: orange
     [0, 255, 0],   #ART_DARKSPOT: green
     [255, 0, 0],   #ART_PEN: red

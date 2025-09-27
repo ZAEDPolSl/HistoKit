@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image
 import cv2
-
+from math import ceil
 
 def make_overlay(slide, wsi_heatmap_im, vis_size):
     """
@@ -48,8 +48,8 @@ def slide_info(slide, model_patch_size, mpp_model, mpp_slide, verbose=False):
     height_level_0 = dim_l0[1]
 
     # Calculate number of patches to process
-    num_patches_width = int(width_level_0 / patch_size)
-    num_patches_height = int(height_level_0 / patch_size)
+    num_patches_width = int(ceil(width_level_0 / patch_size))
+    num_patches_height = int(ceil(height_level_0 / patch_size))
 
     # Number of levels
     num_level = slide.level_count

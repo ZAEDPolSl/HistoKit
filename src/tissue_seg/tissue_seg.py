@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import matplotlib.pyplot as plt
 from src.tissue_seg.find_thr import get_thr_image
@@ -14,9 +16,8 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
     :return:
     """
     img_np = np.array(region)
-
     # get thresholds for each channel (GaMRed or Otsu when threshold is too low)
-    thr, R, G, B = get_thr_image(img_np, thr_min=0.7 * 255, verbose=True)
+    thr, R, G, B = get_thr_image(img_np, thr_min=0.7 * 255, verbose=False)
 
     # remove black pen
     mask_pen = remove_pen(img_np, "black", 0.7, 0, thr, 5)
@@ -41,6 +42,7 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
     mask = ndi.binary_opening(mask, SE_open)
 
     # remove small regions
+    s = time.time()
     mask = remove_small_objects(mask)
 
     return {"mask": mask, "mask_pen": mask_pen, "R": R, "G": G, "B": B, "thr":thr}
@@ -59,6 +61,5 @@ def plot_rgb_hist(R, G, B, thr):
         ax.set_yscale("log")
         ax.axvline(thr[name], color="Orange", linestyle="--", linewidth=2)
         ax.set_title(f"{name} channel histogram: thr = {thr[name]:.2f}")
-
-    plt.tight_layout()
+    fig.tight_layout()
     return fig, axs

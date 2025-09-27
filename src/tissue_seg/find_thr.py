@@ -1,3 +1,5 @@
+import warnings
+import os
 import numpy as np
 from scipy.stats import norm
 import matplotlib.pyplot as plt
@@ -389,7 +391,10 @@ def otsuthresh(counts):
     mu_t = mu[-1]
 
     # Between-class variance
-    sigma_b_squared = (mu_t * omega - mu) ** 2 / (omega * (1 - omega))
+    with warnings.catch_warnings():
+        # Ignore invalid value encountered in divide (handled in the next lines of code)
+        warnings.simplefilter("ignore", category=RuntimeWarning)
+        sigma_b_squared = (mu_t * omega - mu) ** 2 / (omega * (1 - omega))
 
     # Handle NaNs (avoid division by zero cases)
     sigma_b_squared = np.nan_to_num(sigma_b_squared, nan=-np.inf)
