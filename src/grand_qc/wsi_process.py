@@ -86,7 +86,7 @@ def slide_process_single(model, tis_det, slide, num_patches_width, num_patches_h
             else:
                 td_patch_ = td_patch
 
-            if np.count_nonzero(td_patch == 0) > 50: #here change to check of segmentation map
+            if np.count_nonzero(td_patch == 0) > 0: #here change to check of segmentation map
                 # Generate patch
                 work_patch = slide.read_region((w, h), 0, (org_patch_size, org_patch_size))
                 work_patch = work_patch.convert('RGB')
@@ -124,13 +124,14 @@ def slide_process_single(model, tis_det, slide, num_patches_width, num_patches_h
     buffer_bottom_l = int((height_level_0 - (num_patches_height * org_patch_size)) * mpp_slide / mpp_model)
 
     # firstly bottom
-    buffer_bottom = np.full((buffer_bottom_l, end_image.shape[1]), background_class)
-    temp_image = np.concatenate((end_image, buffer_bottom), axis=0)
+    #buffer_bottom = np.full((buffer_bottom_l, end_image.shape[1]), background_class)
+    #temp_image = np.concatenate((end_image, buffer_bottom), axis=0)
 
     # now right side
-    temp_image_he, temp_image_wi = temp_image.shape  # width and height
-    buffer_right = np.full((temp_image_he, buffer_right_l), background_class)
-    end_image = np.concatenate((temp_image, buffer_right), axis=1).astype(np.uint8)
+    #temp_image_he, temp_image_wi = temp_image.shape  # width and height
+    #buffer_right = np.full((temp_image_he, buffer_right_l), background_class)
+    #end_image = np.concatenate((temp_image, buffer_right), axis=1).astype(np.uint8)
+    end_image = end_image[0:int(width_level_0*mpp_slide/mpp_model),0:int(height_level_0*mpp_slide/mpp_model)].astype(np.uint8)
 
     artifacts_color_map = make_artifacts_color_map(end_image, colors)
     artifacts_color_map = Image.fromarray(artifacts_color_map)
