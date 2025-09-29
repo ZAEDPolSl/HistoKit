@@ -1,5 +1,4 @@
 import time
-
 import numpy as np
 import matplotlib.pyplot as plt
 from src.tissue_seg.find_thr import get_thr_image
@@ -8,12 +7,14 @@ from scipy import ndimage as ndi
 
 def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
     """
-
-    :param region:
-    :param fill_holes:
-    :param open_disk_r:
-    :param close_disk_r:
-    :return:
+    Run tissue region segmentation with GaMRed algorithm (or Otsu when threshold is too low).
+    :param region: WSI region for tissue detection
+    :param fill_holes: Fill holes in mask or not
+    :param open_disk_r: radius of the disk used during opening operation
+    :param close_disk_r: radius of the disk used during closing operation
+    :return: dictionary with keys: "mask" tissue mask with detected  tissue region (1 - mask, 0 - background)
+            "mask_pen": mask with detected black pen area, "R","G", "B": red, green, blue channels pixel counts,
+            "thr": dictionary with threshold values for each color channel
     """
     img_np = np.array(region)
     # get thresholds for each channel (GaMRed or Otsu when threshold is too low)
@@ -48,6 +49,14 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
     return {"mask": mask, "mask_pen": mask_pen, "R": R, "G": G, "B": B, "thr":thr}
 
 def plot_rgb_hist(R, G, B, thr):
+    """
+    Create histograms for each color channel and plot the threshold values.
+    :param R: pixel counts for red color channel
+    :param G: pixel counts for green color channel
+    :param B: pixel counts for blue color channel
+    :param thr: threshold values for each color channel (dictionary)
+    :return: fig, ax - figure and axes objects with created plots
+    """
     bins = np.arange(len(R))
 
     fig, axs = plt.subplots(3, 1, figsize=(6, 8), sharex=True)
