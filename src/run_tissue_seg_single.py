@@ -67,180 +67,174 @@ if not os.path.exists(GRANDQC_MAP_VIS): os.makedirs(GRANDQC_MAP_VIS)
 if not os.path.exists(GRANDQC_OVERLAY_VIS): os.makedirs(GRANDQC_OVERLAY_VIS)
 if not os.path.exists(REGION_GRANDQC_VIS) and args.split_regions: os.makedirs(REGION_GRANDQC_VIS)
 
+# get slides names
+slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
 
-def process_single_slide(slide_file):
+# Process WSIs
+print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Using {args.device} for GrandQC. Started processing...\n")
+time_start = time.time()
+log_file = os.path.join(args.out_dir, "error_files.txt")
 
-    # slide basename
-    basename = os.path.basename(slide_file).split('.')[0]
+for slide_file in tqdm(slides, total=len(slides)):
+    try:
+        # slide basename
+        basename = os.path.basename(slide_file).split('.')[0]
 
-    # load slide
-    slide = OpenSlide(slide_file)
+        # load slide
+        slide = OpenSlide(slide_file)
 
-    # get resizing ratio for each layer
-    ratio = slide.level_downsamples
+        # get resizing ratio for each layer
+        ratio = slide.level_downsamples
 
-    # load image with 2.5 magnification (if it is not available - rescale it from the highest magnification)
-    mag = float(slide.properties["openslide.objective-power"])  # get magnification of the 0 layer
-    mag_layers = [round(mag / r, 2) for r in ratio]  # magnification of each layer
-    mpp_slide = 10 / mag_layers[0]  # approximated slide mpp
+        # load image with 2.5 magnification (if it is not available - rescale it from the highest magnification)
+        mag = float(slide.properties["openslide.objective-power"])  # get magnification of the 0 layer
+        mag_layers = [round(mag / r, 2) for r in ratio]  # magnification of each layer
+        mpp_slide = 10 / mag_layers[0]  # approximated slide mpp
 
-    if MAG_BG_DET in mag_layers:
-        mag_idx = mag_layers.index(MAG_BG_DET)
-        w, h = slide.level_dimensions[mag_idx]
-        region = slide.read_region((0, 0), mag_idx, (w, h))
-        scale_val = ratio[mag_idx]
-    else:
-        mag_idx = 0  # get the highest magnification and rescale
-        w0, h0 = slide.level_dimensions[mag_idx]
-        region = slide.read_region((0, 0), mag_idx, (w0, h0))
-        scale_val = MAG_BG_DET / mag
-        region = region.resize((int(w0 * scale_val), int(h0 * scale_val)), Image.BICUBIC)
-        w, h = region.size
+        if MAG_BG_DET in mag_layers:
+            mag_idx = mag_layers.index(MAG_BG_DET)
+            w, h = slide.level_dimensions[mag_idx]
+            region = slide.read_region((0, 0), mag_idx, (w, h))
+            scale_val = ratio[mag_idx]
+        else:
+            mag_idx = 0  # get the highest magnification and rescale
+            w0, h0 = slide.level_dimensions[mag_idx]
+            region = slide.read_region((0, 0), mag_idx, (w0, h0))
+            scale_val = MAG_BG_DET / mag
+            region = region.resize((int(w0 * scale_val), int(h0 * scale_val)), Image.BICUBIC)
+            w, h = region.size
 
-    # size for visualisations
-    vis_size = (int(w * scale_thumbnail), int(h * scale_thumbnail))
+        # size for visualisations
+        vis_size = (int(w * scale_thumbnail), int(h * scale_thumbnail))
 
-    # save scaled region thumbnail
-    thumbnail = region.resize(vis_size, Image.BICUBIC)
-    thumbnail.save(os.path.join(RAW_SMALL, f'{basename}.png'))
-    region = region.convert('RGB')
+        # save scaled region thumbnail
+        thumbnail = region.resize(vis_size, Image.BICUBIC)
+        thumbnail.save(os.path.join(RAW_SMALL, f'{basename}.png'))
+        region = region.convert('RGB')
 
-    ############################################################################################################
-    # RUN TISSUE REGION SEGMENTATION
-    ############################################################################################################
+        ############################################################################################################
+        # RUN TISSUE REGION SEGMENTATION
+        ############################################################################################################
 
-    res_dict = wsi_tissue_seg(region, args.fill_holes, args.close_disk_r, args.open_disk_r)
+        res_dict = wsi_tissue_seg(region, args.fill_holes, args.close_disk_r, args.open_disk_r)
 
-    # save histograms with thresholds
-    fig, ax = plot_rgb_hist(res_dict['R'], res_dict['G'], res_dict['B'], res_dict['thr'])
-    fig.savefig(os.path.join(BG_THRESH_DIR, f'{basename}_thr.png'))
-    plt.close(fig)
+        # save histograms with thresholds
+        fig, ax = plot_rgb_hist(res_dict['R'], res_dict['G'], res_dict['B'], res_dict['thr'])
+        fig.savefig(os.path.join(BG_THRESH_DIR, f'{basename}_thr.png'))
+        plt.close(fig)
 
-    # save marker removal effect results
-    mask_pen = Image.fromarray(apply_mask(np.array(region), res_dict['mask_pen'], inv=False))
-    mask_pen = mask_pen.resize(vis_size, Image.BICUBIC)
-    mask_pen.save(os.path.join(PEN_VIS, f'{basename}_pen-small.png'))
+        # save marker removal effect results
+        mask_pen = Image.fromarray(apply_mask(np.array(region), res_dict['mask_pen'], inv=False))
+        mask_pen = mask_pen.resize(vis_size, Image.BICUBIC)
+        mask_pen.save(os.path.join(PEN_VIS, f'{basename}_pen-small.png'))
 
-    # save mask as color thumbnail
-    mask = Image.fromarray((res_dict['mask'] * 255).astype(np.uint8))
-    mask = mask.resize(vis_size, Image.Resampling.NEAREST)
-    mask.save(os.path.join(BG_MASK_VIS_DIR, f'{basename}_mask-small.png'))
+        # save mask as color thumbnail
+        mask = Image.fromarray((res_dict['mask'] * 255).astype(np.uint8))
+        mask = mask.resize(vis_size, Image.Resampling.NEAREST)
+        mask.save(os.path.join(BG_MASK_VIS_DIR, f'{basename}_mask-small.png'))
 
-    # save mask visualisation on the tissue image
-    region = np.array(region)
-    vis_tissue = Image.fromarray(apply_mask(region.copy(), res_dict['mask'], inv=False))
-    vis_tissue = vis_tissue.resize(vis_size, Image.BICUBIC)
-    vis_tissue.save(os.path.join(REMOVAL_VIS, f'{basename}_tiss-det-small.png'))
+        # save mask visualisation on the tissue image
+        region = np.array(region)
+        vis_tissue = Image.fromarray(apply_mask(region.copy(), res_dict['mask'], inv=False))
+        vis_tissue = vis_tissue.resize(vis_size, Image.BICUBIC)
+        vis_tissue.save(os.path.join(REMOVAL_VIS, f'{basename}_tiss-det-small.png'))
 
-    # save borders visualisation on the tissue image
-    contours, _ = cv2.findContours(res_dict['mask'].astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    region_con = region.copy()
-    cv2.drawContours(region_con, contours, -1, (0, 0, 255), 2)
-    region_con = Image.fromarray(region_con)
-    region_con.resize(vis_size, Image.BICUBIC)
-    region_con.save(os.path.join(REMOVAL_CONT_VIS, f'{basename}_contour-small.png'))
+        # save borders visualisation on the tissue image
+        contours, _ = cv2.findContours(res_dict['mask'].astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        region_con = region.copy()
+        cv2.drawContours(region_con, contours, -1, (0, 0, 255), 2)
+        region_con = Image.fromarray(region_con)
+        region_con.resize(vis_size, Image.BICUBIC)
+        region_con.save(os.path.join(REMOVAL_CONT_VIS, f'{basename}_contour-small.png'))
 
-    ############################################################################################################
-    # RUN GRAND QC FOR ARTIFACTS DETECTION
-    ############################################################################################################
-    model_grandQC = torch.load(args.grandqc_model, map_location=args.device)  # load grandQC model
-    p_s, patch_n_w_l0, patch_n_h_l0, w_l0, h_l0, obj_power = slide_info(slide, PATCH_SIZE_MODEL, MPP_MODEL, mpp_slide)
+        ############################################################################################################
+        # RUN GRAND QC FOR ARTIFACTS DETECTION
+        ############################################################################################################
+        model_grandQC = torch.load(args.grandqc_model, map_location=args.device)  # load grandQC model
+        p_s, patch_n_w_l0, patch_n_h_l0, w_l0, h_l0, obj_power = slide_info(slide, PATCH_SIZE_MODEL, MPP_MODEL, mpp_slide)
 
-    h, w = res_dict["mask"].shape
-    tis_det = Image.fromarray(1 - res_dict["mask"].astype(np.uint8))
-    tis_det = np.array(tis_det.resize((int(w * 4), int(h * 4)), Image.Resampling.NEAREST))
+        h, w = res_dict["mask"].shape
+        tis_det = Image.fromarray(1 - res_dict["mask"].astype(np.uint8))
+        tis_det = np.array(tis_det.resize((int(w * 4), int(h * 4)), Image.Resampling.NEAREST))
 
-    map_tiss, full_mask, tis_det = slide_process_single(model_grandQC, tis_det, slide, patch_n_w_l0, patch_n_h_l0, p_s,
-                                               PATCH_SIZE_MODEL, config.colors, ENCODER_MODEL,ENCODER_MODEL_WEIGHTS,
-                                               args.device, BG_CLASS, MPP_MODEL, mpp_slide, w_l0, h_l0, vis_size)
+        map_tiss, full_mask, tis_det = slide_process_single(model_grandQC, tis_det, slide, patch_n_w_l0, patch_n_h_l0, p_s,
+                                                   PATCH_SIZE_MODEL, config.colors, ENCODER_MODEL,ENCODER_MODEL_WEIGHTS,
+                                                   args.device, BG_CLASS, MPP_MODEL, mpp_slide, w_l0, h_l0, vis_size)
 
-    # save color grandQC artifacts map
-    map_path = os.path.join(GRANDQC_MAP_VIS, basename + "_grandqc-small.png")
-    map_tiss = map_tiss.resize(vis_size, Image.Resampling.NEAREST)
-    map_tiss.save(map_path)
+        # save color grandQC artifacts map
+        map_path = os.path.join(GRANDQC_MAP_VIS, basename + "_grandqc-small.png")
+        map_tiss = map_tiss.resize(vis_size, Image.Resampling.NEAREST)
+        map_tiss.save(map_path)
 
-    # save region with map overlay
-    overlay = make_overlay(region, map_tiss,tis_det, vis_size)
-    overlay_im = Image.fromarray(overlay)
-    overlay_im.save(os.path.join(GRANDQC_OVERLAY_VIS, basename + "_overlay-small.png"))
+        # save region with map overlay
+        overlay = make_overlay(region, map_tiss,tis_det, vis_size)
+        overlay_im = Image.fromarray(overlay)
+        overlay_im.save(os.path.join(GRANDQC_OVERLAY_VIS, basename + "_overlay-small.png"))
 
-    del map_tiss
-    del overlay
+        del map_tiss
+        del overlay
 
-    full_mask = Image.fromarray(full_mask)
-    full_mask = full_mask.resize((int(region.shape[1]), int(region.shape[0])), Image.Resampling.NEAREST)
-    full_mask = np.array(full_mask)
+        full_mask = Image.fromarray(full_mask)
+        full_mask = full_mask.resize((int(region.shape[1]), int(region.shape[0])), Image.Resampling.NEAREST)
+        full_mask = np.array(full_mask)
 
-    tis_det = Image.fromarray(tis_det)
-    tis_det = np.array(tis_det.resize((int(region.shape[1]), int(region.shape[0])), Image.Resampling.NEAREST))
-    res_dict["mask"] = tis_det
+        tis_det = Image.fromarray(tis_det)
+        tis_det = np.array(tis_det.resize((int(region.shape[1]), int(region.shape[0])), Image.Resampling.NEAREST))
+        res_dict["mask"] = tis_det
 
-    if not args.split_regions:
-        save_dict = {
-            'basename': basename, # tissue file basename (without .svs extension)
-            'mask_all': res_dict['mask'],  # mask with detected tissue region
-            'mask_art': full_mask,  # mask with artifacts detected by grandQC for given region
-            'ind_WSI': get_wsi_ind_matlab(slide_file),  # indexes for WSI image layers (idx from 1)
-            'ratio': ratio,  # ratio for each layer
-            'scale_val': scale_val,  # scale factor of masks
-            'thr': res_dict['thr'],  # thresholds calculated for R, G, B color channels
-        }
+        if not args.split_regions:
+            save_dict = {
+                'basename': basename, # tissue file basename (without .svs extension)
+                'mask_all': res_dict['mask'],  # mask with detected tissue region
+                'mask_art': full_mask,  # mask with artifacts detected by grandQC for given region
+                'ind_WSI': get_wsi_ind_matlab(slide_file),  # indexes for WSI image layers (idx from 1)
+                'ratio': ratio,  # ratio for each layer
+                'scale_val': scale_val,  # scale factor of masks
+                'thr': res_dict['thr'],  # thresholds calculated for R, G, B color channels
+            }
 
-        if "mat" in args.save_mask_formats:
-            scipy.io.savemat(os.path.join(BG_MASK_DIR, f'{basename}_mask.mat'), save_dict, do_compression=True)
-        if "npy" in args.save_mask_formats:
-            np.savez(os.path.join(BG_MASK_DIR, f'{basename}_mask.npz'), **save_dict)
-    else:
-        label_img = measure.label(res_dict['mask'])
-        props = measure.regionprops(label_img)
+            if "mat" in args.save_mask_formats:
+                scipy.io.savemat(os.path.join(BG_MASK_DIR, f'{basename}_mask.mat'), save_dict, do_compression=True)
+            if "npy" in args.save_mask_formats:
+                np.savez(os.path.join(BG_MASK_DIR, f'{basename}_mask.npz'), **save_dict)
+        else:
+            label_img = measure.label(res_dict['mask'])
+            props = measure.regionprops(label_img)
 
-        save_dict = {
-            'basename': basename, # tissue file basename (without .svs extension)
-            'mask_all': [],  # mask with detected tissue region
-            'mask_art': [],  # mask with artifacts detected by grandQC for given region
-            'ind_WSI': get_wsi_ind_matlab(slide_file),  # indexes for WSI image layers (idx from 1)
-            'ratio': ratio,  # ratio for each layer
-            'scale_val': scale_val,  # scale factor of masks
-            'thr': res_dict['thr'],  # thresholds calculated for R, G, B color channels
-            'tiss_stats': []  # bbox converted to matlab notation
-        }
+            save_dict = {
+                'basename': basename, # tissue file basename (without .svs extension)
+                'mask_all': [],  # mask with detected tissue region
+                'mask_art': [],  # mask with artifacts detected by grandQC for given region
+                'ind_WSI': get_wsi_ind_matlab(slide_file),  # indexes for WSI image layers (idx from 1)
+                'ratio': ratio,  # ratio for each layer
+                'scale_val': scale_val,  # scale factor of masks
+                'thr': res_dict['thr'],  # thresholds calculated for R, G, B color channels
+                'tiss_stats': []  # bbox converted to matlab notation
+            }
 
-        for n, region in enumerate(props):
-            region_mask_bg = region.image.astype(np.uint8)  # 0/1
-            bbox = region.bbox
-            region_mask_grandqc = full_mask[bbox[0]:bbox[2], bbox[1]:bbox[3]] * region_mask_bg
+            for n, region in enumerate(props):
+                region_mask_bg = region.image.astype(np.uint8)  # 0/1
+                bbox = region.bbox
+                region_mask_grandqc = full_mask[bbox[0]:bbox[2], bbox[1]:bbox[3]] * region_mask_bg
 
-            save_dict['mask_all'].append(region_mask_bg.astype(bool))
-            save_dict['mask_art'].append(region_mask_grandqc)
-            save_dict['tiss_stats'].append([bbox[0] + 1, bbox[1] + 1, bbox[2] + 1, bbox[3] + 1])
+                save_dict['mask_all'].append(region_mask_bg.astype(bool))
+                save_dict['mask_art'].append(region_mask_grandqc)
+                save_dict['tiss_stats'].append([bbox[0] + 1, bbox[1] + 1, bbox[2] + 1, bbox[3] + 1])
 
-            region_mask_grandqc = make_artifacts_color_map(region_mask_grandqc, config.colors)
-            region_mask_grandqc = Image.fromarray(region_mask_grandqc)
-            region_mask_grandqc.save(os.path.join(REGION_GRANDQC_VIS, f'{basename}_R{n + 1}.png'))
+                region_mask_grandqc = make_artifacts_color_map(region_mask_grandqc, config.colors)
+                region_mask_grandqc = Image.fromarray(region_mask_grandqc)
+                region_mask_grandqc.save(os.path.join(REGION_GRANDQC_VIS, f'{basename}_R{n + 1}.png'))
 
-        save_dict['mask_all'] = list2cell(save_dict['mask_all'])
-        save_dict['mask_art'] = list2cell(save_dict['mask_art'])
+            save_dict['mask_all'] = list2cell(save_dict['mask_all'])
+            save_dict['mask_art'] = list2cell(save_dict['mask_art'])
 
-        if "mat" in args.save_mask_formats:
-            scipy.io.savemat(os.path.join(BG_MASK_DIR, f'{basename}_mask_all.mat'), save_dict, do_compression=True)
-        if "npy" in args.save_mask_formats:
-            np.savez(os.path.join(BG_MASK_DIR, f'{basename}_mask_all.npz'), **save_dict)
+            if "mat" in args.save_mask_formats:
+                scipy.io.savemat(os.path.join(BG_MASK_DIR, f'{basename}_mask_all.mat'), save_dict, do_compression=True)
+            if "npy" in args.save_mask_formats:
+                np.savez(os.path.join(BG_MASK_DIR, f'{basename}_mask_all.npz'), **save_dict)
 
-    del full_mask
-
-if __name__ == "__main__":
-    # get slides names
-    slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
-
-    # Process WSIs
-    print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Using {args.device} for GrandQC. Started processing...\n")
-    time_start = time.time()
-    log_file = os.path.join(args.out_dir, "error_files.txt")
-
-    for slide in tqdm(slides, total=len(slides)):
-        try:
-            process_single_slide(slide)
-        except Exception as e:
+        del full_mask
+    except Exception as e:
             with open(log_file, 'a') as f:
                 print(f"There was an error during processing: {slide} - error message: {str(e)}")
                 f.write(f"Slide: {slide} - error message: {str(e)}\n")
