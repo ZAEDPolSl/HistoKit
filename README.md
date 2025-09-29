@@ -6,7 +6,7 @@
 pip install -r requirements.txt
 pip install openslide-bin
 ```
-## ⚙️ Run with CUDA (single thread processing)
+## ⚙️ Run with CUDA (and CPU with a single thread)
 
 To run program with CUDA use `src/run_tissue_seg_single.py` script and set the `device` parameter to `cuda`.
 
