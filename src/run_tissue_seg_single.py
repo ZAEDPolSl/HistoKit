@@ -67,12 +67,6 @@ if not os.path.exists(GRANDQC_MAP_VIS): os.makedirs(GRANDQC_MAP_VIS)
 if not os.path.exists(GRANDQC_OVERLAY_VIS): os.makedirs(GRANDQC_OVERLAY_VIS)
 if not os.path.exists(REGION_GRANDQC_VIS) and args.split_regions: os.makedirs(REGION_GRANDQC_VIS)
 
-# get slides names
-slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
-
-# Process WSIs
-print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Using {args.device} for GrandQC. Started processing...")
-
 
 def process_single_slide(slide_file):
 
@@ -166,7 +160,7 @@ def process_single_slide(slide_file):
     map_tiss.save(map_path)
 
     # save region with map overlay
-    overlay = make_overlay(region, map_tiss, vis_size)
+    overlay = make_overlay(region, map_tiss,tis_det, vis_size)
     overlay_im = Image.fromarray(overlay)
     overlay_im.save(os.path.join(GRANDQC_OVERLAY_VIS, basename + "_overlay-small.png"))
 
@@ -235,6 +229,11 @@ def process_single_slide(slide_file):
     del full_mask
 
 if __name__ == "__main__":
+    # get slides names
+    slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
+
+    # Process WSIs
+    print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Using {args.device} for GrandQC. Started processing...\n")
     time_start = time.time()
     log_file = os.path.join(args.out_dir, "error_files.txt")
 

@@ -187,7 +187,7 @@ def process_single_slide(slide_file):
     map_tiss.save(map_path)
 
     # save region with map overlay
-    overlay = make_overlay(region, map_tiss, vis_size)
+    overlay = make_overlay(region, map_tiss,tis_det, vis_size)
     overlay_im = Image.fromarray(overlay)
     overlay_im.save(os.path.join(GRANDQC_OVERLAY_VIS, basename + "_overlay-small.png"))
 
