@@ -23,7 +23,7 @@ Script for tissue region detection with a single thread (can use cuda if availab
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/HE_data/Labaj_UCEC/SVS/05_2024/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res9/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res10/')
 parser.add_argument('--split_regions', type=bool, help='If there are multiple regions on the slide save each of them to a separate file.', default=True)
 parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not', default=False)
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
