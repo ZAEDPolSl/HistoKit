@@ -4,6 +4,7 @@
 - Uses Python 3.10
 ```python
 pip install -r requirements.txt
+pip install openslide-bin
 ```
 ## ⚙️ Run with CUDA (single thread processing)
 
