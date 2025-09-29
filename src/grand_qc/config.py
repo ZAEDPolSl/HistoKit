@@ -11,8 +11,8 @@ class Config:
     [255, 0, 0],   #ART_PEN: red
     [255, 0, 255],   #ART_EDGE: pink
     [75, 0, 130],      # ART_FOCUS: violet
-    [255, 255, 255],   #BACKGROUND (after mask detection)
-    [50, 120, 230] # BACKGROUND (predicted by artifact detection model)
+    [255, 255, 255],   #BACKGROUND (after mask detection): white
+    [50, 120, 230] # BACKGROUND (predicted by artifact detection model): blue
 ]
 
 config = Config()

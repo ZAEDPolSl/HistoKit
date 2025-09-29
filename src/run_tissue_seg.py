@@ -25,20 +25,21 @@ Original matlab implementation is available in: github.com/WSI_TissueSeg
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/HE_data/Labaj_UCEC/SVS/05_2024/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res5/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res9/')
 parser.add_argument('--split_regions', type=bool, help='If there are multiple regions on the slide save each of them to a separate file.', default=True)
-parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not', default=True)
+parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not', default=False)
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
 parser.add_argument('--save_mask_formats', nargs='+',help='File formats to save masks, choose at least one from: npy, mat.', choices=["npy", "mat"],default=["npy", "mat"])
 parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu', choices=["cuda", "cpu"],default="cpu")
 parser.add_argument('--overlay_factor', help='Factor used for creating image overlay', default=0.60, type=float)
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="grand_qc/models/GrandQC_MPP1.pth", type=str)
-parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=4, type=int,choices=range(1, os.cpu_count() + 1))
+parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=10, type=int,choices=range(1, os.cpu_count() + 1))
 args = parser.parse_args()
 
 MAG_BG_DET = 2.5  # magnification for tissue detection
 WSI_DIR = args.wsi_dir
+
 PATCH_SIZE_MODEL = 512  # patch size for grand QC
 ENCODER_MODEL = 'timm-efficientnet-b0'
 ENCODER_MODEL_WEIGHTS = 'imagenet'
@@ -53,22 +54,25 @@ BG_THRESH_DIR = os.path.join(args.out_dir, 'bg_thr_hist')  # histograms with bg 
 RAW_SMALL = os.path.join(args.out_dir, 'raw_small')  # tissue image [small PNG thumbnails]
 PEN_VIS = os.path.join(args.out_dir, 'pen_vis')  # results of pen removal [small PNG thumbnails]
 REMOVAL_VIS = os.path.join(args.out_dir, 'bg_removal_vis')  # results of bg removal [small PNG thumbnails]
+REMOVAL_CONT_VIS = os.path.join(args.out_dir, 'bg_removal_contour_vis')  # results of bg removal with blue contours [small PNG thumbnails]
 GRANDQC_MAP_VIS = os.path.join(args.out_dir,'grandqc_map_vis')  # results of artifacts detection with GrandQC (color maps) [small PNG thumbnails]
 GRANDQC_OVERLAY_VIS = os.path.join(args.out_dir, 'grandqc_overlay_vis')  # results of artifacts detection with GrandQC (map overlay on tissue regions) [small PNG thumbnails]
 REGION_GRANDQC_VIS = os.path.join(args.out_dir, 'grandqc_vis_region')  # results of artifacts detection with GrandQC for each region (color maps) [small PNG thumbnails]
+
 
 if not os.path.exists(BG_MASK_DIR): os.makedirs(BG_MASK_DIR)
 if not os.path.exists(BG_MASK_VIS_DIR): os.makedirs(BG_MASK_VIS_DIR)
 if not os.path.exists(BG_THRESH_DIR): os.makedirs(BG_THRESH_DIR)
 if not os.path.exists(RAW_SMALL): os.makedirs(RAW_SMALL)
 if not os.path.exists(PEN_VIS): os.makedirs(PEN_VIS)
+if not os.path.exists(REMOVAL_CONT_VIS): os.makedirs(REMOVAL_CONT_VIS)
 if not os.path.exists(REMOVAL_VIS): os.makedirs(REMOVAL_VIS)
 if not os.path.exists(GRANDQC_MAP_VIS): os.makedirs(GRANDQC_MAP_VIS)
 if not os.path.exists(GRANDQC_OVERLAY_VIS): os.makedirs(GRANDQC_OVERLAY_VIS)
 if not os.path.exists(REGION_GRANDQC_VIS) and args.split_regions: os.makedirs(REGION_GRANDQC_VIS)
 
 # get slides names
-slides = glob.glob(os.path.join(WSI_DIR, 'SS45212_R0A10F2A_190425.svs'))
+slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
 
 # Process WSIs
 print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Starting processing with {args.workers} workers...")
@@ -152,7 +156,7 @@ def process_single_slide(slide_file):
 
     # save mask visualisation on the tissue image
     region = np.array(region)
-    vis_tissue = Image.fromarray(apply_mask(region, res_dict['mask'], inv=False))
+    vis_tissue = Image.fromarray(apply_mask(region.copy(), res_dict['mask'], inv=False))
     vis_tissue = vis_tissue.resize(vis_size, Image.BICUBIC)
     vis_tissue.save(os.path.join(REMOVAL_VIS, f'{basename}_tiss-det-small.png'))
 
@@ -162,7 +166,7 @@ def process_single_slide(slide_file):
     cv2.drawContours(region_con, contours, -1, (0, 0, 255), 2)
     region_con = Image.fromarray(region_con)
     region_con.resize(vis_size, Image.BICUBIC)
-    region_con.save(os.path.join(REMOVAL_VIS, f'{basename}_contour-small.png'))
+    region_con.save(os.path.join(REMOVAL_CONT_VIS, f'{basename}_contour-small.png'))
 
     ############################################################################################################
     # RUN GRAND QC FOR ARTIFACTS DETECTION
@@ -174,7 +178,7 @@ def process_single_slide(slide_file):
     tis_det = Image.fromarray(1 - res_dict["mask"].astype(np.uint8))
     tis_det = np.array(tis_det.resize((int(w * 4), int(h * 4)), Image.Resampling.NEAREST))
 
-    map_tiss, full_mask = slide_process_single(model_grandQC, tis_det, slide, patch_n_w_l0, patch_n_h_l0, p_s,
+    map_tiss, full_mask, tis_det = slide_process_single(model_grandQC, tis_det, slide, patch_n_w_l0, patch_n_h_l0, p_s,
                                                PATCH_SIZE_MODEL, config.colors, ENCODER_MODEL,ENCODER_MODEL_WEIGHTS,
                                                args.device, BG_CLASS, MPP_MODEL, mpp_slide, w_l0, h_l0, vis_size)
 
@@ -195,10 +199,13 @@ def process_single_slide(slide_file):
     full_mask = full_mask.resize((int(region.shape[1]), int(region.shape[0])), Image.Resampling.NEAREST)
     full_mask = np.array(full_mask)
 
+    tis_det = Image.fromarray(tis_det)
+    tis_det = np.array(tis_det.resize((int(region.shape[1]), int(region.shape[0])), Image.Resampling.NEAREST))
+    res_dict["mask"] = tis_det
 
     if not args.split_regions:
         save_dict = {
-            'basename': basename,
+            'basename': basename, # tissue file basename (without .svs extension)
             'mask_all': res_dict['mask'],  # mask with detected tissue region
             'mask_art': full_mask,  # mask with artifacts detected by grandQC for given region
             'ind_WSI': get_wsi_ind_matlab(slide_file),  # indexes for WSI image layers (idx from 1)
@@ -216,7 +223,7 @@ def process_single_slide(slide_file):
         props = measure.regionprops(label_img)
 
         save_dict = {
-            'basename': basename,
+            'basename': basename, # tissue file basename (without .svs extension)
             'mask_all': [],  # mask with detected tissue region
             'mask_art': [],  # mask with artifacts detected by grandQC for given region
             'ind_WSI': get_wsi_ind_matlab(slide_file),  # indexes for WSI image layers (idx from 1)
@@ -251,7 +258,8 @@ def process_single_slide(slide_file):
 
 if __name__ == "__main__":
     time_start = time.time()
-    process_single_slide(slides[0])
+    log_file = os.path.join(args.out_dir, "error_files.txt")
+
     with ThreadPoolExecutor(args.workers) as executor:
         k, m = divmod(len(slides), args.workers)
         slides_arr = [slides[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(args.workers)]
@@ -268,10 +276,11 @@ if __name__ == "__main__":
                     print(name)
 
                 if len(e_s)>0:
-                    print(f"There was an error during processing {len(e_s)} slides: ")
-                    for s, m in zip(e_s, e_m):
-                        print(f"Slide: {s} - error message: {m}")
-
+                    with open(log_file, 'a') as f:
+                        print(f"There was an error during processing {len(e_s)} slides: ")
+                        for s, m in zip(e_s, e_m):
+                            print(f"Slide: {s} - error message: {m}")
+                            f.write(f"Slide: {s} - error message: {m}\n")
 
     print("Finished in time: {:.2f} min".format((time.time() - time_start)/60))
 
