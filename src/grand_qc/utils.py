@@ -5,11 +5,11 @@ from math import ceil
 
 def make_overlay(slide, wsi_heatmap_im, vis_size):
     """
-
-    :param slide:
-    :param wsi_heatmap_im:
-    :param overlay_factor:
-    :return:
+    Function to overlay GrandQC results on the small WSI thumbnail
+    :param vis_size: size of a thumbnail
+    :param slide: WSI slide (OpenSlide)
+    :param wsi_heatmap_im: mask with artifacts detection results
+    :return: overlay - overlay image
     """
     slide = Image.fromarray(slide)
     slide_reduced = slide.resize(vis_size, Image.Resampling.NEAREST)
@@ -23,13 +23,18 @@ def make_overlay(slide, wsi_heatmap_im, vis_size):
 
 def slide_info(slide, model_patch_size, mpp_model, mpp_slide, verbose=False):
     """
-
-    :param verbose:
-    :param slide:
-    :param model_patch_size:
-    :param mpp_model:
-    :param mpp_slide:
-    :return:
+    Get information about the slide and calculate number of patches for grandQC model
+    :param verbose: print information on the screen or not
+    :param slide: WSI slide (OpenSlide)
+    :param model_patch_size: patch size for grandQC model
+    :param mpp_model: MPP used by the grandQC model
+    :param mpp_slide: MPP of slide (we calculated the approximated MPP using information about the magnification)
+    :return: patch_size - size of the patch cropped from the highest resolution of the slide
+             num_patches_width - number of patches in width
+             num_patches_height - number of patches in height
+             width_level_0 - width of the slide at the highest resolution
+             height_level_0 - height of the slide at the highest resolution
+             obj_power - objective power of the slide
     """
     # Objective power
     try:
@@ -37,7 +42,7 @@ def slide_info(slide, model_patch_size, mpp_model, mpp_slide, verbose=False):
     except:
         obj_power = 99
 
-    patch_size = int(mpp_model / mpp_slide * model_patch_size)
+    patch_size = int(round(mpp_model / mpp_slide * model_patch_size))
 
     # Vendor
     vendor = slide.properties["openslide.vendor"]

@@ -1,13 +1,47 @@
 import numpy as np
-import os
-from threadpoolctl import threadpool_limits
 from skimage.color import rgb2hsv, rgb2lab
 from skimage import measure, morphology
 from scipy import ndimage as ndi
 from skimage.measure import label
-from sklearn.cluster import KMeans
 import tifffile
 
+def cluster_regions(data, max_iters=100, tol=1e-4):
+    """
+    Cluster regions areas with single-threaded kmeans algorithm with deterministic initialization.
+    :param data: data vector 1D
+    :param max_iters: maximum number of iterations
+    :param tol: tolerance for convergence
+    :return: cluster labels and cluster centers
+    """
+    k=2
+    data = np.array(data, dtype=float)
+    centroids = np.linspace(data.min(), data.max(), k)
+
+    for _ in range(max_iters):
+
+        distances = np.abs(data[:, None] - centroids[None, :])
+        labels = np.argmin(distances, axis=1)
+
+        # Default matlab implementation - when cluster is empty, create a new cluster center by assigning
+        # its centroid position to the furthest point of another clusters
+        if len(set(labels)) < 2:
+            empty_label = set(range(k)) - set(labels)
+            idx_non_empty = np.argmax(distances[labels != empty_label])
+            labels[idx_non_empty] = empty_label
+
+
+        # Calculate a new centroid position by calculating the mean
+        # of samples assigned to this cluster.
+        new_centroids = np.array([
+            data[labels == i].mean() for i in range(k)
+        ])
+
+        if np.all(np.abs(new_centroids - centroids) < tol):
+            break
+
+        centroids = new_centroids
+
+    return labels, centroids
 
 def get_strel_disk(radius):
     """
@@ -126,30 +160,29 @@ def remove_small_objects(mask):
         mask_res = morphology.remove_small_objects(mask.astype(bool), min_size=thr_area, connectivity=2)
         return mask_res
 
+    idx, centers = cluster_regions(np.log10(area_tmp))
 
-    with threadpool_limits(user_api="openmp", limits=1):
-        kmeans = KMeans(n_clusters=2)
-        idx = kmeans.fit_predict(np.log10(area_tmp).reshape(-1, 1))
-        centers = kmeans.cluster_centers_.flatten()
+    if centers[0] > centers[1]:
+        thr_area = min(area_tmp[idx == 0]) - 1
+    else:
+        thr_area = min(area_tmp[idx == 1]) - 1
 
+    if np.sum(areas > thr_area) < 1:
+        idx, centers = cluster_regions(areas)
         if centers[0] > centers[1]:
-            thr_area = min(area_tmp[idx == 0]) - 1
+            thr_area = min(areas[idx == 0]) - 1
         else:
-            thr_area = min(area_tmp[idx == 1]) - 1
-
-        if np.sum(areas > thr_area) < 1:
-            kmeans = KMeans(n_clusters=2)
-            idx = kmeans.fit_predict(areas.reshape(-1, 1))
-            centers = kmeans.cluster_centers_.flatten()
-            if centers[0] > centers[1]:
-                thr_area = min(areas[idx == 0]) - 1
-            else:
-                thr_area = min(areas[idx == 1]) - 1
+            thr_area = min(areas[idx == 1]) - 1
 
     mask_res = morphology.remove_small_objects(mask.astype(bool), min_size=thr_area, connectivity=2)
     return mask_res
 
 def get_wsi_ind_matlab(path):
+    """
+    Get indices of WSI image layers (matlab's iminfo)
+    :param path: path to the SVS file with the WSI image
+    :return: indices of WSI image layers in matlab convention (from 1 not from 0)
+    """
     ind = []
     with tifffile.TiffFile(path) as tif:
         for i, l in enumerate(tif.pages):
@@ -158,8 +191,13 @@ def get_wsi_ind_matlab(path):
                 ind.append(i+1) #matlab indexing
     return ind
 
-def list2cell(list):
-    cell = np.empty((len(list), ), dtype=object)
-    for i, v in enumerate(list):
+def list2cell(list_obj):
+    """
+    Convert list to numpy array of objects
+    :param list_obj: list of objects
+    :return: numpy.array with objects
+    """
+    cell = np.empty((len(list_obj), ), dtype=object)
+    for i, v in enumerate(list_obj):
         cell[i]=v
     return cell
