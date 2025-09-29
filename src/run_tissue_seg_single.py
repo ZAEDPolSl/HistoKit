@@ -14,12 +14,11 @@ from src.grand_qc.wsi_process import slide_process_single, make_artifacts_color_
 from src.tissue_seg.tissue_seg import wsi_tissue_seg, plot_rgb_hist
 from src.tissue_seg.utils import apply_mask, get_wsi_ind_matlab, list2cell
 from grand_qc.config import config
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import time
 from tqdm import tqdm
 
 """
-Script for tissue region detection with multiple threads
+Script for tissue region detection with a single thread (can use cuda if available)
 """
 
 parser = argparse.ArgumentParser()
@@ -30,10 +29,8 @@ parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
 parser.add_argument('--save_mask_formats', nargs='+',help='File formats to save masks, choose at least one from: npy, mat.', choices=["npy", "mat"],default=["npy", "mat"])
-parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu, cuda is not recommended for many threads.', choices=["cuda", "cpu"],default="cpu")
-parser.add_argument('--overlay_factor', help='Factor used for creating image overlay', default=0.60, type=float)
+parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu', choices=["cuda", "cpu"],default="cuda")
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="grand_qc/models/GrandQC_MPP1.pth", type=str)
-parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=10, type=int,choices=range(1, os.cpu_count() + 1))
 args = parser.parse_args()
 
 MAG_BG_DET = 2.5  # magnification for tissue detection
@@ -74,25 +71,7 @@ if not os.path.exists(REGION_GRANDQC_VIS) and args.split_regions: os.makedirs(RE
 slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
 
 # Process WSIs
-print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Starting processing with {args.workers} workers...")
-
-def process_slides(slide_arr):
-    error_slides = []
-    error_msgs = []
-    deltas = []
-    processed = []
-    for slide_file in slide_arr:
-        try:
-            start = time.time()
-            process_single_slide(slide_file)
-            delta = time.time() - start
-            deltas.append(delta)
-            processed.append(slide_file)
-        except Exception as e:
-            error_slides.append(slide_file)
-            error_msgs.append(str(e))
-            deltas.append(0)
-    return error_slides, error_msgs, deltas, processed
+print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Using {args.device} for GrandQC. Started processing...")
 
 
 def process_single_slide(slide_file):
@@ -259,33 +238,15 @@ if __name__ == "__main__":
     time_start = time.time()
     log_file = os.path.join(args.out_dir, "error_files.txt")
 
-    with ThreadPoolExecutor(args.workers) as executor:
-        k, m = divmod(len(slides), args.workers)
-        slides_arr = [slides[i*k+min(i, m):(i+1)*k+min(i+1, m)] for i in range(args.workers)]
-        futures = {executor.submit(process_slides, s): s for s in slides_arr}
-
-        with tqdm(total=len(slides)) as pbar:
-            for fut in as_completed(futures):
-                src = futures[fut]
-                e_s, e_m, d, p = fut.result()
-                pbar.update(len(src))
-                print(f"\nProcessed {len(p)} slides:")
-                print("Slide names:")
-                for name in p:
-                    print(name)
-
-                if len(e_s)>0:
-                    with open(log_file, 'a') as f:
-                        print(f"There was an error during processing {len(e_s)} slides: ")
-                        for s, m in zip(e_s, e_m):
-                            print(f"Slide: {s} - error message: {m}")
-                            f.write(f"Slide: {s} - error message: {m}\n")
+    for slide in tqdm(slides, total=len(slides)):
+        try:
+            process_single_slide(slide)
+        except Exception as e:
+            with open(log_file, 'a') as f:
+                print(f"There was an error during processing: {slide} - error message: {str(e)}")
+                f.write(f"Slide: {slide} - error message: {str(e)}\n")
 
     print("Finished in time: {:.2f} min".format((time.time() - time_start)/60))
-
-
-
-
 
 
 
