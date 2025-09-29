@@ -3,7 +3,7 @@ from PIL import Image
 import cv2
 from math import ceil
 
-def make_overlay(slide, wsi_heatmap_im, vis_size):
+def make_overlay(slide, wsi_heatmap_im, bg_mask, vis_size):
     """
     Function to overlay GrandQC results on the small WSI thumbnail
     :param vis_size: size of a thumbnail
@@ -15,6 +15,8 @@ def make_overlay(slide, wsi_heatmap_im, vis_size):
     slide_reduced = slide.resize(vis_size, Image.Resampling.NEAREST)
     heatmap_temp = wsi_heatmap_im.resize(slide_reduced.size, Image.Resampling.NEAREST)
     overlay = cv2.addWeighted(np.array(slide_reduced), 0.3, np.array(heatmap_temp), 0.7, 0)
+    contours, _ = cv2.findContours(bg_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(overlay, contours, -1, (0, 0, 255), 2)
     heatmap_np = np.array(heatmap_temp)
     mask = np.all(heatmap_np == (128, 128, 128), axis=-1)
     overlay[mask] = np.array(slide_reduced)[mask]
