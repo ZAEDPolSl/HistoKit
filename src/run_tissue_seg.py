@@ -30,7 +30,7 @@ parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
 parser.add_argument('--save_mask_formats', nargs='+',help='File formats to save masks, choose at least one from: npy, mat.', choices=["npy", "mat"],default=["npy", "mat"])
-parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu, cuda is not recommended for many threads.', choices=["cuda", "cpu"],default="cpu")
+parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu, cuda is not recommended for multiple threads.', choices=["cuda", "cpu"],default="cpu")
 parser.add_argument('--overlay_factor', help='Factor used for creating image overlay', default=0.60, type=float)
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="grand_qc/models/GrandQC_MPP1.pth", type=str)
 parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=10, type=int,choices=range(1, os.cpu_count() + 1))
