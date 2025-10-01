@@ -12,7 +12,7 @@ To run program with CUDA use `src/run_tissue_seg_single.py` script and set the `
 
 ## ⚙️ Run detection on many threads (CPU)
 
-To run program with multiple threads use `src/run_tissue_seg.py` script and set the `workers` parameter to the number of threads you want to use.
+To run program with multiple threads use `src/run_tissue_seg.py` script and set the `workers` parameter to the number of threads you want to use. Using `cuda` is not recommended for multiple workers due to competition for resources.
 
 ## ⚙️ Configuration
 
