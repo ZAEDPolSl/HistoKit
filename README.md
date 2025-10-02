@@ -27,7 +27,7 @@ To run program with multiple threads use `src/run_tissue_seg.py` script and set 
 | `--close_disk_r`     | int    | `2`                                                                     | Radius of disk structuring element used for closing operation (mask cleaning). |
 | `--open_disk_r`      | int    | `2`                                                                     | Radius of disk structuring element used for opening operation (mask cleaning). |
 | `--save_mask_formats`| list   | `["npy", "mat"]`                                                        | File formats for saving masks. Choose at least one: `npy`, `mat`.           |
-| `--device`           | str    | `cpu`                                                                   | Device for artifacts detection: `cuda` or `cpu`.                            |
+| `--device`           | str    | `cpu`                                                                   | Device for artifacts detection: `cuda` or `cpu` (only for  run_tissue_seg_single.py) |
 | `--grandqc_model`    | str    | `grand_qc/models/GrandQC_MPP1.pth`                                      | Path to GrandQC model weights (10x magnification model used by default).    |
 | `--workers`          | int    | `10`                                                                    | Number of workers for parallel processing (max number: `os.cpu_count()`).             |
 
