@@ -12,7 +12,7 @@ To run program with CUDA use `src/run_tissue_seg_single.py` script and set the `
 
 ## ⚙️ Run detection on many threads (CPU)
 
-To run program with multiple threads use `src/run_tissue_seg.py` script and set the `workers` parameter to the number of threads you want to use.
+To run program with multiple threads use `src/run_tissue_seg.py` script and set the `workers` parameter to the number of threads you want to use. Using `cuda` is not recommended for multiple workers due to competition for resources.
 
 ## ⚙️ Configuration
 
@@ -27,7 +27,7 @@ To run program with multiple threads use `src/run_tissue_seg.py` script and set 
 | `--close_disk_r`     | int    | `2`                                                                     | Radius of disk structuring element used for closing operation (mask cleaning). |
 | `--open_disk_r`      | int    | `2`                                                                     | Radius of disk structuring element used for opening operation (mask cleaning). |
 | `--save_mask_formats`| list   | `["npy", "mat"]`                                                        | File formats for saving masks. Choose at least one: `npy`, `mat`.           |
-| `--device`           | str    | `cpu`                                                                   | Device for artifacts detection: `cuda` or `cpu`.                            |
+| `--device`           | str    | `cpu`                                                                   | Device for artifacts detection: `cuda` or `cpu` (only for  run_tissue_seg_single.py) |
 | `--grandqc_model`    | str    | `grand_qc/models/GrandQC_MPP1.pth`                                      | Path to GrandQC model weights (10x magnification model used by default).    |
 | `--workers`          | int    | `10`                                                                    | Number of workers for parallel processing (max number: `os.cpu_count()`).             |
 
@@ -114,12 +114,12 @@ end
   *GrandQC: A comprehensive solution to quality control problem in digital pathology.*  
   Nature Communications 15, 10685 (2024).  
   [https://doi.org/10.1038/s41467-024-54769-y](https://doi.org/10.1038/s41467-024-54769-y)
-  [Github repository](https://github.com/cpath-ukk/grandqc)
+  | [Github repository](https://github.com/cpath-ukk/grandqc)
 
 - Marczyk, M., Wrobel, A., Merta, J. and Polanska, J. (2025).  
   *Post-Processing of Thresholding or Deep Learning Methods for Enhanced Tissue Segmentation of Whole-Slide Histopathological Images.*  
   In Proceedings of the 18th International Joint Conference on Biomedical Engineering Systems and Technologies - Volume 1: BIOIMAGING;  
   ISBN 978-989-758-731-3, SciTePress, pp. 229–238.  
   [https://doi.org/10.5220/0013174700003911](https://doi.org/10.5220/0013174700003911)
-  [Github repository](https://github.com/ZAEDPolSl/WSI_TissueSeg)
+  | [Github repository](https://github.com/ZAEDPolSl/WSI_TissueSeg)
 
