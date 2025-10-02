@@ -68,14 +68,14 @@ if not os.path.exists(GRANDQC_OVERLAY_VIS): os.makedirs(GRANDQC_OVERLAY_VIS)
 if not os.path.exists(REGION_GRANDQC_VIS) and args.split_regions: os.makedirs(REGION_GRANDQC_VIS)
 
 # get slides names
-slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
+slides = glob.glob(os.path.join(WSI_DIR, 'SS45212_R0A10F2J_065436.svs'))
 
 # Process WSIs
 print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Using {args.device} for GrandQC. Started processing...\n")
 time_start = time.time()
 log_file = os.path.join(args.out_dir, "error_files.txt")
 
-for slide_file in tqdm(slides, total=len(slides)):
+for slide_file in slides:
     try:
         # slide basename
         basename = os.path.basename(slide_file).split('.')[0]
@@ -167,6 +167,14 @@ for slide_file in tqdm(slides, total=len(slides)):
         map_tiss.save(map_path)
 
         # save region with map overlay
+        region = Image.fromarray(region)
+        tis_det = Image.fromarray(tis_det)
+
+        region.save("../test_data/region.png")
+        map_tiss.save("../test_data/map_tis.png")
+        tis_det.save("../test_data/tis_det.png")
+
+
         overlay = make_overlay(region, map_tiss,tis_det, vis_size)
         overlay_im = Image.fromarray(overlay)
         overlay_im.save(os.path.join(GRANDQC_OVERLAY_VIS, basename + "_overlay-small.png"))
