@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from scipy.io import loadmat, savemat
+from scipy.io import loadmat
 from PIL import Image
 from numpy.testing import assert_array_equal, assert_allclose
 from src.tissue_seg.find_thr import get_pixel_distribution, norm_pdf, gmm_init_dp_hist, EM_iter_hist, find_thr, \
@@ -29,7 +29,7 @@ def test_find_pixel_distribution(image_path, mat_file):
     ("B", 2, False, 5, "../../test_data/test_find_thr/GaMRed_hist_3.mat")
 ])
 def test_GaMRed_hist(channel, K, draw, SW, mat_file):
-    img = Image.open("../../test_data/test_find_thr/region_3.tif")
+    img = Image.open("../../test_data/tissue_seg/test_find_thr/region_3.tif")
     img_np = np.array(img)
     distribution = get_pixel_distribution(img_np)
     channels = {"R": distribution[0],
@@ -57,7 +57,7 @@ def test_GaMRed_hist(channel, K, draw, SW, mat_file):
      np.array([7.9579,   30.8136,    1.0814,    0.8200,    0.4007]),4, "../../test_data/test_find_thr/EM_iter_hist_3.mat"),
 ])
 def test_EM_iter_hist(channel, alpha, mu, sig, SW, mat_file):
-    img = Image.open("../../test_data/test_find_thr/region_3.tif")
+    img = Image.open("../../test_data/tissue_seg/test_find_thr/region_3.tif")
     img_np = np.array(img)
     distribution = get_pixel_distribution(img_np)
     channels = {"R": distribution[0],
@@ -79,7 +79,7 @@ def test_EM_iter_hist(channel, alpha, mu, sig, SW, mat_file):
     ("B",10, "../../test_data/test_find_thr/gmm_init_dp_hist_3.mat")
 ])
 def test_gmm_init_dp_hist(channel, K, mat_file):
-    img = Image.open("../../test_data/test_find_thr/region_3.tif")
+    img = Image.open("../../test_data/tissue_seg/test_find_thr/region_3.tif")
     img_np = np.array(img)
     distribution = get_pixel_distribution(img_np)
     channels = {"R": distribution[0],
