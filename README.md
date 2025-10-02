@@ -114,12 +114,12 @@ end
   *GrandQC: A comprehensive solution to quality control problem in digital pathology.*  
   Nature Communications 15, 10685 (2024).  
   [https://doi.org/10.1038/s41467-024-54769-y](https://doi.org/10.1038/s41467-024-54769-y)
-  [Github repository](https://github.com/cpath-ukk/grandqc)
+  |[Github repository](https://github.com/cpath-ukk/grandqc)
 
 - Marczyk, M., Wrobel, A., Merta, J. and Polanska, J. (2025).  
   *Post-Processing of Thresholding or Deep Learning Methods for Enhanced Tissue Segmentation of Whole-Slide Histopathological Images.*  
   In Proceedings of the 18th International Joint Conference on Biomedical Engineering Systems and Technologies - Volume 1: BIOIMAGING;  
   ISBN 978-989-758-731-3, SciTePress, pp. 229–238.  
   [https://doi.org/10.5220/0013174700003911](https://doi.org/10.5220/0013174700003911)
-  [Github repository](https://github.com/ZAEDPolSl/WSI_TissueSeg)
+  |[Github repository](https://github.com/ZAEDPolSl/WSI_TissueSeg)
 
