@@ -52,18 +52,51 @@ To run program with multiple threads use `src/run_tissue_seg.py` script and set 
 
 ### Examplary results
 #### `masks/` 
+.npz or .mat files are saved here
 
 #### `bg_masks_vis/`
 
+Small mask visualisations, tissue region is white (255), while background region is black (0)
+<p align="center">
+<img width="445" height="276" alt="SS45212_R0A10F1X_170414_mask-small" src="https://github.com/user-attachments/assets/0d0ab825-59b5-46ce-a409-da30b36fbaf2" />
+</p>
+
 #### `bg_thr_hist/`
+
+Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method, when the threshold obtained with GaMRed is too small (lower than `0.7*255`)
+
+<p align="center">
+<img width="300" height="400" alt="SS45212_R0A10F1X_170414_thr" src="https://github.com/user-attachments/assets/de6b7c7e-5f14-41a9-89ab-c51a49f93ef1" />
+</p>
+
 
 #### `raw_small/`
 
+Small tissue thumbnails.
+
+<p align="center">
+<img width="445" height="276" alt="SS45212_R0A10F1X_170414" src="https://github.com/user-attachments/assets/0d0a9b3f-f33c-428b-9c9f-52320d149d32" />
+</p>
+
 #### `pen_vis/`
+
+Small thumbnail with detected black pen regions.
+
+<p align="center">
+<img width="445" height="445" alt="SS45212_R0A10F1X_170414_pen-small" src="https://github.com/user-attachments/assets/0658c79b-a696-4963-abca-abd9fb6a6fec" />
+</p>
 
 #### `bg_removal_vis/`
 
+Small thumbnail of the tissue region with removed background.
+
+<p align="center">
+<img width="445" height="445" alt="SS45212_R0A10F1X_170414_tiss-det-small" src="https://github.com/user-attachments/assets/64727ef7-8c56-44b4-a3e4-92224604041a" />
+</p>
+
 #### `bg_removal_contour_vis/`
+
+
 
 #### `grandqc_map_vis/`
 
