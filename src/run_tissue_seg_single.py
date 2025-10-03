@@ -101,14 +101,14 @@ for slide_file in slides:
             w0, h0 = slide.level_dimensions[mag_idx]
             region = slide.read_region((0, 0), mag_idx, (w0, h0))
             scale_val = MAG_BG_DET / mag
-            region = region.resize((int(w0 * scale_val), int(h0 * scale_val)), Image.BICUBIC)
+            region = region.resize((int(w0 * scale_val), int(h0 * scale_val)), Image.LANCZOS)
             w, h = region.size
 
         # size for visualisations
         vis_size = (int(w * scale_thumbnail), int(h * scale_thumbnail))
 
         # save scaled region thumbnail
-        thumbnail = region.resize(vis_size, Image.BICUBIC)
+        thumbnail = region.resize(vis_size, Image.LANCZOS)
         thumbnail.save(os.path.join(RAW_SMALL, f'{basename}.png'))
         region = region.convert('RGB')
 
@@ -125,7 +125,7 @@ for slide_file in slides:
 
         # save marker removal effect results
         mask_pen = Image.fromarray(apply_mask(np.array(region), res_dict['mask_pen'], inv=False))
-        mask_pen = mask_pen.resize(vis_size, Image.BICUBIC)
+        mask_pen = mask_pen.resize(vis_size, Image.LANCZOS)
         mask_pen.save(os.path.join(PEN_VIS, f'{basename}_pen-small.png'))
 
         # save mask as color thumbnail
@@ -136,7 +136,7 @@ for slide_file in slides:
         # save mask visualisation on the tissue image
         region = np.array(region)
         vis_tissue = Image.fromarray(apply_mask(region.copy(), res_dict['mask'], inv=False))
-        vis_tissue = vis_tissue.resize(vis_size, Image.BICUBIC)
+        vis_tissue = vis_tissue.resize(vis_size, Image.LANCZOS)
         vis_tissue.save(os.path.join(REMOVAL_VIS, f'{basename}_tiss-det-small.png'))
 
         # save borders visualisation on the tissue image
@@ -144,7 +144,7 @@ for slide_file in slides:
         region_con = region.copy()
         cv2.drawContours(region_con, contours, -1, (0, 0, 255), 2)
         region_con = Image.fromarray(region_con)
-        region_con.resize(vis_size, Image.BICUBIC)
+        region_con.resize(vis_size, Image.LANCZOS)
         region_con.save(os.path.join(REMOVAL_CONT_VIS, f'{basename}_contour-small.png'))
 
         ############################################################################################################
