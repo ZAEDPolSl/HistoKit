@@ -50,6 +50,28 @@ To run program with multiple threads use `src/run_tissue_seg.py` script and set 
 
 <img width="452" height="190" alt="Bez nazwy" src="https://github.com/user-attachments/assets/3e8726c1-3b24-4505-92dc-04ed852d28e7" />
 
+### Examplary results
+#### `masks/` 
+
+#### `bg_masks_vis/`
+
+#### `bg_thr_hist/`
+
+#### `raw_small/`
+
+#### `pen_vis/`
+
+#### `bg_removal_vis/`
+
+#### `bg_removal_contour_vis/`
+
+#### `grandqc_map_vis/`
+
+#### `grandqc_overlay_vis/`
+
+#### `grandqc_vis_region/` 
+
+
 ### Output `.mat` and `.npz` files descriptions
 #### For a whole image:
 | Key          | Description |
