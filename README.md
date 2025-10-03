@@ -91,7 +91,7 @@ Small thumbnail with detected black pen regions.
 Small thumbnail of the tissue region with removed background.
 
 <p align="center">
-<img width="445" height="445" alt="SS45212_R0A10F1X_170414_tiss-det-small" src="https://github.com/user-attachments/assets/64727ef7-8c56-44b4-a3e4-92224604041a" />
+<img width="445" height="276" alt="SS45212_R0A10F1X_170414_tiss-det-small" src="https://github.com/user-attachments/assets/64727ef7-8c56-44b4-a3e4-92224604041a" />
 </p>
 
 #### `bg_removal_contour_vis/`
@@ -100,9 +100,23 @@ Small thumbnail of the tissue region with removed background.
 
 #### `grandqc_map_vis/`
 
+<p align="center">
+<img width="445" height="276" alt="SS45212_R0A10F1X_170414_grandqc-small" src="https://github.com/user-attachments/assets/a1622779-1c11-4592-9cfe-4472da1cafd8" />
+</p>
+
 #### `grandqc_overlay_vis/`
 
+<p align="center">
+<img width="445" height="276" alt="SS45212_R0A10F1X_170414_overlay-small" src="https://github.com/user-attachments/assets/89bc6cb7-1c05-487b-9732-386fefda4bf6" />
+</p>
+
 #### `grandqc_vis_region/` 
+
+In this folder images with tissue regions are saved, background is black while other areas are filled with colors defined by GrandQC. Each region is saved to a separate file. In .mat or .npz files you can find bounding box coordinates for each region, which allowes to read the corresponding tisse region from the WSI. Remember that it is necessary to scale the bounding box for the given image magnification, you can use the `scale_factor` to do that. 
+
+<img width="1280" height="720" alt="tissue_seg" src="https://github.com/user-attachments/assets/63248351-083c-4725-8cf1-a1b46aad8b29" />
+
+
 
 
 ### Output `.mat` and `.npz` files descriptions
