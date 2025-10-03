@@ -71,7 +71,6 @@ if not os.path.exists(REGION_GRANDQC_VIS) and args.split_regions: os.makedirs(RE
 
 # get slides names
 slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
-slides = slides[0:10]
 
 # Process WSIs
 print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Starting processing with {args.workers} workers...")
