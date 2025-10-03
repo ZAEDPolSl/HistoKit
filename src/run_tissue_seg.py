@@ -30,7 +30,6 @@ parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
 parser.add_argument('--save_mask_formats', nargs='+',help='File formats to save masks, choose at least one from: npy, mat.', choices=["npy", "mat"],default=["npy", "mat"])
-parser.add_argument('--overlay_factor', help='Factor used for creating image overlay', default=0.60, type=float)
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="grand_qc/models/GrandQC_MPP1.pth", type=str)
 parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=10, type=int,choices=range(1, os.cpu_count() + 1))
 args = parser.parse_args()
@@ -43,7 +42,7 @@ ENCODER_MODEL = 'timm-efficientnet-b0'
 ENCODER_MODEL_WEIGHTS = 'imagenet'
 BG_CLASS = 7  # background class
 MPP_MODEL = 1  # mpp for grand qc model (mpp=1 corresponds to magnification 10x)
-scale_thumbnail = 0.25  # factor used to scale small thumbnails to show algorithms results (scaled from magnification for tissue detection)
+scale_thumbnail = 0.1  # factor used to scale small thumbnails to show algorithms results (scaled from magnification for tissue detection)
 
 # Create folders for results
 BG_MASK_DIR = os.path.join(args.out_dir, 'masks')  # masks with detected tissues and grandQC results (saved as npy arrays, mat files or both)
