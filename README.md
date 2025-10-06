@@ -148,7 +148,8 @@ In this folder images with tissue regions are saved, background is black while o
 | `ratio`      | Ratio for each image layer. |
 | `scale_val`  | Scale factor applied to masks. |
 | `thr`        | Thresholds calculated for R, G, B color channels. |
-| `tiss_stats` | Bounding box coordinates (in .mat files converted to MATLAB notation - indexing from 1). |
+| `tiss_stats_mat` | Bounding box coordinates converted to MATLAB notation - indexing from 1. |
+| `tiss_stats_py` | Bounding box coordinates in Python notation - indexing from 0. |
 
 ## How to load regions to Matlab?
 
