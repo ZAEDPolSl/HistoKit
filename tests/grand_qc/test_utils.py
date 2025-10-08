@@ -18,3 +18,4 @@ def test_make_overlay(region_path, map_tis_path, tis_det_path):
     overlay_im.save("../../test_data/test_grandqc/overlay.png")
 
 
+'SS45212_R0A10F2A_190425'
