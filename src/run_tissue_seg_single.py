@@ -16,6 +16,7 @@ from src.tissue_seg.utils import apply_mask, get_wsi_ind_matlab, list2cell
 from grand_qc.config import config
 import time
 from tqdm import tqdm
+from src.wsi_utils.heatmaps import load_wsi_mag
 
 """
 Script for tissue region detection with a single thread (can use cuda if available)
@@ -23,7 +24,7 @@ Script for tissue region detection with a single thread (can use cuda if availab
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/HE_data/Labaj_UCEC/SVS/05_2024/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res10/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res11/')
 parser.add_argument('--split_regions', type=bool, help='If there are multiple regions on the slide save each of them to a separate file.', default=True)
 parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not', default=False)
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
@@ -75,7 +76,7 @@ print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Using {args.device} for
 time_start = time.time()
 log_file = os.path.join(args.out_dir, "error_files.txt")
 
-for slide_file in slides:
+for slide_file in tqdm(slides):
     try:
         # slide basename
         basename = os.path.basename(slide_file).split('.')[0]
@@ -83,26 +84,9 @@ for slide_file in slides:
         # load slide
         slide = OpenSlide(slide_file)
 
-        # get resizing ratio for each layer
-        ratio = slide.level_downsamples
-
-        # load image with 2.5 magnification (if it is not available - rescale it from the highest magnification)
-        mag = float(slide.properties["openslide.objective-power"])  # get magnification of the 0 layer
-        mag_layers = [round(mag / r, 2) for r in ratio]  # magnification of each layer
-        mpp_slide = 10 / mag_layers[0]  # approximated slide mpp
-
-        if MAG_BG_DET in mag_layers:
-            mag_idx = mag_layers.index(MAG_BG_DET)
-            w, h = slide.level_dimensions[mag_idx]
-            region = slide.read_region((0, 0), mag_idx, (w, h))
-            scale_val = ratio[mag_idx]
-        else:
-            mag_idx = 0  # get the highest magnification and rescale
-            w0, h0 = slide.level_dimensions[mag_idx]
-            region = slide.read_region((0, 0), mag_idx, (w0, h0))
-            scale_val = MAG_BG_DET / mag
-            region = region.resize((int(w0 * scale_val), int(h0 * scale_val)), Image.LANCZOS)
-            w, h = region.size
+        # rescale region
+        region, scale_val, info, mpp_slide, ratio = load_wsi_mag(slide, MAG_BG_DET, allow_upscaling=True)
+        w, h = region.size
 
         # size for visualisations
         vis_size = (int(w * scale_thumbnail), int(h * scale_thumbnail))
@@ -209,8 +193,11 @@ for slide_file in slides:
                 'ratio': ratio,  # ratio for each layer
                 'scale_val': scale_val,  # scale factor of masks
                 'thr': res_dict['thr'],  # thresholds calculated for R, G, B color channels
-                'tiss_stats': []  # bbox converted to matlab notation
+                'tiss_stats': []  # bbox converted to matlab notation in .mat files (indexing from 1) in .npz files (indexing from 0)
             }
+
+            bbox_mat = []
+            bbox_py = []
 
             for n, region in enumerate(props):
                 region_mask_bg = region.image.astype(np.uint8)  # 0/1
@@ -219,7 +206,9 @@ for slide_file in slides:
 
                 save_dict['mask_all'].append(region_mask_bg.astype(bool))
                 save_dict['mask_art'].append(region_mask_grandqc)
-                save_dict['tiss_stats'].append([bbox[0] + 1, bbox[1] + 1, bbox[2] + 1, bbox[3] + 1])
+
+                bbox_mat.append([bbox[0] + 1, bbox[1] + 1, bbox[2] + 1, bbox[3] + 1])
+                bbox_py.append([bbox[0], bbox[1], bbox[2], bbox[3]])
 
                 region_mask_grandqc = make_artifacts_color_map(region_mask_grandqc, config.colors)
                 region_mask_grandqc = Image.fromarray(region_mask_grandqc)
@@ -229,8 +218,10 @@ for slide_file in slides:
             save_dict['mask_art'] = list2cell(save_dict['mask_art'])
 
             if "mat" in args.save_mask_formats:
+                save_dict["tiss_stats"] = bbox_mat
                 scipy.io.savemat(os.path.join(BG_MASK_DIR, f'{basename}_mask_all.mat'), save_dict, do_compression=True)
             if "npy" in args.save_mask_formats:
+                save_dict["tiss_stats"] = bbox_py
                 np.savez(os.path.join(BG_MASK_DIR, f'{basename}_mask_all.npz'), **save_dict)
 
         del full_mask
