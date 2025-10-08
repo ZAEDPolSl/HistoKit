@@ -33,10 +33,10 @@ def get_preprocessing(image, preprocessing_fn, model_size):
 
 def make_artifacts_color_map(mask, class_colors):
     """
-
-    :param mask:
-    :param class_colors:
-    :return:
+    Make artifacts color map
+    :param mask: mask with results from grandQC from 0 to 8
+    :param class_colors: dictionary defining class colors
+    :return: rgb - rgb image with artifacts colors
     """
     r = np.zeros_like(mask).astype(np.uint8)
     g = np.zeros_like(mask).astype(np.uint8)
@@ -134,6 +134,7 @@ def slide_process_single(model, tis_det, slide, num_patches_width, num_patches_h
             else:
                 temp_image = np.concatenate((temp_image, mask), axis=1)
                 temp_image_bg = np.concatenate((temp_image_bg, td_patch_), axis=1)
+                print("processed patch")
 
         if he == 0:
             end_image = temp_image
