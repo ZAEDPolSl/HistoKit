@@ -52,25 +52,79 @@ To run program with multiple threads use `src/run_tissue_seg.py` script and set 
 
 ### Examplary results
 #### `masks/` 
+.npz or .mat files are saved here
 
 #### `bg_masks_vis/`
 
+Small mask visualisations, tissue region is white (255), while background region is black (0)
+<p align="center">
+<img width="445" height="276" alt="SS45212_R0A10F1X_170414_mask-small" src="https://github.com/user-attachments/assets/0d0ab825-59b5-46ce-a409-da30b36fbaf2" />
+</p>
+
 #### `bg_thr_hist/`
+
+Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method, when the threshold obtained with GaMRed is too small (lower than `0.7*255`)
+
+<p align="center">
+<img width="300" height="400" alt="SS45212_R0A10F1X_170414_thr" src="https://github.com/user-attachments/assets/de6b7c7e-5f14-41a9-89ab-c51a49f93ef1" />
+</p>
+
 
 #### `raw_small/`
 
+Small tissue thumbnails.
+
+<p align="center">
+<img width="445" height="276" alt="SS45212_R0A10F1X_170414" src="https://github.com/user-attachments/assets/0d0a9b3f-f33c-428b-9c9f-52320d149d32" />
+</p>
+
 #### `pen_vis/`
+
+Small thumbnail with detected black pen regions.
+
+<p align="center">
+<img width="445" height="445" alt="SS45212_R0A10F1X_170414_pen-small" src="https://github.com/user-attachments/assets/0658c79b-a696-4963-abca-abd9fb6a6fec" />
+</p>
 
 #### `bg_removal_vis/`
 
+Small thumbnail of the tissue region with removed background.
+
+<p align="center">
+<img width="445" height="276" alt="SS45212_R0A10F1X_170414_tiss-det-small" src="https://github.com/user-attachments/assets/64727ef7-8c56-44b4-a3e4-92224604041a" />
+</p>
+
 #### `bg_removal_contour_vis/`
+
+Contours visualisation of the detected tissue regions. Contours are marked in blue.
+
+<p align="center">
+<img width="445" height="276" alt="obraz" src="https://github.com/user-attachments/assets/dc22cd35-e44e-4977-b817-dece445889f9" />
+</p>
 
 #### `grandqc_map_vis/`
 
+Visualisation of results obtained with GrandQC based on the tissue region detection map from GaMRed or Otsu algorithms, background is marked in white, while colors of other image areas are marked in colors defined by GrandQC.
+
+<p align="center">
+<img width="445" height="276" alt="SS45212_R0A10F1X_170414_grandqc-small" src="https://github.com/user-attachments/assets/a1622779-1c11-4592-9cfe-4472da1cafd8" />
+</p>
+
 #### `grandqc_overlay_vis/`
+
+Visualisation of the tissue region with contours of the tissue area detected by GaMRed or Otsu algorithms marked in blue, and GrandQC results ovarlay.
+
+<p align="center">
+<img width="445" height="276" alt="SS45212_R0A10F1X_170414_overlay-small" src="https://github.com/user-attachments/assets/89bc6cb7-1c05-487b-9732-386fefda4bf6" />
+</p>
 
 #### `grandqc_vis_region/` 
 
+In this folder images with tissue regions are saved, background is black while other areas are filled with colors defined by GrandQC. Each region is saved to a separate file. In .mat or .npz files you can find bounding box coordinates for each region, which allowes to read the corresponding tisse region from the WSI. Remember that it is necessary to scale the bounding box for the given image magnification, you can use the `scale_factor` to do that. 
+
+<p align="center">
+<img width="1000" height="800" alt="tissue_seg" src="https://github.com/user-attachments/assets/63248351-083c-4725-8cf1-a1b46aad8b29" />
+</p>
 
 ### Output `.mat` and `.npz` files descriptions
 #### For a whole image:
@@ -94,7 +148,7 @@ To run program with multiple threads use `src/run_tissue_seg.py` script and set 
 | `ratio`      | Ratio for each image layer. |
 | `scale_val`  | Scale factor applied to masks. |
 | `thr`        | Thresholds calculated for R, G, B color channels. |
-| `tiss_stats` | Bounding box coordinates (in .mat files converted to MATLAB notation - indexing from 1). |
+| `tiss_stats` | Bounding box coordinates converted to MATLAB notation - indexing from 1. For .npz files indexing is in Python notation from 0).|
 
 ## How to load regions to Matlab?
 
