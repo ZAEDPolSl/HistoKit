@@ -7,6 +7,8 @@ from openslide import OpenSlide
 from PIL import Image
 import scipy.io as sio
 
+from src.histo_kit.wsi_utils.patches import load_wsi_mag, read_region, patch_wsi
+
 """
 Script for dividing image into patches
 """
