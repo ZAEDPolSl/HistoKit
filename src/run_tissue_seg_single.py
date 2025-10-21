@@ -9,14 +9,15 @@ import torch
 from openslide import OpenSlide
 import PIL.Image as Image
 from skimage import measure
-from src.grand_qc.utils import slide_info, make_overlay
-from src.grand_qc.wsi_process import slide_process_single, make_artifacts_color_map
-from src.tissue_seg.tissue_seg import wsi_tissue_seg, plot_rgb_hist
-from src.tissue_seg.utils import apply_mask, get_wsi_ind_matlab, list2cell
-from grand_qc.config import config
 import time
 from tqdm import tqdm
-from src.wsi_utils.heatmaps import load_wsi_mag
+
+from src.histo_kit.grand_qc.artifact_detection import make_artifacts_color_map, slide_process_single, slide_info
+from src.histo_kit.grand_qc.visualisation import make_overlay
+from src.histo_kit.tissue_seg.bg_segmentation import wsi_tissue_seg, plot_rgb_hist
+from src.histo_kit.wsi_utils.apply_mask import apply_mask
+from src.histo_kit.wsi_utils.matlab2python import get_wsi_ind_matlab, list2cell
+from src.histo_kit.wsi_utils.patches import load_wsi_mag
 
 """
 Script for tissue region detection with a single thread (can use cuda if available)
@@ -24,14 +25,14 @@ Script for tissue region detection with a single thread (can use cuda if availab
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/HE_data/Labaj_UCEC/SVS/05_2024/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res11/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res12/')
 parser.add_argument('--split_regions', type=bool, help='If there are multiple regions on the slide save each of them to a separate file.', default=True)
 parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not', default=False)
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
 parser.add_argument('--save_mask_formats', nargs='+',help='File formats to save masks, choose at least one from: npy, mat.', choices=["npy", "mat"],default=["npy", "mat"])
 parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu', choices=["cuda", "cpu"],default="cuda")
-parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="grand_qc/models/GrandQC_MPP1.pth", type=str)
+parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="/mnt/data/Tmp/jmerta/HE/models/GrandQC_MPP1.pth", type=str)
 args = parser.parse_args()
 
 MAG_BG_DET = 2.5  # magnification for tissue detection
@@ -142,7 +143,7 @@ for slide_file in tqdm(slides):
         tis_det = np.array(tis_det.resize((int(w * 4), int(h * 4)), Image.Resampling.NEAREST))
 
         map_tiss, full_mask, tis_det = slide_process_single(model_grandQC, tis_det, slide, patch_n_w_l0, patch_n_h_l0, p_s,
-                                                   PATCH_SIZE_MODEL, config.colors, ENCODER_MODEL,ENCODER_MODEL_WEIGHTS,
+                                                   PATCH_SIZE_MODEL, ENCODER_MODEL,ENCODER_MODEL_WEIGHTS,
                                                    args.device, BG_CLASS, MPP_MODEL, mpp_slide, w_l0, h_l0, vis_size)
 
         # save color grandQC artifacts map
@@ -210,7 +211,7 @@ for slide_file in tqdm(slides):
                 bbox_mat.append([bbox[0] + 1, bbox[1] + 1, bbox[2] + 1, bbox[3] + 1])
                 bbox_py.append([bbox[0], bbox[1], bbox[2], bbox[3]])
 
-                region_mask_grandqc = make_artifacts_color_map(region_mask_grandqc, config.colors)
+                region_mask_grandqc = make_artifacts_color_map(region_mask_grandqc)
                 region_mask_grandqc = Image.fromarray(region_mask_grandqc)
                 region_mask_grandqc.save(os.path.join(REGION_GRANDQC_VIS, f'{basename}_R{n + 1}.png'))
 
