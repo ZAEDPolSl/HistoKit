@@ -1,3 +1,4 @@
+[![HistoKit](https://github.com/ZAEDPolSl/HistoKit/actions/workflows/python-package.yml/badge.svg)](https://github.com/ZAEDPolSl/HistoKit/actions/workflows/python-package.yml)
 # Tools for processing WSI
 
 ## ⚙️ Installation
