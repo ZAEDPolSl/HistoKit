@@ -18,8 +18,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install sphinx sphinx_rtd_theme myst_parser sphinx-autodoc-typehints sphinxcontrib-bibtex furo
+          python -m pip install --upgrade pip setuptools wheel
+          pip install numpy opencv-python
+          pip install -e .
+          pip install furo sphinx sphinx_rtd_theme myst_parser sphinx-autodoc-typehints sphinxcontrib-bibtex
+
 
       - name: Sphinx build
         run: |
