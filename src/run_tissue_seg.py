@@ -26,7 +26,7 @@ Script for tissue region detection with multiple threads
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/HE_data/Labaj_UCEC/SVS/05_2024/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/test_patches/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/test_patches/res1')
 parser.add_argument('--split_regions', type=bool, help='If there are multiple regions on the slide save each of them to a separate file.', default=True)
 parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not', default=False)
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
@@ -70,8 +70,7 @@ if not os.path.exists(GRANDQC_OVERLAY_VIS): os.makedirs(GRANDQC_OVERLAY_VIS)
 if not os.path.exists(REGION_GRANDQC_VIS) and args.split_regions: os.makedirs(REGION_GRANDQC_VIS)
 
 # get slides names
-slides = glob.glob(os.path.join(WSI_DIR, '*.svs'))
-slides = slides[0:4]
+slides = glob.glob(os.path.join(WSI_DIR, 'SS45212_R0A10F2J_065436.svs'))
 
 # Process WSIs
 print(f"Found {len(slides)} WSIs in {WSI_DIR} directory. Starting processing with {args.workers} workers...")

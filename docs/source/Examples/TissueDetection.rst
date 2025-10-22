@@ -107,12 +107,12 @@ Artifacts Color Mapping
 Example Results
 ---------------
 
-masks/
+masks
 ^^^^^^
 
 .npz or .mat files are saved here.
 
-bg_masks_vis/
+bg_masks_vis
 ^^^^^^^^^^^^^
 
 Small mask visualisations, tissue region is white (255), background is black (0).
@@ -122,77 +122,77 @@ Small mask visualisations, tissue region is white (255), background is black (0)
    :height: 276
    :align: center
 
-bg_thr_hist/
+bg_thr_hist
 ^^^^^^^^^^^^
 
 Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method when threshold obtained with GaMRed is too small.
 
-.. image:: https://github.com/user-attachments/assets/de6b7c7e-5f14-41a9-89ab-c51a49f93ef1
+.. image:: bg_thr_hist.png
    :width: 300
    :height: 400
    :align: center
 
-raw_small/
+raw_small
 ^^^^^^^^^^
 
 Small tissue thumbnails.
 
-.. image:: https://github.com/user-attachments/assets/0d0a9b3f-f33c-428b-9c9f-52320d149d32
+.. image:: raw_small.png
    :width: 445
    :height: 276
    :align: center
 
-pen_vis/
+pen_vis
 ^^^^^^^^
 
 Small thumbnail with detected black pen regions.
 
-.. image:: https://github.com/user-attachments/assets/0658c79b-a696-4963-abca-abd9fb6a6fec
+.. image:: pen_vis.png
    :width: 445
    :height: 445
    :align: center
 
-bg_removal_vis/
+bg_removal_vis
 ^^^^^^^^^^^^^^^
 
 Small thumbnail of the tissue region with removed background.
 
-.. image:: https://github.com/user-attachments/assets/64727ef7-8c56-44b4-a3e4-92224604041a
+.. image:: bg_removal_vis.png
    :width: 445
    :height: 276
    :align: center
 
-bg_removal_contour_vis/
+bg_removal_contour_vis
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Contours visualisation of the detected tissue regions. Contours are marked in blue.
 
-.. image:: https://github.com/user-attachments/assets/dc22cd35-e44e-4977-b817-dece445889f9
+.. image:: bg_removal_contour_vis.png
    :width: 445
    :height: 276
    :align: center
 
-grandqc_map_vis/
+grandqc_map_vis
 ^^^^^^^^^^^^^^^^
 
 Visualisation of results obtained with GrandQC based on the tissue region detection map from GaMRed or Otsu algorithms.
 
-.. image:: https://github.com/user-attachments/assets/a1622779-1c11-4592-9cfe-4472da1cafd8
+.. image:: grandqc_map_vis.png
    :width: 445
    :height: 276
    :align: center
 
-grandqc_overlay_vis/
+grandqc_overlay_vis
 ^^^^^^^^^^^^^^^^^^^^
 
 Visualisation of the tissue region with contours of tissue area detected by GaMRed or Otsu algorithms marked in blue, and GrandQC results overlay.
 
-.. image:: https://github.com/user-attachments/assets/89bc6cb7-1c05-487b-9732-386fefda4bf6
+.. image:: grandqc_overlay_vis.png
    :width: 445
    :height: 276
    :align: center
 
-grandqc_vis_region/
+grandqc_vis_region
 ^^^^^^^^^^^^^^^^^^^
 
 Images with tissue regions are saved, background is black while other areas are colored by GrandQC. Each region is saved separately. Bounding boxes are stored in `.mat` or `.npz` files.
