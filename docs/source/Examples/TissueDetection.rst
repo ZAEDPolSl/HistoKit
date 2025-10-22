@@ -127,7 +127,7 @@ bg_thr_hist
 
 Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method when threshold obtained with GaMRed is too small.
 
-.. image:: bg_thr_hist.png
+.. image:: ../bg_thr_hist.png
    :width: 300
    :height: 400
    :align: center
@@ -137,7 +137,7 @@ raw_small
 
 Small tissue thumbnails.
 
-.. image:: raw_small.png
+.. image:: ../raw_small.png
    :width: 445
    :height: 276
    :align: center
@@ -147,7 +147,7 @@ pen_vis
 
 Small thumbnail with detected black pen regions.
 
-.. image:: pen_vis.png
+.. image:: ../pen_vis.png
    :width: 445
    :height: 445
    :align: center
@@ -157,7 +157,7 @@ bg_removal_vis
 
 Small thumbnail of the tissue region with removed background.
 
-.. image:: bg_removal_vis.png
+.. image:: ../bg_removal_vis.png
    :width: 445
    :height: 276
    :align: center
@@ -167,7 +167,7 @@ bg_removal_contour_vis
 
 Contours visualisation of the detected tissue regions. Contours are marked in blue.
 
-.. image:: bg_removal_contour_vis.png
+.. image:: ../bg_removal_contour_vis.png
    :width: 445
    :height: 276
    :align: center
@@ -177,7 +177,7 @@ grandqc_map_vis
 
 Visualisation of results obtained with GrandQC based on the tissue region detection map from GaMRed or Otsu algorithms.
 
-.. image:: grandqc_map_vis.png
+.. image:: ../grandqc_map_vis.png
    :width: 445
    :height: 276
    :align: center
@@ -187,7 +187,7 @@ grandqc_overlay_vis
 
 Visualisation of the tissue region with contours of tissue area detected by GaMRed or Otsu algorithms marked in blue, and GrandQC results overlay.
 
-.. image:: grandqc_overlay_vis.png
+.. image:: ../grandqc_overlay_vis.png
    :width: 445
    :height: 276
    :align: center
