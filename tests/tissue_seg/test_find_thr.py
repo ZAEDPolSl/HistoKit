@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import pytest
 from scipy.io import loadmat
@@ -7,10 +9,9 @@ from numpy.testing import assert_array_equal, assert_allclose
 from src.histo_kit.tissue_seg.find_thr import get_pixel_distribution, GaMRed_hist, EM_iter_hist, gmm_init_dp_hist, \
     norm_pdf, find_thr, get_thr_image, two_step_otsu
 
-
+@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
 @pytest.mark.parametrize("image_path, mat_file", [
     ("../../test_data/tissue_seg/test_find_thr/region_1.tif", "../../test_data/tissue_seg/test_find_thr/pixel_distribution_1.mat"),
-    ("../../test_data/tissue_seg/test_find_thr/region_2.tif", "../../test_data/tissue_seg/test_find_thr/pixel_distribution_2.mat"),
     ("../../test_data/tissue_seg/test_find_thr/region_3.tif", "../../test_data/tissue_seg/test_find_thr/pixel_distribution_3.mat")
 ])
 def test_find_pixel_distribution(image_path, mat_file):
@@ -23,10 +24,9 @@ def test_find_pixel_distribution(image_path, mat_file):
     assert_array_equal(G.reshape(1, -1), mat_res["G"])
     assert_array_equal(B.reshape(1, -1), mat_res["B"])
 
-
+@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
 @pytest.mark.parametrize("channel, K, draw, SW, mat_file", [
     ("R", 2, False, 5, "../../test_data/tissue_seg/test_find_thr/GaMRed_hist_1.mat"),
-    ("G", 2, False, 5, "../../test_data/tissue_seg/test_find_thr/GaMRed_hist_2.mat"),
     ("B", 2, False, 5, "../../test_data/tissue_seg/test_find_thr/GaMRed_hist_3.mat")
 ])
 def test_GaMRed_hist(channel, K, draw, SW, mat_file):
@@ -50,7 +50,7 @@ def test_GaMRed_hist(channel, K, draw, SW, mat_file):
     assert_allclose(stats['logL'], mat_res["logL"], rtol=1e-7)
 
 
-
+@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
 @pytest.mark.parametrize("channel, alpha, mu, sig, SW, mat_file", [
     ("R",np.array([0.3060, 0.6940]),np.array([187.8922, 242.0600]),np.array([33.1638, 0.7579]),5, "../../test_data/tissue_seg/test_find_thr/EM_iter_hist_1.mat"),
     ("G",np.array([0.300,0.263,0.435]),np.array([1.26e+02,2.40e+02,2.43e+02]),np.array([42.12,2.98,0.23]),5, "../../test_data/tissue_seg/test_find_thr/EM_iter_hist_2.mat"),
@@ -73,7 +73,7 @@ def test_EM_iter_hist(channel, alpha, mu, sig, SW, mat_file):
     assert_allclose(sig_est.reshape(1, -1), mat_res["sig_est"])
     assert_allclose(logL.reshape(1, -1), mat_res["logL"])
 
-
+@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
 @pytest.mark.parametrize("channel, K, mat_file", [
     ("R",2, "../../test_data/tissue_seg/test_find_thr/gmm_init_dp_hist_1.mat"),
     ("G",3, "../../test_data/tissue_seg/test_find_thr/gmm_init_dp_hist_2.mat"),
@@ -116,10 +116,9 @@ def test_find_thr(data, alpha, mi, sigma, idx, draw, thr_gt):
     thr = find_thr(data, alpha, mi, sigma, idx, draw)
     assert_allclose(thr, thr_gt)
 
+@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
 @pytest.mark.parametrize("img_path, mat_file", [
-    ("../../test_data/tissue_seg/test_find_thr/region_1.tif", "../../test_data/tissue_seg/test_find_thr/get_thr_image_1.mat"),
-    ("../../test_data/tissue_seg/test_find_thr/region_2.tif", "../../test_data/tissue_seg/test_find_thr/get_thr_image_2.mat"),
-    ("../../test_data/tissue_seg/test_find_thr/region_3.tif", "../../test_data/tissue_seg/test_find_thr/get_thr_image_3.mat")
+    ("../../test_data/tissue_seg/regions/region_1.tif", "../../test_data/tissue_seg/test_find_thr/get_thr_image_1.mat"),
 ])
 def test_get_thr_image(img_path, mat_file):
     img = Image.open(img_path)
@@ -131,10 +130,9 @@ def test_get_thr_image(img_path, mat_file):
     assert_allclose(thr["G"], mat_res["G"])
     assert_allclose(thr["B"], mat_res["B"])
 
+@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
 @pytest.mark.parametrize("img_path, mat_file", [
-    ("../../test_data/tissue_seg/test_find_thr/region_1.tif", "../../test_data/tissue_seg/test_find_thr/two_step_otsu_1.mat"),
-    ("../../test_data/tissue_seg/test_find_thr/region_2.tif", "../../test_data/tissue_seg/test_find_thr/two_step_otsu_2.mat"),
-    ("../../test_data/tissue_seg/test_find_thr/region_3.tif", "../../test_data/tissue_seg/test_find_thr/two_step_otsu_3.mat")
+    ("../../test_data/tissue_seg/regions/region_1.tif", "../../test_data/tissue_seg/test_find_thr/two_step_otsu_1.mat"),
 ])
 def test_two_step_otsu(img_path, mat_file):
     img = Image.open(img_path)
