@@ -6,11 +6,16 @@ from scipy.io import loadmat
 from PIL import Image
 from src.histo_kit.tissue_seg.bg_segmentation import wsi_tissue_seg
 
+from pathlib import Path
+
+ROOT = Path(__file__).parent.parent.parent
+
 @pytest.mark.skip_ci
 @pytest.mark.parametrize("img_path, mat_file", [
-    ("../../test_data/tissue_seg/regions/region_1.tif","../../test_data/tissue_seg/test_bg_segmentation/tissue_seg_1.mat"),
+    (f"{ROOT}/test_data/tissue_seg/regions/region_1.tif",f"{ROOT}/test_data/tissue_seg/test_bg_segmentation/tissue_seg_1.mat"),
 ])
 def test_tissue_seg(img_path, mat_file):
+
     mat_res = loadmat(mat_file)
     img = Image.open(img_path)
     img = img.convert('RGB')

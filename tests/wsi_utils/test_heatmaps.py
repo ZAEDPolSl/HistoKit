@@ -2,11 +2,12 @@ import os
 import numpy as np
 import pytest
 from PIL import Image
-from openslide import OpenSlide
+from pathlib import Path
 from src.histo_kit.grand_qc.artifacts import Artifact
 from src.histo_kit.wsi_utils.patches import read_region, patch_wsi, load_wsi_mag, merge_patches
 from openslide import OpenSlide
 
+ROOT = Path(__file__).parent.parent.parent
 
 @pytest.mark.skip_ci
 @pytest.mark.parametrize("desired_mag,patch_size, save_folder, bg_percent, overlap, extract_type", [
@@ -33,7 +34,7 @@ def test_read_region():
 
 @pytest.mark.skip_ci
 @pytest.mark.parametrize("patches_folder, scale_factor, alpha", [
-("../../test_data/test_postprocessing/out_5_256_0.90_reflect", 0.5, 0.2)])
+(f"{ROOT}/test_data/test_postprocessing/out_5_256_0.90_reflect", 0.5, 0.2)])
 def test_merge_patches(patches_folder, scale_factor, alpha):
     patch_names = os.listdir(patches_folder)
     a_s_1 = np.sort(np.random.uniform(0, 0.3, int(len(patch_names)/2)))
