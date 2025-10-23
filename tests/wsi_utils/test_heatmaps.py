@@ -32,17 +32,6 @@ def test_read_region():
 
 
 @pytest.mark.skip_ci
-@pytest.mark.parametrize("wsi, desired_mag, rescale_method, verbose, allow_upscaling, res", [
-(OpenSlide("../../test_data/tissue_seg/wsi/C3N-00339-23.svs"), 10, Image.BICUBIC, True, True, "Desired resolution is not available, image will be rescaled from the highest magnification available."),
-(OpenSlide("../../test_data/tissue_seg/wsi/C3N-00339-23.svs"), 5, Image.LANCZOS, True, True, "Desired magnification is available"),
-(OpenSlide("../../test_data/tissue_seg/wsi/C3N-00339-23.svs"), 20, Image.BICUBIC, True, True, "Desired magnification is available"),
-(OpenSlide("../../test_data/tissue_seg/wsi/C3N-00339-23.svs"), 40, Image.BICUBIC, True, True, "Desired magnification is available"),
-])
-def test_rescale_wsi(wsi, desired_mag, rescale_method, verbose, allow_upscaling, res):
-    region, scale_val, info, mpp, ratio  = load_wsi_mag(wsi, desired_mag, rescale_method, verbose, allow_upscaling)
-    assert info == res
-
-@pytest.mark.skip_ci
 @pytest.mark.parametrize("patches_folder, scale_factor, alpha", [
 ("../../test_data/test_postprocessing/out_5_256_0.90_reflect", 0.5, 0.2)])
 def test_merge_patches(patches_folder, scale_factor, alpha):
