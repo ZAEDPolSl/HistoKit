@@ -5,10 +5,7 @@ from PIL import Image
 from openslide import OpenSlide
 from src.histo_kit.grand_qc.artifacts import Artifact
 from src.histo_kit.wsi_utils.patches import read_region, patch_wsi, load_wsi_mag, merge_patches
-
-skip_openslide = os.getenv("CI", "").lower() == "true"
-if not skip_openslide:
-    from openslide import OpenSlide
+from openslide import OpenSlide
 
 
 @pytest.mark.skip_ci
