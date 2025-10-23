@@ -11,7 +11,7 @@ if not skip_openslide:
     from openslide import OpenSlide
 
 
-@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
+@pytest.mark.skip_ci
 @pytest.mark.parametrize("desired_mag,patch_size, save_folder, bg_percent, overlap, extract_type", [
     (5, 256, "out_5_256_0.90_reflect", 0.05, 0.9, "reflect"),
 ])
@@ -24,7 +24,7 @@ def test_patch_image(desired_mag,patch_size, save_folder, bg_percent, overlap, e
     Image.fromarray(region).save("region_masked.png")
     patch_wsi(region, patch_size, save_folder, bg_percent, overlap, extract_type)
 
-@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
+@pytest.mark.skip_ci
 def test_read_region():
     path = "/mnt/data/Tmp/jmerta/HE/test_data/test_utils/SS45212_R0A10F2A_190425.svs"
     mask_path = np.load("/mnt/data/Tmp/jmerta/HE/test_data/test_utils/SS45212_R0A10F2A_190425_mask_all.npz", allow_pickle=True)
@@ -34,7 +34,7 @@ def test_read_region():
     Image.fromarray(read_region(wsi, mask_path, region_idx, desired_mag, notation="python", allow_list=(Artifact.NORM, Artifact.BG_MODEL), tol=1e-3)).save("region_masked.png")
 
 
-@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
+@pytest.mark.skip_ci
 @pytest.mark.parametrize("wsi, desired_mag, rescale_method, verbose, allow_upscaling, res", [
 (OpenSlide("../../test_data/tissue_seg/wsi/C3N-00339-23.svs"), 10, Image.BICUBIC, True, True, "Desired resolution is not available, image will be rescaled from the highest magnification available."),
 (OpenSlide("../../test_data/tissue_seg/wsi/C3N-00339-23.svs"), 5, Image.LANCZOS, True, True, "Desired magnification is available"),
@@ -45,7 +45,7 @@ def test_rescale_wsi(wsi, desired_mag, rescale_method, verbose, allow_upscaling,
     region, scale_val, info, mpp, ratio  = load_wsi_mag(wsi, desired_mag, rescale_method, verbose, allow_upscaling)
     assert info == res
 
-@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
+@pytest.mark.skip_ci
 @pytest.mark.parametrize("patches_folder, scale_factor, alpha", [
 ("../../test_data/test_postprocessing/out_5_256_0.90_reflect", 0.5, 0.2)])
 def test_merge_patches(patches_folder, scale_factor, alpha):

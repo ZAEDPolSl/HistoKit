@@ -73,7 +73,7 @@ def test_get_strel_disk(radius, strel_gt):
     strel = get_strel_disk(radius)
     assert_array_equal(strel, strel_gt)
 
-@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
+@pytest.mark.skip_ci
 @pytest.mark.parametrize("img_path,inv, mat_file", [
 ("../../test_data/tissue_seg/regions/region_3.tif",True, "../../test_data/tissue_seg/test_postprocessing/apply_mask_3.mat"),
 ("../../test_data/tissue_seg/regions/region_3.tif",False, "../../test_data/tissue_seg/test_postprocessing/apply_mask_4.mat"),
@@ -96,7 +96,7 @@ def test_remove_small_objects(mat_file):
 
     assert_array_equal(mask_res, mat_res["mask_res"].astype(bool))
 
-@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
+@pytest.mark.skip_ci
 @pytest.mark.parametrize("img_path, mat_file", [
 ("../../test_data/tissue_seg/regions/region_1.tif", "../../test_data/tissue_seg/test_postprocessing/remove_grey_stains_1.mat"),
 ("../../test_data/tissue_seg/regions/region_1.tif", "../../test_data/tissue_seg/test_postprocessing/remove_grey_stains_4.mat"),
@@ -115,7 +115,7 @@ def test_remove_grey_stains(img_path, mat_file):
     print(f" Fraction of mismatched elements: {diff_fraction:.8f} - Number of pixels mismatched: {diff_num}")
     assert diff_fraction < 10e-7
 
-@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
+@pytest.mark.skip_ci
 @pytest.mark.parametrize("svs_path, ind_gt", [
 ("../../test_data/tissue_seg/wsi/wsi_1.svs", [1, 3, 4, 5]),
 ])
