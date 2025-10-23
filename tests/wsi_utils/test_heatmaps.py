@@ -3,10 +3,12 @@ import numpy as np
 import pytest
 from PIL import Image
 from openslide import OpenSlide
-
 from src.histo_kit.grand_qc.artifacts import Artifact
 from src.histo_kit.wsi_utils.patches import read_region, patch_wsi, load_wsi_mag, merge_patches
 
+skip_openslide = os.getenv("CI", "").lower() == "true"
+if not skip_openslide:
+    from openslide import OpenSlide
 
 @pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
 def bimodal_normal_vector(n, mean1=0.3, mean2=0.7, std1=0.08, std2=0.08):

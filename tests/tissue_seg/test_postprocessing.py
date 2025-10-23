@@ -1,12 +1,10 @@
 import os
-
 import numpy as np
 import pytest
 from matplotlib import pyplot as plt
 from scipy.io import loadmat
 from PIL import Image
 from numpy.testing import assert_array_equal
-
 from src.histo_kit.tissue_seg.postprocessing import remove_black_pen, remove_gray_stains, remove_small_objects
 from src.histo_kit.wsi_utils.apply_mask import apply_mask
 from src.histo_kit.wsi_utils.matlab2python import get_wsi_ind_matlab, get_strel_disk
