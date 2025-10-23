@@ -49,7 +49,7 @@ def patch_slides(slide, mask, patch_size, out_dir, bg_percent, overlap, extract_
 
             reg_num = len(mask["tiss_stats"])
             for r in range(reg_num):
-                region = read_region(wsi, mask, r, desired_mag, notation = args.notation, allow_list = config.allow_list, resampling_method = rescale_method)
+                region = read_region(wsi, mask, r, desired_mag, notation = args.notation, allow_list = [], resampling_method = rescale_method)
 
         patch_wsi(region, patch_size, out_dir, bg_percent, overlap, extract_type)
         delta = time.time() - start
