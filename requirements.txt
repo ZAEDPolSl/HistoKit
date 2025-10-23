@@ -1,4 +1,4 @@
-matplotlib==3.10.0
+matplotlib>=3.9
 numpy==1.26.4
 opencv-python-headless==4.7.0.72
 openslide-python
