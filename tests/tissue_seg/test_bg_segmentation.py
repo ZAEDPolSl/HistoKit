@@ -6,7 +6,7 @@ from scipy.io import loadmat
 from PIL import Image
 from src.histo_kit.tissue_seg.bg_segmentation import wsi_tissue_seg
 
-@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
+@pytest.mark.skip_ci
 @pytest.mark.parametrize("img_path, mat_file", [
     ("../../test_data/tissue_seg/regions/region_1.tif","../../test_data/tissue_seg/test_bg_segmentation/tissue_seg_1.mat"),
 ])
