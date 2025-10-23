@@ -1,14 +1,14 @@
-import os
 import numpy as np
 import pytest
-from matplotlib import pyplot as plt
 from scipy.io import loadmat
 from PIL import Image
 from numpy.testing import assert_array_equal
 from src.histo_kit.tissue_seg.postprocessing import remove_black_pen, remove_gray_stains, remove_small_objects
 from src.histo_kit.wsi_utils.apply_mask import apply_mask
 from src.histo_kit.wsi_utils.matlab2python import get_wsi_ind_matlab, get_strel_disk
+from pathlib import Path
 
+ROOT = Path(__file__).parent.parent.parent
 
 
 @pytest.mark.parametrize("radius, strel_gt", [
@@ -75,8 +75,8 @@ def test_get_strel_disk(radius, strel_gt):
 
 @pytest.mark.skip_ci
 @pytest.mark.parametrize("img_path,inv, mat_file", [
-("../../test_data/tissue_seg/regions/region_3.tif",True, "../../test_data/tissue_seg/test_postprocessing/apply_mask_3.mat"),
-("../../test_data/tissue_seg/regions/region_3.tif",False, "../../test_data/tissue_seg/test_postprocessing/apply_mask_4.mat"),
+(f"{ROOT}/test_data/tissue_seg/regions/region_3.tif",True, f"{ROOT}/test_data/tissue_seg/test_postprocessing/apply_mask_3.mat"),
+(f"{ROOT}/test_data/tissue_seg/regions/region_3.tif",False, f"{ROOT}/test_data/tissue_seg/test_postprocessing/apply_mask_4.mat"),
 ])
 def test_apply_mask(img_path, inv, mat_file):
     img = Image.open(img_path)
@@ -87,7 +87,7 @@ def test_apply_mask(img_path, inv, mat_file):
     assert_array_equal(img_res, mat_res["img_res"])
 
 @pytest.mark.parametrize("mat_file", [
-    "../../test_data/tissue_seg/test_postprocessing/remove_small_objects_1.mat",
+    f"{ROOT}/test_data/tissue_seg/test_postprocessing/remove_small_objects_1.mat",
 ])
 @pytest.mark.repeat(5)
 def test_remove_small_objects(mat_file):
@@ -98,8 +98,8 @@ def test_remove_small_objects(mat_file):
 
 @pytest.mark.skip_ci
 @pytest.mark.parametrize("img_path, mat_file", [
-("../../test_data/tissue_seg/regions/region_1.tif", "../../test_data/tissue_seg/test_postprocessing/remove_grey_stains_1.mat"),
-("../../test_data/tissue_seg/regions/region_1.tif", "../../test_data/tissue_seg/test_postprocessing/remove_grey_stains_4.mat"),
+(f"{ROOT}/test_data/tissue_seg/regions/region_1.tif", f"{ROOT}/test_data/tissue_seg/test_postprocessing/remove_grey_stains_1.mat"),
+(f"{ROOT}/test_data/tissue_seg/regions/region_1.tif", f"{ROOT}/test_data/tissue_seg/test_postprocessing/remove_grey_stains_4.mat"),
 ])
 def test_remove_grey_stains(img_path, mat_file):
     img = Image.open(img_path)
@@ -117,7 +117,7 @@ def test_remove_grey_stains(img_path, mat_file):
 
 @pytest.mark.skip_ci
 @pytest.mark.parametrize("svs_path, ind_gt", [
-("../../test_data/tissue_seg/wsi/wsi_1.svs", [1, 3, 4, 5]),
+(f"{ROOT}/test_data/tissue_seg/wsi/wsi_1.svs", [1, 3, 4, 5]),
 ])
 def test_get_wsi_ind_matlab(svs_path, ind_gt):
     ind = get_wsi_ind_matlab(svs_path)
