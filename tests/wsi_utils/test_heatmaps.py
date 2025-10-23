@@ -10,16 +10,6 @@ skip_openslide = os.getenv("CI", "").lower() == "true"
 if not skip_openslide:
     from openslide import OpenSlide
 
-@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
-def bimodal_normal_vector(n, mean1=0.3, mean2=0.7, std1=0.08, std2=0.08):
-    n1 = n // 2
-    n2 = n - n1
-    data1 = np.random.normal(mean1, std1, n1)
-    data2 = np.random.normal(mean2, std2, n2)
-    data = np.concatenate([data1, data2])
-    data = np.clip(data, 0, 1)
-    data = np.sort(data)
-    return data
 
 @pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
 @pytest.mark.parametrize("desired_mag,patch_size, save_folder, bg_percent, overlap, extract_type", [
