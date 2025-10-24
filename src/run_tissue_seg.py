@@ -27,13 +27,13 @@ Script for tissue region detection with multiple threads
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/HE_data/Labaj_UCEC/SVS/05_2024/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res12/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='../test_data/res102/')
 parser.add_argument('--split_regions', type=bool, help='If there are multiple regions on the slide save each of them to a separate file.', default=True)
 parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not', default=False)
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
 parser.add_argument('--save_mask_formats', nargs='+',help='File formats to save masks, choose at least one from: npy, mat.', choices=["npy", "mat"],default=["npy", "mat"])
-parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=2, type=int,choices=range(1, os.cpu_count() + 1))
+parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=1, type=int,choices=range(1, os.cpu_count() + 1))
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="/mnt/data/Tmp/jmerta/HE/models/GrandQC_MPP1.pth", type=str)
 parser.add_argument('--grandqc_mpp', help='MPP for grand qc model (mpp=1 corresponds to magnification 10x, mpp=2.0 - 5x, mpp=1.5 - 7.5x)',default=1.0, type=float)
 parser.add_argument('--tissdet_mag', help='Magnification used for tissue detection',default=10, type=float)
@@ -59,7 +59,7 @@ GRANDQC_OVERLAY_VIS = create_folder(args.out_dir, 'grandqc_overlay_vis')  # resu
 REGION_GRANDQC_VIS = create_folder(args.out_dir, 'grandqc_vis_region')  # results of artifacts detection with GrandQC for each region (color maps) [small PNG thumbnails]
 
 # get slides names
-slides = glob.glob(os.path.join(args.wsi_dir, 'SS45212_R0A10F2J_065436.svs'))
+slides = glob.glob(os.path.join(args.wsi_dir, '*.svs'))
 
 # Process WSIs
 print(f"Found {len(slides)} WSIs in {args.wsi_dir} directory. Starting processing with {args.workers} workers...")
