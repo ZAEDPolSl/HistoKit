@@ -3,6 +3,7 @@ import numpy as np
 from PIL import Image
 import segmentation_models_pytorch as smp
 import torch
+from .artifacts import Artifact
 from ..grand_qc.visualisation import make_artifacts_color_map
 
 
@@ -186,7 +187,7 @@ def get_preprocessing(image, preprocessing_fn, model_size):
 
 
 def slide_process_single(model, tis_det, slide, num_patches_width, num_patches_height, org_patch_size, model_patch_size,
-                         encoder_model, encoder_weights, device, background_class, mpp_model, mpp_slide, width_level_0, height_level_0, size_mask_tissue):
+                         encoder_model, encoder_weights, device,  mpp_model, mpp_slide, width_level_0, height_level_0, size_mask_tissue, background_class = 0):
     """
     Process a single whole-slide image (WSI) for artifact detection using the GrandQC model.
 
@@ -249,7 +250,7 @@ def slide_process_single(model, tis_det, slide, num_patches_width, num_patches_h
     ...                                                     num_patches_height=15, org_patch_size=512,
     ...                                                     model_patch_size=512,
     ...                                                     encoder_model='resnet34', encoder_weights='imagenet',
-    ...                                                     device='cuda', background_class=8,
+    ...                                                     device='cuda',
     ...                                                     mpp_model=0.5, mpp_slide=0.25,
     ...                                                     width_level_0=10000, height_level_0=8000,
     ...                                                     size_mask_tissue=(512, 512))
@@ -306,10 +307,9 @@ def slide_process_single(model, tis_det, slide, num_patches_width, num_patches_h
                 mask_raw = np.argmax(predictions, axis=0).astype('int8')
 
                 # add background predicted during artifacts prediction
-                mask_raw[mask_raw == 7] = 8
-                mask = np.where(td_patch_ != 0, background_class, mask_raw)
+                mask = np.where(td_patch_ != 0, Artifact.BG_THR.value, mask_raw)
             else:
-                mask = np.full(model_size, background_class)
+                mask = np.full(model_size, Artifact.BG_THR.value)
 
             if wi == 0:
                 temp_image = mask

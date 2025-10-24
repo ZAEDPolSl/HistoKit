@@ -1,5 +1,5 @@
 __all__ = [
-    'wsi_utils',
+    'utils',
     'tissue_seg',
     'stain_normalisation',
     'mil',

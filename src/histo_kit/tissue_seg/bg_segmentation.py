@@ -5,7 +5,7 @@ from scipy import ndimage as ndi
 from ..tissue_seg.find_thr import get_thr_image
 from ..tissue_seg.postprocessing import remove_black_pen, get_strel_disk, remove_small_objects, \
     remove_gray_stains
-from ..wsi_utils.apply_mask import apply_mask
+from ..utils.apply_mask import apply_mask
 
 
 def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
