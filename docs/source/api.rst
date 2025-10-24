@@ -10,8 +10,9 @@ Documentation
    histo_kit.tissue_seg.bg_segmentation
    histo_kit.tissue_seg.postprocessing
    histo_kit.tissue_seg.find_thr
-   histo_kit.wsi_utils.patches
-   histo_kit.wsi_utils.matlab2python
+   histo_kit.utils.patches
+   histo_kit.utils.matlab2python
+   histo_kit.utils.file_utils
    histo_kit.stain_normalisation
    histo_kit.mil
    histo_kit.foundation_models
