@@ -4,7 +4,7 @@ import pytest
 from PIL import Image
 from pathlib import Path
 from src.histo_kit.grand_qc.artifacts import Artifact
-from src.histo_kit.wsi_utils.patches import read_region, patch_wsi, load_wsi_mag, merge_patches
+from src.histo_kit.utils.patches import read_region, patch_wsi, load_wsi_mag, merge_patches
 from openslide import OpenSlide
 
 ROOT = Path(__file__).parent.parent.parent
