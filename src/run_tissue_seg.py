@@ -33,7 +33,7 @@ parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
 parser.add_argument('--save_mask_formats', nargs='+',help='File formats to save masks, choose at least one from: npy, mat.', choices=["npy", "mat"],default=["npy", "mat"])
-parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=10, type=int,choices=range(1, os.cpu_count() + 1))
+parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=2, type=int,choices=range(1, os.cpu_count() + 1))
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="/mnt/data/Tmp/jmerta/HE/models/GrandQC_MPP1.pth", type=str)
 parser.add_argument('--grandqc_mpp', help='MPP for grand qc model (mpp=1 corresponds to magnification 10x, mpp=2.0 - 5x, mpp=1.5 - 7.5x)',default=1.0, type=float)
 parser.add_argument('--tissdet_mag', help='Magnification used for tissue detection',default=10, type=float)
@@ -59,8 +59,8 @@ GRANDQC_OVERLAY_VIS = create_folder(args.out_dir, 'grandqc_overlay_vis')  # resu
 REGION_GRANDQC_VIS = create_folder(args.out_dir, 'grandqc_vis_region')  # results of artifacts detection with GrandQC for each region (color maps) [small PNG thumbnails]
 
 # get slides names
-slides = glob.glob(os.path.join(args.wsi_dir, '*.svs'))
-slides = slides[:10]
+slides = glob.glob(os.path.join(args.wsi_dir, 'SS45212_R0A10F2J_065436.svs'))
+
 # Process WSIs
 print(f"Found {len(slides)} WSIs in {args.wsi_dir} directory. Starting processing with {args.workers} workers...")
 
@@ -136,7 +136,7 @@ def process_single_slide(slide_file):
     ############################################################################################################
     # RUN GRAND QC FOR ARTIFACTS DETECTION
     ############################################################################################################
-    model_grandQC = torch.load(args.grandqc_model, map_location=args.device)  # load grandQC model
+    model_grandQC = torch.load(args.grandqc_model, map_location=DEVICE)  # load grandQC model
     p_s, patch_n_w_l0, patch_n_h_l0, w_l0, h_l0, obj_power = slide_info(slide, args.patch_size_model, args.grandqc_mpp,
                                                                         mpp_slide)
 
