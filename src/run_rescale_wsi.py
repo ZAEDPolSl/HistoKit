@@ -7,7 +7,7 @@ from tifffile import tifffile
 from tqdm import tqdm
 from PIL import Image
 
-from src.histo_kit.wsi_utils.patches import load_wsi_mag
+from src.histo_kit.utils.patches import load_wsi_mag
 
 """
 Script for loading wsi with desired resolution. If desired resolution is not available, image is rescaled from the 

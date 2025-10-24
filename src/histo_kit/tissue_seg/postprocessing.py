@@ -4,7 +4,7 @@ from skimage import measure, morphology
 from scipy import ndimage as ndi
 from skimage.measure import label
 
-from ..wsi_utils.matlab2python import get_strel_disk
+from ..utils.matlab2python import get_strel_disk
 
 
 def cluster_regions(data, max_iters=100, tol=1e-4):
