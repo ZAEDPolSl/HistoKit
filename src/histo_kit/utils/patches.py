@@ -2,8 +2,8 @@ import os
 import cv2
 from PIL import Image
 from math import ceil, floor
-import math
 import numpy as np
+from skimage import measure
 from tqdm import tqdm
 import matplotlib.colors as colors
 from ..grand_qc.artifacts import Artifact
@@ -196,7 +196,7 @@ def load_wsi_mag(wsi, desired_mag, rescale_method = Image.LANCZOS, verbose = Fal
         mag_idx = 0  # get the highest magnification and rescale
         w0, h0 = wsi.level_dimensions[mag_idx]
         region = wsi.read_region((0, 0), mag_idx, (w0, h0))
-        scale_val = desired_mag/ mag_l0
+        scale_val = desired_mag/mag_l0
         region = region.resize((int(w0 * scale_val), int(h0 * scale_val)), rescale_method)
 
     # convert RGBA to RGB
@@ -207,7 +207,7 @@ def load_wsi_mag(wsi, desired_mag, rescale_method = Image.LANCZOS, verbose = Fal
         
     return region, scale_val, info, mpp_slide, ratio
 
-def read_region(wsi, mask_file, region_idx, desired_mag, notation ="python", allow_list = (Artifact.NORM, Artifact.BG_MODEL), tol=1e-2, resampling_method = Image.Resampling.LANCZOS):
+def read_region(wsi, mask_file, region_idx, desired_mag, notation ="python", allow_list = (Artifact.NORM, Artifact.BG_MODEL), resampling_method = Image.Resampling.LANCZOS):
     """
     Read a masked region from a whole-slide image (WSI) and rescale it to a desired magnification.
 
@@ -231,9 +231,6 @@ def read_region(wsi, mask_file, region_idx, desired_mag, notation ="python", all
     allow_list : tuple of Artifact enums, optional
         Artifacts to allow in the mask. Only pixels labeled with these artifact types
         will be kept. Default is `(Artifact.NORM, Artifact.BG_MODEL)`.
-    tol : float, optional
-        Tolerance for the difference between the desired downsample ratio and the
-        best available level. Default is 1e-2.
     resampling_method : PIL.Image.Resampling, optional
         Resampling method used when resizing regions (e.g., `Image.Resampling.LANCZOS`).
         Default is `Image.Resampling.LANCZOS`.
@@ -258,7 +255,7 @@ def read_region(wsi, mask_file, region_idx, desired_mag, notation ="python", all
     >>> plt.show()
     """
 
-    # Load bounding box of the region at the magnification 2.5x
+
     bbox = np.array(mask_file["tiss_stats"][region_idx])
 
     # change matlab indexing to python indexing
@@ -273,10 +270,9 @@ def read_region(wsi, mask_file, region_idx, desired_mag, notation ="python", all
     w0, h0 = wsi.level_dimensions[0]
     des_w, des_h = int(w0 / desired_ratio), int(h0 / desired_ratio)
 
-    level = wsi.get_best_level_for_downsample(desired_ratio)
-
     # load region defined by bbox
-    if not math.isclose(float(wsi.level_downsamples[level]), desired_ratio, rel_tol=tol):
+    if (des_w, des_h) in wsi.level_dimensions:
+        level = wsi.level_dimensions.index((des_w, des_h))
         # when desired magnification is not available - read the layer with the ratio that
         # is the nearest larger ratio to the desired ratio and resize
         region = wsi.read_region((0, 0), level, wsi.level_dimensions[level]).convert("RGB")
@@ -284,6 +280,7 @@ def read_region(wsi, mask_file, region_idx, desired_mag, notation ="python", all
         region = np.array(region)[bbox[0]:bbox[2], bbox[1]:bbox[3]]
     else:
         # when desired ratio is available read the correct wsi layer
+        level = wsi.get_best_level_for_downsample(desired_ratio)
         region = np.array(wsi.read_region((bbox[0], bbox[1]), level, (bbox[2] - bbox[0], bbox[3] - bbox[1])).convert("RGB"))
 
     # load mask with artifacts
@@ -292,7 +289,11 @@ def read_region(wsi, mask_file, region_idx, desired_mag, notation ="python", all
 
     # take regions from allow list
     for i in allow_list:
-        mask[mask_art == i.value] = 1
+        if isinstance(i, Artifact):
+            mask[mask_art == i.value] = 1
+        else:
+            # when allow_list is given as bool array or others
+            mask[mask_art == i] = 1
 
     # Resize mask for desired resolution
     mask = np.array(Image.fromarray(mask).resize((region.shape[1], region.shape[0]), Image.Resampling.NEAREST))
@@ -305,6 +306,8 @@ def read_region(wsi, mask_file, region_idx, desired_mag, notation ="python", all
     region_masked[np.all(region_masked == [0, 0, 0], axis=-1)] = [255, 255, 255]
 
     return region_masked
+
+
 
 
 def merge_patches(patches_folder, attention_scores, scale_factor = 1, alpha=0.2):
@@ -401,3 +404,19 @@ def merge_patches(patches_folder, attention_scores, scale_factor = 1, alpha=0.2)
     attention_map_rgb = Image.fromarray(attention_map_rgb).resize((int(width * scale_factor), int(height * scale_factor)), Image.Resampling.NEAREST)
 
     return overlay, attention_map_rgb, attention_map
+
+
+def get_regions_location(bg_mask):
+
+    label_img = measure.label(bg_mask)
+    props = measure.regionprops(label_img)
+
+    bbox_list = []
+
+    for region in props:
+        bbox = region.bbox
+        # y_min, x_min, y_max, x_max
+        bbox_list.append([bbox[0], bbox[1], bbox[2], bbox[3]])
+
+    return bbox_list
+

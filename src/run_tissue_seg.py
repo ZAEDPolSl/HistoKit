@@ -33,18 +33,16 @@ parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
 parser.add_argument('--save_mask_formats', nargs='+',help='File formats to save masks, choose at least one from: npy, mat.', choices=["npy", "mat"],default=["npy", "mat"])
-parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=1, type=int,choices=range(1, os.cpu_count() + 1))
+parser.add_argument('--workers', help="Number of workers used to process images in parallel.", default=4, type=int,choices=range(1, os.cpu_count() + 1))
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="/mnt/data/Tmp/jmerta/HE/models/GrandQC_MPP1.pth", type=str)
 parser.add_argument('--grandqc_mpp', help='MPP for grand qc model (mpp=1 corresponds to magnification 10x, mpp=2.0 - 5x, mpp=1.5 - 7.5x)',default=1.0, type=float)
-parser.add_argument('--tissdet_mag', help='Magnification used for tissue detection',default=10, type=float)
+parser.add_argument('--tissdet_mag', help='Magnification used for tissue detection',default=2.5, type=float)
 parser.add_argument('--scale_thumbnail', help='factor used to scale small thumbnails to show algorithms results (scaled from magnification for tissue detection).',default=0.1, type=int)
 parser.add_argument('--patch_size_model', help='Patch size for grand QC.',default=512, type=int)
 parser.add_argument('--encoder_model', help='Name of a model used as encoder for GrandQC', default='timm-efficientnet-b0', type=str)
 parser.add_argument('--encoder_model_weights', help='Name of weights used for encoder model in GrandQC', default='imagenet', type=str)
 args = parser.parse_args()
 
-MAG_MODEL = 10/args.grandqc_mpp
-DEVICE = "cpu"
 
 # Create folders for results
 BG_MASK_DIR = create_folder(args.out_dir, 'masks')  # masks with detected tissues and grandQC results (saved as npy arrays, mat files or both)
@@ -60,6 +58,14 @@ REGION_GRANDQC_VIS = create_folder(args.out_dir, 'grandqc_vis_region')  # result
 
 # get slides names
 slides = glob.glob(os.path.join(args.wsi_dir, '*.svs'))
+slides.sort(key=lambda f: os.path.getsize(f))
+slides = slides[:4]
+
+# calculate grandQC model magnification
+MAG_MODEL = 10/args.grandqc_mpp
+
+# multiprocessing version uses only cpu
+DEVICE = "cpu"
 
 # Process WSIs
 print(f"Found {len(slides)} WSIs in {args.wsi_dir} directory. Starting processing with {args.workers} workers...")

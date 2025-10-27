@@ -42,7 +42,7 @@ parser.add_argument('--encoder_model', help='Name of a model used as encoder for
 parser.add_argument('--encoder_model_weights', help='Name of weights used for encoder model in GrandQC', default='imagenet', type=str)
 args = parser.parse_args()
 
-MAG_MODEL = 10/args.grandqc_mpp
+
 
 # Create folders for results
 BG_MASK_DIR = create_folder(args.out_dir, 'masks')  # masks with detected tissues and grandQC results (saved as npy arrays, mat files or both)
@@ -58,6 +58,9 @@ REGION_GRANDQC_VIS = create_folder(args.out_dir, 'grandqc_vis_region')  # result
 
 # get slides names
 slides = glob.glob(os.path.join(args.wsi_dir, '*.svs'))
+
+# calculate grandQC model magnification
+MAG_MODEL = 10/args.grandqc_mpp
 
 # Process WSIs
 print(f"Found {len(slides)} WSIs in {args.wsi_dir} directory. Using {args.device} for GrandQC. Started processing...\n")
