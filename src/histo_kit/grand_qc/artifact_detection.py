@@ -4,6 +4,7 @@ from PIL import Image
 import segmentation_models_pytorch as smp
 import torch
 from .artifacts import Artifact
+from .dataset import to_tensor_x
 from ..grand_qc.visualisation import make_artifacts_color_map
 
 
@@ -98,45 +99,7 @@ def slide_info(slide, model_patch_size, mpp_model, mpp_slide, verbose=False):
 
     return patch_size, num_patches_width, num_patches_height, width_level_0, height_level_0, obj_power
 
-def to_tensor_x(x, **kwargs):
-    """
-    Convert an RGB image from a NumPy array to a PyTorch tensor.
 
-    This function transposes the image from HWC (height, width, channels) format
-    to CHW (channels, height, width) format and casts it to `float32`, preparing
-    it for input into PyTorch models.
-
-    Parameters
-    ----------
-    x : ndarray of shape (H, W, C)
-        RGB image as a NumPy array.
-    **kwargs
-        Additional keyword arguments (currently unused).
-
-    Returns
-    -------
-    tensor : ndarray of dtype float32, shape (C, H, W)
-        Transposed and type-cast tensor suitable for PyTorch.
-
-    Notes
-    -----
-    - The function does not normalize pixel values (e.g., to [0,1]). This should
-      be done separately if required by the model.
-    - This is a lightweight function and does not create a true `torch.Tensor`.
-      To convert to a PyTorch tensor, use `torch.from_numpy(to_tensor_x(x))`.
-
-    Examples
-    --------
-    >>> x_tensor = to_tensor_x(image_np)
-    >>> print(x_tensor.shape)  # (3, H, W)
-
-    References
-    ----------
-    This function is taken from \ :footcite:p:`Weng2024`
-
-    .. footbibliography::
-    """
-    return x.transpose(2, 0, 1).astype('float32')
 
 def get_preprocessing(image, preprocessing_fn, model_size):
     """
@@ -335,6 +298,9 @@ def slide_process_single(model, tis_det, slide, num_patches_width, num_patches_h
     artifacts_color_map = artifacts_color_map.resize(size_mask_tissue, Image.Resampling.NEAREST)
 
     return artifacts_color_map, end_image, end_image_bg
+
+
+
 
 
 

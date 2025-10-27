@@ -1,11 +1,19 @@
+import os
 import time
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy
+from PIL import Image
+from openslide import OpenSlide
 from scipy import ndimage as ndi
 from ..tissue_seg.find_thr import get_thr_image
 from ..tissue_seg.postprocessing import remove_black_pen, get_strel_disk, remove_small_objects, \
     remove_gray_stains
 from ..utils.apply_mask import apply_mask
+from ..utils.file_utils import get_basename, save_rescaled
+from ..utils.matlab2python import get_wsi_ind_matlab
+from ..utils.patches import load_wsi_mag, get_regions_location
 
 
 def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
@@ -154,3 +162,66 @@ def plot_rgb_hist(R, G, B, thr):
         ax.set_title(f"{name} channel histogram: thr = {thr[name]:.2f}")
     fig.tight_layout()
     return fig, axs
+
+def segment_tissue(slide_file, args, paths_dict):
+
+    # slide basename
+    basename = get_basename(slide_file)
+
+    # load slide
+    slide = OpenSlide(slide_file)
+
+    # rescale region
+    region, scale_val, info, mpp_slide, ratio = load_wsi_mag(slide, args.tissdet_mag, allow_upscaling=True)
+    w, h = region.size
+    region = np.array(region)
+
+    # size for visualisations
+    vis_size = (int(w * args.scale_thumbnail), int(h * args.scale_thumbnail))
+
+    # save scaled region thumbnail
+    save_rescaled(region, vis_size, os.path.join(paths_dict["raw_small"], f'{basename}.tiff'), writer="tifffile")
+
+    res_dict = wsi_tissue_seg(region, args.fill_holes, args.close_disk_r, args.open_disk_r)
+
+    # save histograms with thresholds
+    fig, ax = plot_rgb_hist(res_dict['R'], res_dict['G'], res_dict['B'], res_dict['thr'])
+    fig.savefig(os.path.join(paths_dict["bg_thr_hist"], f'{basename}.png'))
+    plt.close(fig)
+
+    # save marker removal effect results
+    mask_pen = Image.fromarray(apply_mask(np.array(region), res_dict['mask_pen'], inv=False))
+    save_rescaled(mask_pen, vis_size, os.path.join(paths_dict["pen_vis"], f'{basename}.tiff'), writer="tifffile")
+
+    # save mask as a binary thumbnail
+    save_rescaled(res_dict['mask'], vis_size, os.path.join(paths_dict["bg_masks_vis"], f'{basename}.png'),
+                  rescale_method=Image.Resampling.NEAREST, mode='1')
+
+    # save mask visualisation on the tissue image
+    vis_tissue = Image.fromarray(apply_mask(region.copy(), res_dict['mask'], inv=False))
+    save_rescaled(vis_tissue, vis_size, os.path.join(paths_dict["bg_removal_vis"], f'{basename}.tiff'), writer="tifffile")
+
+    # save borders visualisation on the tissue image
+    contours, _ = cv2.findContours(res_dict['mask'].astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    region_con = region.copy()
+    cv2.drawContours(region_con, contours, -1, (0, 0, 255), 2)
+    save_rescaled(region_con, vis_size, os.path.join(paths_dict["bg_removal_contour_vis"], f'{basename}.tiff'), writer="tifffile")
+
+    # save tissue detection results
+    bboxes = get_regions_location(res_dict['mask'])
+
+    save_dict = {
+            'basename': basename,  # tissue file basename (without .svs extension)
+            'mask_bg': res_dict['mask'].astype(np.uint8),  # mask with detected tissue region
+            'ind_WSI': get_wsi_ind_matlab(slide_file),  # indexes for WSI image layers (idx from 1)
+            'ratio': ratio,  # ratio for each layer
+            'scale_val': scale_val,  # scale factor of masks
+            'mask_mag': args.tissdet_mag, # magnification of tissue detection
+            'thr': res_dict['thr'],  # thresholds calculated for R, G, B color channels
+            'bbox': bboxes # bounding boxes for each region
+        }
+
+    # save data to .mat file
+    scipy.io.savemat(os.path.join(paths_dict["masks"], f'{basename}.mat'), save_dict, do_compression=True)
+
+    return basename

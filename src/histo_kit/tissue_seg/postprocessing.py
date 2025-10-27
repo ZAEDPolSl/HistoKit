@@ -3,7 +3,6 @@ from skimage.color import rgb2hsv, rgb2lab
 from skimage import measure, morphology
 from scipy import ndimage as ndi
 from skimage.measure import label
-
 from ..utils.matlab2python import get_strel_disk
 
 

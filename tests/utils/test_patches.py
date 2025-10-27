@@ -1,10 +1,13 @@
 import os
+
+import cv2
 import numpy as np
 import pytest
 from PIL import Image
 from pathlib import Path
 from src.histo_kit.grand_qc.artifacts import Artifact
-from src.histo_kit.utils.patches import read_region, patch_wsi, load_wsi_mag, merge_patches
+from src.histo_kit.grand_qc.dataset import get_patch_grid
+from src.histo_kit.utils.patches import read_region, patch_wsi, load_wsi_mag, merge_patches, get_regions_location
 from openslide import OpenSlide
 
 ROOT = Path(__file__).parent.parent.parent
@@ -44,6 +47,74 @@ def test_merge_patches(patches_folder, scale_factor, alpha):
     overlay, attention_map_rgb, attention_map = merge_patches(patches_folder, attention_scores, scale_factor, alpha)
     overlay.save("../../test_data/test_postprocessing/overlay.png")
     attention_map_rgb.save("../../test_data/test_postprocessing/attention_map.png")
+
+def test_get_patches():
+
+    test_arr = np.zeros((100, 100))
+
+    test_arr[10:20, 10:20] = 1
+    test_arr[40:60, 70:90] = 1
+
+    region_list = get_regions_location(test_arr)
+    bbox_gt = [[10, 10, 20, 20], [40, 70, 60, 90]]
+
+    assert sorted(region_list) == sorted(bbox_gt)
+
+def test_get_grid():
+    patch_size = 256
+    overlap_gt = 0.9
+
+    bg = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/bg_test.png").convert("1"))
+    region_list = get_regions_location(bg)
+    coords = get_patch_grid(region_list, patch_size=patch_size, overlap=overlap_gt)
+
+    p_w = coords["x_end"][0] - coords["x_start"][0]
+    p_h = coords["y_end"][0] - coords["y_start"][0]
+
+    stride = coords["y_start"][1] - coords["y_start"][0]
+    overlap = round(1 - stride/patch_size, 1)
+
+    assert len(region_list) == 3
+    assert p_w == patch_size
+    assert p_h == patch_size
+    assert overlap == overlap_gt
+
+@pytest.mark.skip_ci
+def test_vis_grid():
+    patch_size = 512
+    overlap_gt = 0.5
+
+    region = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/region_test.png"))
+    bg = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/bg_test.png").convert("1"))
+    region_list = get_regions_location(bg)
+    bg_rgb = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/bg_test.png").convert("RGB"))
+
+    for r in region_list:
+        y_min, x_min, y_max, x_max = r
+        cv2.rectangle(
+            bg_rgb,
+            (x_min, y_min),
+            (x_max, y_max),
+            color=(255, 0, 255),
+            thickness=2
+        )
+    cv2.imwrite("bbox_vis.png", bg_rgb)
+
+    coords = get_patch_grid(region_list, patch_size=patch_size, overlap=overlap_gt)
+
+    for x_s, y_s, x_e, y_e in zip(coords["x_start"], coords["y_start"], coords["x_end"], coords["y_end"]):
+        cv2.rectangle(
+            bg_rgb,
+            (max(0, x_s), max(0, y_s)),
+            (min(region.shape[1], x_e), min(region.shape[0], y_e)),
+            color=(0, 255, 0),
+            thickness=2
+        )
+    cv2.imwrite(f"reg_vis.png", bg_rgb)
+
+
+
+
 
 
 

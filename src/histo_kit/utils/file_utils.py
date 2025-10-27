@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from PIL import Image
+from tifffile import tifffile
 
 
 def create_folder(parent, folder_name):
@@ -29,7 +30,7 @@ def create_folder(parent, folder_name):
     return path
 
 
-def save_rescaled(image, new_size, save_path, rescale_method=Image.LANCZOS, mode='RGB'):
+def save_rescaled(image, new_size, save_path, rescale_method=Image.LANCZOS, mode='RGB', writer="PIL"):
     """
     Rescale and save an image to the specified path.
 
@@ -63,12 +64,17 @@ def save_rescaled(image, new_size, save_path, rescale_method=Image.LANCZOS, mode
     # Rescale image
     image = image.resize(new_size, rescale_method)
 
-    # Convert color mode
-    if image.mode != mode:
-        image = image.convert(mode)
+    if writer == "PIL":
+        # Convert color mode
+        if image.mode != mode:
+            image = image.convert(mode)
 
-    # Save the rescaled image
-    image.save(save_path)
+        # Save the rescaled image
+        image.save(save_path)
+
+    elif writer == "tifffile":
+        image = np.array(image).astype(np.uint8)
+        tifffile.imwrite(save_path, image, photometric='rgb', compression='lzw')
 
     return image
 
