@@ -173,11 +173,11 @@ def segment_tissue(slide_file, args, paths_dict):
 
     # rescale region
     region, scale_val, info, mpp_slide, ratio = load_wsi_mag(slide, args.tissdet_mag, allow_upscaling=True)
-    w, h = region.size
     region = np.array(region)
 
     # size for visualisations
-    vis_size = (int(w * args.scale_thumbnail), int(h * args.scale_thumbnail))
+    w_l0, h_l0 = slide.level_dimensions[0]
+    vis_size = (int(w_l0 * args.scale_thumbnail), int(h_l0 * args.scale_thumbnail))
 
     # save scaled region thumbnail
     save_rescaled(region, vis_size, os.path.join(paths_dict["raw_small"], f'{basename}.tiff'), writer="tifffile")

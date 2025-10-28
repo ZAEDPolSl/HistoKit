@@ -1,15 +1,16 @@
 import os
 
+import cv2
 import numpy as np
 import torch
 from PIL import Image
 from openslide import OpenSlide
 from torch.utils.data import DataLoader
-from ..grand_qc.artifacts import Artifact
 from ..grand_qc.dataset import GrandQCDataset
 from ..grand_qc.visualisation import make_artifacts_color_map, make_overlay
-from ..utils.file_utils import get_basename
+from ..utils.file_utils import get_basename, save_rescaled
 from ..utils.image import gaussian_window
+from ..utils.matlab2python import list2cell
 from ..utils.patches import load_wsi_mag
 import scipy.io as sio
 
@@ -30,7 +31,8 @@ def process_single_optimized(slide_file, res_dict_path, batch_size, num_workers,
     region = np.array(region)
 
     # size for visualisations
-    vis_size = (int(W * scale_thumbnail), int(H * scale_thumbnail))
+    w_l0, h_l0 = slide.level_dimensions[0]
+    vis_size = (int(w_l0 * scale_thumbnail), int(h_l0 * scale_thumbnail))
 
     data = sio.loadmat(res_dict_path)
     tis_det = data["mask_bg"]
@@ -95,27 +97,46 @@ def process_single_optimized(slide_file, res_dict_path, batch_size, num_workers,
             where=weights != 0
         )
 
-    weights = Image.fromarray(((weights - np.min(weights)) / (np.max(weights) - np.min(weights)) * 255).astype(np.uint8)).convert("L")
-
-
     pred_mask = np.argmax(raw_mask, axis=2).astype('int8')
     pred_mask = pred_mask[:region.shape[0], :region.shape[1]]
 
     # remove the rest of bg pixels
     tis_det_bool = tis_det.astype(bool)
-    pred_mask[~tis_det_bool] = Artifact.BG_THR.value
+    pred_mask[~tis_det_bool] = 0
 
     # make color visualisation
     artifacts_color_map = Image.fromarray(make_artifacts_color_map(pred_mask))
-    artifacts_color_map.save(os.path.join(paths_dict["grandqc_map_vis"], f'{basename}.png'))
+    save_rescaled(artifacts_color_map, vis_size, os.path.join(paths_dict["grandqc_map_vis"], f'{basename}.png'))
 
     # overlay heatmap on the image
     overlay = make_overlay(region, artifacts_color_map, tis_det, vis_size)
     overlay = Image.fromarray(overlay)
-    overlay.save(os.path.join(paths_dict["grandqc_overlay_vis"], f'{basename}.png'))
+    save_rescaled(overlay, vis_size, os.path.join(paths_dict["grandqc_overlay_vis"], f'{basename}.png'))
 
-    # save weights as a grayscale image
-    weights.save(os.path.join(paths_dict["grandqc_vis_weights"], f'{basename}.png'))
+    # save weights as a grayscale image with bboxes and patches visualisation
+    coords = dataset.coords
+    weights = Image.fromarray(
+        ((weights - np.min(weights)) / (np.max(weights) - np.min(weights)) * 255).astype(np.uint8)).convert("RGB")
+    weights = np.array(weights)
+    for b in bbox:
+        y_min, x_min, y_max, x_max = b
+        cv2.rectangle(
+            weights,
+            (x_min, y_min),
+            (x_max, y_max),
+            color=(255, 0, 255),
+            thickness=2
+        )
+
+    for x_s, y_s, x_e, y_e in zip(coords["x_start"], coords["y_start"], coords["x_end"], coords["y_end"]):
+        cv2.rectangle(
+            weights,
+            (max(0, x_s), max(0, y_s)),
+            (min(weights.shape[1], x_e), min(weights.shape[0], y_e)),
+            color=(0, 255, 0),
+            thickness=2
+        )
+    save_rescaled(weights, vis_size, os.path.join(paths_dict["grandqc_vis_weights"], f'{basename}.png'))
 
     # rescale result to desired magnification
     if mag_model != save_mag:
@@ -138,19 +159,23 @@ def process_single_optimized(slide_file, res_dict_path, batch_size, num_workers,
         bbox = np.array(bbox, dtype=float)
         bbox = np.round(bbox / scale).astype(int)
 
-    w_l0, h_l0 = slide.level_dimensions[0]
+
+    mag_l0 = float(slide.properties["openslide.objective-power"])
     h_res, w_res = pred_mask.shape
-    scale_val = w_res/w_l0
+    scale_val = save_mag/mag_l0
 
     save_dict = {
         'basename': basename,  # tissue file basename (without .svs extension)
         'mask_art': [],  # mask with artifacts detected by grandQC for given region
-        'raw_mask_art':[], # raw mask with predictions (3D)
         'ind_WSI': data['ind_WSI'],  # indexes for WSI image layers (idx from 1)
         'ratio': data['ratio'],  # ratio for each layer
         'scale_val': scale_val,  # scale factor of masks
         'thr': data['thr'],  # thresholds calculated for R, G, B color channels
         'bbox': bbox # bboxes for tissue regions (indexing from 0)
+    }
+
+    save_dict_raw = {
+        'raw_mask_art':[], # raw mask with predictions (3D)
     }
 
     for n, region_bbox in enumerate(bbox):
@@ -165,11 +190,18 @@ def process_single_optimized(slide_file, res_dict_path, batch_size, num_workers,
         raw_mask_region = raw_mask[y0:y1, x0:x1, :]
 
         save_dict['mask_art'].append(pred_mask_region)
-        save_dict['raw_mask_art'].append(raw_mask_region)
+        save_dict_raw['raw_mask_art'].append(raw_mask_region)
 
         region_color_map = Image.fromarray(make_artifacts_color_map(pred_mask_region))
+        new_size = (int(region_color_map.size[0]*scale_thumbnail/scale_val), int(region_color_map.size[1]*scale_thumbnail/scale_val))
+        region_color_map = region_color_map.resize(new_size, Image.Resampling.NEAREST)
         region_color_map.save(os.path.join(paths_dict["grandqc_vis_region"], f'{basename}_R{n}.png'))
 
+    # convert to cells for matlab
+    save_dict_raw['raw_mask_art'] = list2cell(save_dict_raw['raw_mask_art'])
+    save_dict['mask_art'] = list2cell(save_dict['mask_art'])
+
     sio.savemat(os.path.join(paths_dict["masks_grandqc"], f'{basename}.mat'), save_dict, do_compression=True)
+    sio.savemat(os.path.join(paths_dict["masks_grandqc_confidence_maps"], f'{basename}.mat'), save_dict_raw, do_compression=True)
 
     return save_dict
