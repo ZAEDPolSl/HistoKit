@@ -82,7 +82,7 @@ def test_get_grid():
 @pytest.mark.skip_ci
 def test_vis_grid():
     patch_size = 512
-    overlap_gt = 0.5
+    overlap_gt = 0.1
 
     region = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/region_test.png"))
     bg = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/bg_test.png").convert("1"))
