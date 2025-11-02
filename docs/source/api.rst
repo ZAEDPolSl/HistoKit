@@ -22,4 +22,3 @@ Documentation
    histo_kit.stain_normalisation
    histo_kit.mil
    histo_kit.foundation_models
-   histo_kit.config
