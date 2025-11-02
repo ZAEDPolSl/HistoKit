@@ -1,5 +1,4 @@
 import os
-
 import cv2
 import numpy as np
 import pytest
@@ -7,7 +6,8 @@ from PIL import Image
 from pathlib import Path
 from src.histo_kit.grand_qc.artifacts import Artifact
 from src.histo_kit.grand_qc.dataset import get_patch_grid
-from src.histo_kit.utils.patches import read_region, patch_wsi, load_wsi_mag, merge_patches, get_regions_location
+from src.histo_kit.utils.patches import merge_patches, patch_wsi
+from src.histo_kit.utils.wsi import read_region, get_regions_location
 from openslide import OpenSlide
 
 ROOT = Path(__file__).parent.parent.parent
