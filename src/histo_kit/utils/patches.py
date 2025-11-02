@@ -3,10 +3,8 @@ import cv2
 from PIL import Image
 from math import ceil, floor
 import numpy as np
-from skimage import measure
 from tqdm import tqdm
 import matplotlib.colors as colors
-from ..grand_qc.artifacts import Artifact
 
 heatmap_colors = [
    (0.0, "#00008B"),

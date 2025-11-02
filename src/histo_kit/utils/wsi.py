@@ -2,8 +2,6 @@ from PIL import Image
 from math import ceil
 import numpy as np
 from skimage import measure
-from ..grand_qc.artifacts import Artifact
-
 
 def slide_info(slide, model_patch_size, mpp_model, mpp_slide, verbose=False):
     """
@@ -245,7 +243,7 @@ def load_wsi_mag(wsi, desired_mag, rescale_method=Image.LANCZOS, verbose=False, 
 
 
 def read_region(wsi, mask_file, region_idx, desired_mag, notation="python",
-                allow_list=(Artifact.NORM, Artifact.BG_MODEL), resampling_method=Image.Resampling.LANCZOS):
+                allow_list=(1, 7), resampling_method=Image.Resampling.LANCZOS):
     """
     Read a masked region from a whole-slide image (WSI) and rescale it to a desired magnification.
 
@@ -266,9 +264,9 @@ def read_region(wsi, mask_file, region_idx, desired_mag, notation="python",
     notation : {'python', 'matlab'}, optional
         Specifies whether bounding boxes use Python (0-based) or MATLAB (1-based) indexing.
         Default is "python".
-    allow_list : tuple of Artifact enums, optional
+    allow_list : tuple of int, optional
         Artifacts to allow in the mask. Only pixels labeled with these artifact types
-        will be kept. Default is `(Artifact.NORM, Artifact.BG_MODEL)`.
+        will be kept. Default is `1, 7`.
     resampling_method : PIL.Image.Resampling, optional
         Resampling method used when resizing regions (e.g., `Image.Resampling.LANCZOS`).
         Default is `Image.Resampling.LANCZOS`.
@@ -327,11 +325,7 @@ def read_region(wsi, mask_file, region_idx, desired_mag, notation="python",
 
     # take regions from allow list
     for i in allow_list:
-        if isinstance(i, Artifact):
-            mask[mask_art == i.value] = 1
-        else:
-            # when allow_list is given as bool array or others
-            mask[mask_art == i] = 1
+        mask[mask_art == i] = 1
 
     # Resize mask for desired resolution
     mask = np.array(Image.fromarray(mask).resize((region.shape[1], region.shape[0]), Image.Resampling.NEAREST))
