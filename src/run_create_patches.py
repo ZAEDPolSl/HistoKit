@@ -7,7 +7,8 @@ from openslide import OpenSlide
 from tqdm import tqdm
 from PIL import Image
 
-from src.histo_kit.utils.patches import load_wsi_mag, read_region, patch_wsi
+from src.histo_kit.utils.patches import patch_wsi
+from src.histo_kit.utils.wsi import load_wsi_mag, read_region
 
 """
 Script for dividing image into patches

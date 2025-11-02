@@ -1,6 +1,42 @@
 import numpy as np
 
 def gaussian_window(h, w, sigma=None):
+    """
+    Create a 2D Gaussian weighting window with values normalized to [0, 1].
+
+    The window is symmetric and smoothly attenuates values towards the edges.
+    It is used to blend overlapping patches in whole-slide inference
+    to avoid visible stitching artifacts.
+
+    Parameters
+    ----------
+    h : int
+        Height of the window.
+    w : int
+        Width of the window.
+    sigma : float, optional
+        Standard deviation controlling the spread of the Gaussian.
+        If ``None`` (default), the value is set to ``0.5 * max(h, w)``.
+
+    Returns
+    -------
+    ndarray of shape (h, w)
+        A 2D Gaussian window normalized such that its maximum value is 1.
+
+    Notes
+    -----
+    - The Gaussian is computed independently in x and y dimensions and combined
+      via an outer product.
+    - Normalization ensures the central peak equals 1.
+
+    Examples
+    --------
+    >>> win = gaussian_window(5, 5)
+    >>> win.shape
+    (5, 5)
+    >>> win.max()
+    1.0
+    """
     if sigma is None:
         sigma = 0.5 * max(h, w)
 

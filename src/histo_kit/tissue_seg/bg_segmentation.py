@@ -1,10 +1,8 @@
 import os
-import time
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy
-from PIL import Image
 from openslide import OpenSlide
 from scipy import ndimage as ndi
 from ..tissue_seg.find_thr import get_thr_image
@@ -13,10 +11,10 @@ from ..tissue_seg.postprocessing import remove_black_pen, get_strel_disk, remove
 from ..utils.apply_mask import apply_mask
 from ..utils.file_utils import get_basename, save_rescaled
 from ..utils.matlab2python import get_wsi_ind_matlab
-from ..utils.patches import load_wsi_mag, get_regions_location
+from ..utils.wsi import load_wsi_mag
 
 
-def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
+def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2, rem_small_obj=True):
     """
     Segment tissue regions in a whole-slide image (WSI) region using GaMRed or Otsu algorithms.
 
@@ -36,6 +34,8 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
         Radius of the disk-shaped structuring element used for morphological opening. Default is 2.
     close_disk_r : int, optional
         Radius of the disk-shaped structuring element used for morphological closing. Default is 2.
+    rem_small_obj: bool, optional
+        If True, remove small objects around the tissue region. Default is True.
 
     Returns
     -------
@@ -62,13 +62,6 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
     >>> print("Red channel histogram:", result["R"])
     >>> print("Thresholds:", result["thr"])
 
-    .. image:: example.png
-        :alt: Example image
-        :align: center
-        :width: 400px
-
-
-
     References
     ----------
     Method is described in \ :footcite:p:`bioimaging25`.
@@ -80,7 +73,7 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
     thr, R, G, B = get_thr_image(img_np, thr_min=0.7 * 255, verbose=False)
 
     # remove black pen
-    mask_pen = remove_black_pen(img_np, 0.7,  thr, 5)
+    mask_pen = remove_black_pen(img_np, 10,  thr, 5)
     img_np = apply_mask(img_np, mask_pen, inv=True)
 
     # get regions above background
@@ -102,8 +95,8 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2):
     mask = ndi.binary_opening(mask, SE_open)
 
     # remove small regions
-    s = time.time()
-    mask = remove_small_objects(mask)
+    if rem_small_obj:
+        mask = remove_small_objects(mask)
 
     return {"mask": mask, "mask_pen": mask_pen, "R": R, "G": G, "B": B, "thr":thr}
 
@@ -163,6 +156,7 @@ def plot_rgb_hist(R, G, B, thr):
     fig.tight_layout()
     return fig, axs
 
+
 def segment_tissue(slide_file, args, paths_dict):
 
     # slide basename
@@ -177,38 +171,28 @@ def segment_tissue(slide_file, args, paths_dict):
 
     # size for visualisations
     w_l0, h_l0 = slide.level_dimensions[0]
-    vis_size = (int(w_l0 * args.scale_thumbnail), int(h_l0 * args.scale_thumbnail))
+    mag_l0 = float(slide.properties["openslide.objective-power"])
+    scale_vis = args.vis_mag/mag_l0
+    vis_size = (int(w_l0 * scale_vis), int(h_l0 * scale_vis))
+
+    # free memory
+    del slide
 
     # save scaled region thumbnail
     save_rescaled(region, vis_size, os.path.join(paths_dict["raw_small"], f'{basename}.tiff'), writer="tifffile")
 
-    res_dict = wsi_tissue_seg(region, args.fill_holes, args.close_disk_r, args.open_disk_r)
+    res_dict = wsi_tissue_seg(region, args.fill_holes, args.close_disk_r, args.open_disk_r, args.remove_small_objects)
 
     # save histograms with thresholds
     fig, ax = plot_rgb_hist(res_dict['R'], res_dict['G'], res_dict['B'], res_dict['thr'])
     fig.savefig(os.path.join(paths_dict["bg_thr_hist"], f'{basename}.png'))
     plt.close(fig)
 
-    # save marker removal effect results
-    mask_pen = Image.fromarray(apply_mask(np.array(region), res_dict['mask_pen'], inv=False))
-    save_rescaled(mask_pen, vis_size, os.path.join(paths_dict["pen_vis"], f'{basename}.tiff'), writer="tifffile")
-
-    # save mask as a binary thumbnail
-    save_rescaled(res_dict['mask'], vis_size, os.path.join(paths_dict["bg_masks_vis"], f'{basename}.png'),
-                  rescale_method=Image.Resampling.NEAREST, mode='1')
-
-    # save mask visualisation on the tissue image
-    vis_tissue = Image.fromarray(apply_mask(region.copy(), res_dict['mask'], inv=False))
-    save_rescaled(vis_tissue, vis_size, os.path.join(paths_dict["bg_removal_vis"], f'{basename}.tiff'), writer="tifffile")
-
     # save borders visualisation on the tissue image
     contours, _ = cv2.findContours(res_dict['mask'].astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    region_con = region.copy()
-    cv2.drawContours(region_con, contours, -1, (0, 0, 255), 2)
-    save_rescaled(region_con, vis_size, os.path.join(paths_dict["bg_removal_contour_vis"], f'{basename}.tiff'), writer="tifffile")
-
-    # save tissue detection results
-    bboxes = get_regions_location(res_dict['mask'])
+    cv2.drawContours(region, contours, -1, (0, 0, 255), 2)
+    save_rescaled(region, vis_size, os.path.join(paths_dict["bg_removal_contour_vis"], f'{basename}.tiff'), writer="tifffile")
+    del region
 
     save_dict = {
             'basename': basename,  # tissue file basename (without .svs extension)
@@ -217,8 +201,9 @@ def segment_tissue(slide_file, args, paths_dict):
             'ratio': ratio,  # ratio for each layer
             'scale_val': scale_val,  # scale factor of masks
             'mask_mag': args.tissdet_mag, # magnification of tissue detection
-            'thr': res_dict['thr'],  # thresholds calculated for R, G, B color channels
-            'bbox': bboxes # bounding boxes for each region
+            'thr': res_dict['thr'],  # thresholds calculated for R, G, B color channels,
+            'mpp': mpp_slide,
+            'mag_l0': mag_l0
         }
 
     # save data to .mat file
