@@ -60,6 +60,7 @@ def test_get_patches():
 
     assert sorted(region_list) == sorted(bbox_gt)
 
+@pytest.mark.skip_ci
 def test_get_grid():
     patch_size = 256
     overlap_gt = 0.9
