@@ -14,10 +14,10 @@ from ..utils.wsi import load_wsi_mag, get_regions_location
 import scipy.io as sio
 
 
-def process_single_optimized(slide_file, res_dict_path, batch_size, num_workers,
-                             device, model, paths_dict, vis_mag, overlap=0.7, mag_model=10,
-                             patch_size=512, mode="gaussian", classes = 8, sigma=None, save_mag = 2.5,
-                             save_confidence_maps=True):
+def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
+                           device, model, paths_dict, vis_mag, overlap=0.7, mag_model=10,
+                           patch_size=512, mode="gaussian", classes = 8, sigma=None, save_mag = 2.5,
+                           save_confidence_maps=True):
     """
     Run optimized GrandQC inference on a whole-slide image (WSI), aggregate patch-wise
     predictions into full-resolution confidence maps, produce visualizations and save
@@ -111,7 +111,7 @@ def process_single_optimized(slide_file, res_dict_path, batch_size, num_workers,
     ...     "masks_grandqc": "/out/masks",
     ...     "masks_grandqc_confidence_maps": "/out/conf_maps"
     ... }
-    >>> save_info = process_single_optimized(
+    >>> save_info = detect_artifacts_slide(
     ...     "slide.svs",
     ...     "slide_res.mat",
     ...     batch_size=8,

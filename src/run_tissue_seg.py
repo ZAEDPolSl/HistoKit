@@ -3,7 +3,7 @@ import argparse
 import glob
 import time
 import torch
-from histo_kit.grand_qc.artifact_detection import process_single_optimized
+from histo_kit.grand_qc.artifact_detection import detect_artifacts_slide
 from histo_kit.tissue_seg.bg_segmentation import segment_tissue
 from histo_kit.utils.file_utils import create_folder, get_basename
 from tqdm import tqdm
@@ -177,7 +177,7 @@ if __name__ == "__main__":
             try:
                 basename = get_basename(s_f)
                 tis_det = os.path.join(folder_tis_det, basename+".mat")
-                process_single_optimized(
+                detect_artifacts_slide(
                     s_f, tis_det, args.batch_size,
                     args.workers_per_slide, args.device,
                     model, paths_dict, args.vis_mag, args.overlap, mag_model=MAG_MODEL,
