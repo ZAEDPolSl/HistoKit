@@ -1,13 +1,61 @@
-from math import ceil
 import numpy as np
 from torch.utils.data import Dataset
 from ..grand_qc.artifacts import Artifact
 import segmentation_models_pytorch as smp
 from ..utils.image import to_tensor_x
+from ..utils.patches import get_patch_grid
+
 
 class GrandQCDataset(Dataset):
+    """
+    Pytorch Dataset for extracting fixed-size patches from a region while applying padding
+    to boundary areas. Also returns a background mask patch and metadata describing
+    the location of each patch.
 
-    def __init__(self, region, bg, bbox_list, patch_size=512, overlap=0.2, pad_value=Artifact.BG_THR.value, encoder='timm-efficientnet-b0', weights="imagenet"):
+    Parameters
+    ----------
+    region : np.ndarray
+        Source RGB region image from which patches will be extracted.
+        Expected shape is ``(H, W, 3)``.
+    bg : np.ndarray
+        Background mask associated with `region`, matching spatial dimensions
+        ``(H, W)``.
+    bbox_list : list of tuples
+        List of bounding boxes defining areas of interest. Each bounding box should be
+        represented as ``(x_start, y_start, x_end, y_end)``.
+    patch_size : int, optional
+        Target size (height and width) for the extracted patches (default is ``512`` which is valid for the GrandQC model).
+    overlap : float, optional
+        Fractional overlap between neighboring patches (default is ``0.7``).
+    pad_value : int, optional
+        Value used to pad pixels when patches extend beyond the region boundary.
+        Typically background (default is ``Artifact.BG_THR.value``, which corresponds to 0).
+    encoder : str, optional
+        Name of the encoder used for preprocessing, passed to
+        `segmentation_models_pytorch.encoders.get_preprocessing_fn`.
+    weights : str, optional
+        Pre-trained weights to use with the encoder (default is ``"imagenet"``).
+
+    Attributes
+    ----------
+    coords : dict
+        Dictionary of patch coordinates with keys ``"x_start"``, ``"y_start"``,
+        ``"x_end"``, ``"y_end"``.
+    prep_fn : callable
+        Preprocessing function for encoder normalization.
+    patch_size : int
+        Final patch spatial size.
+    pad_value : int
+        Background padding value.
+
+    Notes
+    -----
+    Returned items are dictionaries rather than `(image, label)` pairs to allow
+    downstream inference pipelines to use bounding box metadata.
+
+    """
+
+    def __init__(self, region, bg, bbox_list, patch_size=512, overlap=0.7, pad_value=Artifact.BG_THR.value, encoder='timm-efficientnet-b0', weights="imagenet"):
 
         self.bg = bg
         self.patch_size = patch_size
@@ -21,11 +69,41 @@ class GrandQCDataset(Dataset):
         return len(self.coords["x_start"])
 
     def preprocess(self, img):
+        """
+        Apply encoder-specific preprocessing and convert the image to a tensor.
+
+        Parameters
+        ----------
+        img : np.ndarray
+            Input patch of shape ``(patch_size, patch_size, 3)``.
+
+        Returns
+        -------
+        torch.Tensor
+            Preprocessed tensor suitable for the GrandQC model input.
+        """
         x = self.prep_fn(img)
         x = to_tensor_x(x)
         return x
 
     def __getitem__(self, idx):
+        """
+        Retrieve the patch and its associated metadata for a given index.
+
+        Parameters
+        ----------
+        idx : int
+            Index of the patch to retrieve.
+
+        Returns
+        -------
+        dict
+            A dictionary containing:
+            - ``"patch"`` : torch.Tensor, preprocessed patch image
+            - ``"patch_bg"`` : np.ndarray, background mask patch
+            - ``"x_start"``, ``"y_start"``, ``"x_end"``, ``"y_end"`` : int coordinates
+            - ``"all_bg"`` : bool, whether the patch is entirely background
+        """
 
         x_start = int(self.coords["x_start"][idx])
         y_start = int(self.coords["y_start"][idx])
@@ -69,34 +147,7 @@ class GrandQCDataset(Dataset):
 
         return res_dict
 
-def get_patch_grid(regions, patch_size=256, overlap=0.9):
 
-    coords = {"x_start": [], "y_start": [], "x_end": [], "y_end": []}
-
-    for bbox in regions:
-
-        stride = max(int(round(patch_size * (1.0 - overlap))), 1)
-
-        y_0 = bbox[0] - stride
-        x_0 = bbox[1] - stride
-
-        tis_h = bbox[2] - y_0  # y_max - y_min
-        tis_w = bbox[3] - x_0  # x_max - x_min
-
-        num_x = ceil((tis_w - patch_size) / stride) + 1 if tis_w > patch_size else 1
-        num_y = ceil((tis_h - patch_size) / stride) + 1 if tis_h > patch_size else 1
-
-        for ix in range(num_x):
-            x = x_0 + ix * stride
-            for iy in range(num_y):
-                y = y_0 + iy * stride
-
-                coords["x_start"].append(x)
-                coords["y_start"].append(y)
-                coords["x_end"].append(x + patch_size)
-                coords["y_end"].append(y + patch_size)
-
-    return coords
 
 
 

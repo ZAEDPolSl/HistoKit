@@ -93,7 +93,7 @@ def test_apply_mask(img_path, inv, mat_file):
 def test_remove_small_objects(mat_file):
     mat_res = loadmat(mat_file)
     mask_res = remove_small_objects(mat_res['mask'])
-
+    Image.fromarray(mask_res).show()
     assert_array_equal(mask_res, mat_res["mask_res"].astype(bool))
 
 @pytest.mark.skip_ci
@@ -122,3 +122,5 @@ def test_remove_grey_stains(img_path, mat_file):
 def test_get_wsi_ind_matlab(svs_path, ind_gt):
     ind = get_wsi_ind_matlab(svs_path)
     assert_array_equal(ind, ind_gt)
+
+

@@ -75,7 +75,7 @@ def GaMRed_hist(x, y, K, draw, SW):
     ind = np.argsort(x)
     x = np.sort(x)
     y = y[ind]
-    N = np.sum(y) #nb of measurments
+    N = np.sum(y) #nb of measurements
     bic = np.inf
 
     # remove no signal at the beginning or the end
@@ -518,6 +518,7 @@ def get_pixel_distribution(img):
 
     return R, G, B
 
+
 def get_thr_image(img, thr_min = 0.7*255, verbose=False):
     """
     Compute per-channel thresholds for an RGB image using the GaMRed algorithm.
@@ -672,7 +673,7 @@ def otsuthresh(counts):
     .. footbibliography::
     """
 
-    counts = np.asarray(counts, dtype=np.float128).ravel()
+    counts = np.asarray(counts, dtype=np.float64).ravel()
     num_bins = counts.size
 
     # Probabilities

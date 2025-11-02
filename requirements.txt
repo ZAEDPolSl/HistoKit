@@ -5,7 +5,7 @@ openslide-python
 pytest==8.4.2
 pytest-repeat==0.9.4
 scikit-image==0.21.0
-scikit-learn
+scikit-learn~=1.7.2
 scipy>=1.9
 segmentation-models-pytorch==0.3.1
 tifffile==2023.4.12
@@ -13,3 +13,6 @@ timm==0.4.12
 torch==2.0.1
 torchvision==0.15.2
 tqdm==4.65.0
+
+pillow~=11.3.0
+memory-profiler~=0.61.0

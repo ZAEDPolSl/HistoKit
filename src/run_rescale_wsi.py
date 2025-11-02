@@ -6,17 +6,16 @@ from openslide import OpenSlide
 from tifffile import tifffile
 from tqdm import tqdm
 from PIL import Image
-
-from src.histo_kit.utils.patches import load_wsi_mag
+from histo_kit.utils.wsi import load_wsi_mag
 
 """
 Script for loading wsi with desired resolution. If desired resolution is not available, image is rescaled from the 
 """
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/HE_data/Pietrus/Healthy/')
-parser.add_argument("--out_folder", type=str, help="Input directory with masks created by grandQC for detected regions with file extension. ", default="healthy_mag2.5")
-parser.add_argument('--desired_mag', help="Desired slide magnification.", default=2.5, type = float)
+parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/Compass/HE/LMUM/20x/')
+parser.add_argument("--out_folder", type=str, help="Input directory with masks created by grandQC for detected regions with file extension. ", default="/mnt/data/Tmp/jmerta/compass_regions_small/")
+parser.add_argument('--desired_mag', help="Desired slide magnification.", default=1, type = float)
 
 
 
