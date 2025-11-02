@@ -116,200 +116,6 @@ def patch_wsi(region, patch_size, save_folder, bg_percent, overlap=0, extract_ty
 
 
 
-def load_wsi_mag(wsi, desired_mag, rescale_method = Image.LANCZOS, verbose = False, allow_upscaling = True):
-    """
-    Load and rescale a whole-slide image (WSI) to a desired magnification.
-
-    This function reads the WSI at the closest available level to the desired
-    magnification. If the exact magnification is unavailable, it rescales the
-    highest-resolution level using the specified resampling method. Optionally,
-    upscaling is allowed when the desired magnification is higher than the
-    native WSI magnification.
-
-    Parameters
-    ----------
-    wsi : OpenSlide object
-        OpenSlide WSI object to load and rescale.
-    desired_mag : float
-        Desired slide magnification (e.g., 10, 20, 40).
-    rescale_method : PIL.Image.Resampling or int, optional
-        Resampling method used when resizing the image. Options include
-        `Image.BICUBIC`, `Image.BILINEAR`, `Image.BOX`, `Image.HAMMING`,
-        `Image.LANCZOS`, `Image.NEAREST`. Default is `Image.LANCZOS`.
-    verbose : bool, optional
-        If True, prints information about the rescaling process. Default is False.
-    allow_upscaling : bool, optional
-        If True, allows upscaling when the desired magnification is higher than
-        the highest magnification available. Default is True.
-
-    Returns
-    -------
-    region : PIL.Image.Image
-        Rescaled WSI region at the desired magnification (converted to RGB).
-    scale_val : float
-        Scaling factor applied relative to the highest-resolution WSI level.
-        For example, if the highest level is 40x and desired magnification is 10x,
-        `scale_val = 40/10 = 4`.
-    info : str
-        Information message describing whether the desired magnification was
-        available or if rescaling/upscaling was applied.
-    mpp_slide : float
-        Approximate microns-per-pixel (MPP) of the slide based on the highest magnification.
-    ratio : list of float
-        List of downsample ratios for each WSI level.
-
-    Notes
-    -----
-    - If the desired magnification is available among the WSI levels, no rescaling
-      is performed.
-    - Rescaling is performed from the highest magnification level if the exact
-      desired magnification is unavailable.
-    - The function converts any RGBA images to RGB.
-
-    Examples
-    --------
-    >>> region, scale_val, info, mpp_slide, ratio = load_wsi_mag(wsi, desired_mag=10)
-    >>> print(info)
-    >>> region.show()
-    """
-    
-    ratio = wsi.level_downsamples
-    mag_l0 = float(wsi.properties["openslide.objective-power"])
-    mag_layers = [round(mag_l0/r, 2) for r in ratio]
-    mpp_slide = 10 / mag_layers[0] # approximated slide mpp
-    
-    if desired_mag in mag_layers:
-        info = "Desired magnification is available"
-        mag_idx = mag_layers.index(desired_mag)
-        w, h = wsi.level_dimensions[mag_idx]
-        region = wsi.read_region((0, 0), mag_idx, (w, h))
-        scale_val = ratio[mag_idx]
-    else:
-        if desired_mag > mag_l0:
-            info = "Desired slide magnification is larger than available, image will be magnified from the highest magnification available."
-            if not allow_upscaling:
-                raise ValueError("The desired magnification is smaller than the highest magnification available. "
-                                 "The parameter allow_upscaling is set to False, so the image will not be upscaled. "
-                                 "If you want to upscale the image, set the parameter allow_upscaling to True. ")
-        else:
-            info = "Desired resolution is not available, image will be rescaled from the highest magnification available."
-        mag_idx = 0  # get the highest magnification and rescale
-        w0, h0 = wsi.level_dimensions[mag_idx]
-        region = wsi.read_region((0, 0), mag_idx, (w0, h0))
-        scale_val = desired_mag/mag_l0
-        region = region.resize((int(w0 * scale_val), int(h0 * scale_val)), rescale_method)
-
-    # convert RGBA to RGB
-    region = region.convert("RGB")
-
-    if verbose:
-        print(info)
-        
-    return region, scale_val, info, mpp_slide, ratio
-
-def read_region(wsi, mask_file, region_idx, desired_mag, notation ="python", allow_list = (Artifact.NORM, Artifact.BG_MODEL), resampling_method = Image.Resampling.LANCZOS):
-    """
-    Read a masked region from a whole-slide image (WSI) and rescale it to a desired magnification.
-
-    This function extracts a specified region from a WSI using bounding box information
-    stored in a mask file. It applies artifact filtering, rescales the region to the
-    desired magnification, and converts background pixels to white.
-
-    Parameters
-    ----------
-    wsi : OpenSlide object
-        OpenSlide WSI object from which to read the region.
-    mask_file : dict-like
-        Dictionary or NumPy file containing region bounding boxes, masks, and scaling information.
-    region_idx : int
-        Index of the region to read from the mask file.
-    desired_mag : float
-        Target magnification for the output region.
-    notation : {'python', 'matlab'}, optional
-        Specifies whether bounding boxes use Python (0-based) or MATLAB (1-based) indexing.
-        Default is "python".
-    allow_list : tuple of Artifact enums, optional
-        Artifacts to allow in the mask. Only pixels labeled with these artifact types
-        will be kept. Default is `(Artifact.NORM, Artifact.BG_MODEL)`.
-    resampling_method : PIL.Image.Resampling, optional
-        Resampling method used when resizing regions (e.g., `Image.Resampling.LANCZOS`).
-        Default is `Image.Resampling.LANCZOS`.
-
-    Returns
-    -------
-    region_masked : ndarray of shape (H, W, 3)
-        Masked and rescaled RGB region. Background pixels are set to white ([255, 255, 255]).
-
-    Notes
-    -----
-    - Reads the WSI at the level closest to the desired magnification. If an exact
-      level is not available, the region is rescaled using the specified resampling method.
-    - Masks are resized to match the extracted region, and only allowed artifact regions
-      are retained.
-    - Pixels outside allowed regions are set to white for visualization.
-
-    Examples
-    --------
-    >>> region = read_region(wsi, mask_file, region_idx=0, desired_mag=10)
-    >>> plt.imshow(region)
-    >>> plt.show()
-    """
-
-
-    bbox = np.array(mask_file["tiss_stats"][region_idx])
-
-    # change matlab indexing to python indexing
-    if notation == "matlab":
-        bbox = bbox-1
-
-    mag_l0 = float(wsi.properties["openslide.objective-power"])
-    desired_ratio = mag_l0 / desired_mag
-    scale_val = mask_file["scale_val"] / desired_ratio
-    bbox = (bbox * scale_val).astype(int)
-
-    w0, h0 = wsi.level_dimensions[0]
-    des_w, des_h = int(w0 / desired_ratio), int(h0 / desired_ratio)
-
-    # load region defined by bbox
-    if (des_w, des_h) in wsi.level_dimensions:
-        level = wsi.level_dimensions.index((des_w, des_h))
-        # when desired magnification is not available - read the layer with the ratio that
-        # is the nearest larger ratio to the desired ratio and resize
-        region = wsi.read_region((0, 0), level, wsi.level_dimensions[level]).convert("RGB")
-        region = region.resize((des_w, des_h), resampling_method)
-        region = np.array(region)[bbox[0]:bbox[2], bbox[1]:bbox[3]]
-    else:
-        # when desired ratio is available read the correct wsi layer
-        level = wsi.get_best_level_for_downsample(desired_ratio)
-        region = np.array(wsi.read_region((bbox[0], bbox[1]), level, (bbox[2] - bbox[0], bbox[3] - bbox[1])).convert("RGB"))
-
-    # load mask with artifacts
-    mask_art = mask_file["mask_art"][region_idx]
-    mask = np.zeros_like(mask_art)
-
-    # take regions from allow list
-    for i in allow_list:
-        if isinstance(i, Artifact):
-            mask[mask_art == i.value] = 1
-        else:
-            # when allow_list is given as bool array or others
-            mask[mask_art == i] = 1
-
-    # Resize mask for desired resolution
-    mask = np.array(Image.fromarray(mask).resize((region.shape[1], region.shape[0]), Image.Resampling.NEAREST))
-
-    # get only areas defined by mask
-    mask_rgb = np.repeat(mask[:, :, np.newaxis], 3, axis=2)
-    region_masked = region * mask_rgb
-
-    # turn bg pixels to white
-    region_masked[np.all(region_masked == [0, 0, 0], axis=-1)] = [255, 255, 255]
-
-    return region_masked
-
-
-
-
 def merge_patches(patches_folder, attention_scores, scale_factor = 1, alpha=0.2):
     """
     Merge image patches into a full image and optionally overlay an attention heatmap.
@@ -406,17 +212,70 @@ def merge_patches(patches_folder, attention_scores, scale_factor = 1, alpha=0.2)
     return overlay, attention_map_rgb, attention_map
 
 
-def get_regions_location(bg_mask):
 
-    label_img = measure.label(bg_mask)
-    props = measure.regionprops(label_img)
 
-    bbox_list = []
+def get_patch_grid(regions, patch_size=256, overlap=0.7):
+    """
+    Generate a grid of patch coordinates for one or multiple bounding regions.
+    Patches are placed with a given overlap and returned as coordinate lists.
 
-    for region in props:
-        bbox = region.bbox
-        # y_min, x_min, y_max, x_max
-        bbox_list.append([bbox[0], bbox[1], bbox[2], bbox[3]])
+    Parameters
+    ----------
+    regions : list of tuple
+        List of bounding boxes, where each bounding box is defined as
+        ``(y_min, x_min, y_max, x_max)`` in pixel coordinates.
+    patch_size : int, optional
+        Size (height and width) of the extracted patches (default is ``256``).
+    overlap : float, optional
+        Fraction of overlap between adjacent patches, where ``0.0`` means no overlap
+        and ``1.0`` means fully overlapping patches (default is ``0.9``).
 
-    return bbox_list
+    Returns
+    -------
+    dict of list
+        A dictionary containing lists of patch coordinates:
+
+        - ``"x_start"`` : list of int, starting x-coordinates
+        - ``"y_start"`` : list of int, starting y-coordinates
+        - ``"x_end"`` : list of int, ending x-coordinates
+        - ``"y_end"`` : list of int, ending y-coordinates
+
+    Notes
+    -----
+    The function may return coordinates outside the image boundaries.
+    It is the caller's responsibility to handle cropping or padding.
+
+    Examples
+    --------
+    >>> regions = [(100, 200, 500, 800)]
+    >>> coords = get_patch_grid(regions, patch_size=256, overlap=0.5)
+    """
+    coords = {"x_start": [], "y_start": [], "x_end": [], "y_end": []}
+
+    for bbox in regions:
+
+        stride = max(int(round(patch_size * (1.0 - overlap))), 1)
+
+        y_0 = bbox[0] - stride
+        x_0 = bbox[1] - stride
+
+        tis_h = bbox[2] - y_0  # y_max - y_min
+        tis_w = bbox[3] - x_0  # x_max - x_min
+
+        num_x = ceil((tis_w - patch_size) / stride) + 1 if tis_w > patch_size else 1
+        num_y = ceil((tis_h - patch_size) / stride) + 1 if tis_h > patch_size else 1
+
+        for ix in range(num_x):
+            x = x_0 + ix * stride
+            for iy in range(num_y):
+                y = y_0 + iy * stride
+
+                coords["x_start"].append(x)
+                coords["y_start"].append(y)
+                coords["x_end"].append(x + patch_size)
+                coords["y_end"].append(y + patch_size)
+
+    return coords
+
+
 
