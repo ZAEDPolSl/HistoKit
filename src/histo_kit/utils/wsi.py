@@ -1,61 +1,46 @@
 from PIL import Image
-from math import ceil
 import numpy as np
 from skimage import measure
 
-def slide_info(slide, model_patch_size, mpp_model, mpp_slide, verbose=False):
+def slide_info(slide, verbose=False):
     """
-    Retrieve basic information about a whole-slide image (WSI) and compute patch grid for GrandQC model.
+    Retrieve basic information about a whole-slide image (WSI).
 
-    This function calculates the patch size at the slide's highest resolution and
-    the number of patches along width and height needed to cover the slide for processing.
-    Additional metadata such as objective power, vendor, and level downsamples are also extracted.
+    This function extracts metadata such as objective power, vendor, and width and height of the largest layer,
+    and level downsamples.
 
     Parameters
     ----------
     slide : OpenSlide object
         Whole-slide image loaded via OpenSlide.
-    model_patch_size : int
-        Patch size expected by the GrandQC model.
-    mpp_model : float
-        Microns per pixel (MPP) used by the model.
-    mpp_slide : float
-        MPP of the slide, estimated from magnification.
     verbose : bool, default=False
         If True, prints slide information to the console.
 
     Returns
     -------
-    patch_size : int
-        Patch size at the highest resolution of the slide.
-    num_patches_width : int
-        Number of patches along the slide width.
-    num_patches_height : int
-        Number of patches along the slide height.
     width_level_0 : int
         Width of the slide at the highest resolution (level 0).
     height_level_0 : int
         Height of the slide at the highest resolution (level 0).
     obj_power : float
         Objective magnification of the slide.
-
-    Notes
-    -----
-    - The patch size is scaled according to the ratio between model MPP and slide MPP.
+    num_level: int
+        Number of levels downsampled.
+    vendor: str
+        Slide vendor.
+    down_levels: tuple of int
+        Ratio of downsampled levels.
 
     Examples
     --------
-    >>> patch_size, num_w, num_h, width, height, obj_power = slide_info(slide, model_patch_size=512,
-    ...                                                       mpp_model=0.5, mpp_slide=0.25, verbose=True)
+    >>> patch_size,  obj_power = slide_info(slide, verbose=True)
 
     """
     # Objective power
     try:
-        obj_power = slide.properties["openslide.objective-power"]
+        obj_power = float(slide.properties["openslide.objective-power"])
     except:
         obj_power = 99
-
-    patch_size = int(round(mpp_model / mpp_slide * model_patch_size))
 
     # Vendor
     vendor = slide.properties["openslide.vendor"]
@@ -65,15 +50,17 @@ def slide_info(slide, model_patch_size, mpp_model, mpp_slide, verbose=False):
     width_level_0 = dim_l0[0]
     height_level_0 = dim_l0[1]
 
-    # Calculate number of patches to process
-    num_patches_width = int(ceil(width_level_0 / patch_size))
-    num_patches_height = int(ceil(height_level_0 / patch_size))
-
     # Number of levels
     num_level = slide.level_count
 
-    # Level downsamples
+    # Level down samples
     down_levels = slide.level_downsamples
+
+    # Get slide MPP if there is no information about MPP get approximated slide MPP
+    slide_mpp = float(slide.properties["openslide.mpp-x"]) if slide.properties.get("openslide.mpp-x", None) is not None else 10/obj_power
+
+    # Calculate magnification levels of each file
+    level_mag = [obj_power/x for x in down_levels]
 
     # Output
     if verbose:
@@ -84,15 +71,12 @@ def slide_info(slide, model_patch_size, mpp_model, mpp_slide, verbose=False):
         print("Scan magnification: ", obj_power)
         print("Number of levels: ", num_level)
         print("Level downsamples: ", down_levels)
-        print("Microns per pixel (slide) estimated from slide magnification:", mpp_slide)
         print("Height: ", height_level_0)
         print("Width: ", width_level_0)
-        print("Model patch size at slide MPP: ", patch_size, "x", patch_size)
-        print("Width - number of patches: ", num_patches_width)
-        print("Height - number of patches: ", num_patches_height)
-        print("Overall number of patches / slide (without tissue detection): ", num_patches_width * num_patches_height)
+        print("MPP: ", slide_mpp)
+        print("Level magnifications: ", level_mag)
 
-    return patch_size, num_patches_width, num_patches_height, width_level_0, height_level_0, obj_power
+    return width_level_0, height_level_0, obj_power, num_level, vendor, down_levels, level_mag, slide_mpp
 
 def get_regions_location(bg_mask):
     """
@@ -201,12 +185,8 @@ def load_wsi_mag(wsi, desired_mag, rescale_method=Image.LANCZOS, verbose=False, 
     >>> print(info)
     >>> region.show()
     """
-
-    ratio = wsi.level_downsamples
-    mag_l0 = float(wsi.properties["openslide.objective-power"])
-    mag_layers = [round(mag_l0 / r, 2) for r in ratio]
-    mpp_slide = 10 / mag_layers[0]  # approximated slide mpp
-    w0, h0 = wsi.level_dimensions[0]
+    w0, h0, mag_l0, _, _, ratio, mag_layers, mpp_slide = slide_info(wsi)
+    mag_layers = [round(m, 2) for m in mag_layers]
 
     if desired_mag in mag_layers:
         info = "Desired magnification is available"
@@ -235,6 +215,8 @@ def load_wsi_mag(wsi, desired_mag, rescale_method=Image.LANCZOS, verbose=False, 
 
     # convert RGBA to RGB
     region = region.convert("RGB")
+
+    scale_val = w0/region.size[0]
 
     if verbose:
         print(info)

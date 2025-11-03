@@ -15,13 +15,13 @@ Script for tissue region and artifacts detection
 parser = argparse.ArgumentParser()
 
 # Common settings
-parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/Compass/HE/LMUM/20x/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/Compass_HE_LMUM_20x/')
+parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Tmp/jmerta/HE/test_data/tissue_seg/wsi/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/HE/test_data/tissue_seg/wsi_processed/')
 parser.add_argument('--vis_mag', help='Magnification of saved visualisations.',default=0.625, type=int)
 parser.add_argument('--overwrite', help='Overwrite files with results if they exist in the output folder or not.',default=False, type=bool)
 
 # Settings for background detection with thresholding methods
-parser.add_argument('--run_tis_det', type=bool, help='Run tissue detection step or not.', default=False)
+parser.add_argument('--run_tis_det', type=bool, help='Run tissue detection step or not.', default=True)
 parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not.', default=True)
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
