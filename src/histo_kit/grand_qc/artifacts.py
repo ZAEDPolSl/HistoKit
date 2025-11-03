@@ -26,11 +26,6 @@ class Artifact(Enum):
     BG_MODEL : int
         Background predicted by the artifact detection model (blue).
 
-    References
-    ----------
-    This function is taken from \ :footcite:p:`Weng2024`
-
-    .. footbibliography::
     """
 
     BG_THR = 0       # BACKGROUND (after mask detection): black

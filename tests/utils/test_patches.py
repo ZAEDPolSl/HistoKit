@@ -18,7 +18,7 @@ ROOT = Path(__file__).parent.parent.parent
 ])
 def test_patch_image(desired_mag,patch_size, save_folder, bg_percent, overlap, extract_type):
     path = "/mnt/data/Tmp/jmerta/HE/test_data/test_utils/SS45212_R0A10F2A_190425.svs"
-    mask_path = np.load("/mnt/data/Tmp/jmerta/HE/test_data/test_utils/SS45212_R0A10F2A_190425_mask_all.npz", allow_pickle=True)
+    mask_path = np.load("/mnt/data/Tmp/jmerta/HE/test_data/tissue_seg/wsi_processed/masks/TCGA-BK-A6W4-01Z-00-DX1.1C36AB2B-FC3E-4F51-A18A-1B3080E18672.mat", allow_pickle=True)
     region_idx = 0
     wsi = OpenSlide(path)
     region = read_region(wsi, mask_path, region_idx, desired_mag, notation="python", allow_list=(Artifact.NORM, Artifact.BG_MODEL), tol=1e-3)

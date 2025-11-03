@@ -14,30 +14,42 @@ Features
 - **Patch extraction** – divide slides into patches at a specified zoom level and step size.
 - **Visualization** – explore extracted features with **UMAP** embeddings.
 
-
-Installation
-------------
-
-.. code-block:: bash
-
-   pip install histo_kit
-
 GitHub Repository
 -----------------
 
 You can find the source code on  🔗  `GitHub <https://github.com/ZAEDPolSl/HistoKit>`_
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Quick Start
 
-   install
+Installation
+------------
+From remote repository
+~~~~~~~~~~~~~~~~~~~~~~
+The first way to use HistoKit is to download the source code from a remote repository.
+It is recommended to create a virtual environment with Anaconda or Venv.
+Then it is necessary to install the required dependencies from the requirements.txt file.
+Which can be done with the following command:
 
-.. toctree::
-   :maxdepth: 1
-   :caption: Source Code
+.. code-block:: bash
 
-   git
+   pip install -r requirements.txt
+   
+Then OpenSlide library needs to be installed with:
+.. code-block:: bash
+   pip install openslide-bin
+
+If everything has been installed correctly, now it is possible to use functions
+from the HistoKit package after extracting files from a .zip archive.
+
+As a local pip package
+~~~~~~~~~~~~~~~~~~~~~~
+
+It is also possible to install the package from .zip archive with pip. To do that repeat the steps described in the previous section, but now you don't need to extract the files.
+You just have to install histo_kit from your .zip file with the following command:
+
+
+.. code-block:: bash
+
+   pip install {path-to-histokit-archive}.zip
 
 Examples
 --------

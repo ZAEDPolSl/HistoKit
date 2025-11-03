@@ -50,8 +50,7 @@ class GrandQCDataset(Dataset):
 
     Notes
     -----
-    Returned items are dictionaries rather than `(image, label)` pairs to allow
-    downstream inference pipelines to use bounding box metadata.
+    Returned items are dictionaries to allow downstream inference pipelines to use bounding box metadata.
 
     """
 

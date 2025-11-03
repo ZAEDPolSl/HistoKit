@@ -2,11 +2,10 @@ import os
 import pytest
 from PIL import Image
 import numpy as np
-
 from src.histo_kit.grand_qc.visualisation import make_overlay
 
 
-@pytest.mark.skipif(os.getenv("CI")=="true", reason="Large tissue files not uploaded to CI")
+@pytest.mark.skip_ci
 @pytest.mark.parametrize("region_path, map_tis_path, tis_det_path", [
     ("../../test_data/test_grandqc/region.png", "../../test_data/test_grandqc/map_tis.png", "../../test_data/test_grandqc/tis_det.png")
 ])

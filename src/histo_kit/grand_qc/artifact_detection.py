@@ -83,8 +83,7 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
 
     Returns
     -------
-    dict
-        A dictionary summarizing saved results and metadata. Keys include:
+    A dictionary summarizing saved results and metadata. Keys include:
         - ``'basename'`` : str, base filename of the processed WSI (without extension)
         - ``'mask_art'`` : list or MATLAB cell (converted inside function) of hard masks
           for tissue regions
