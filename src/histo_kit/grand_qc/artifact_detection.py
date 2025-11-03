@@ -5,8 +5,8 @@ from PIL import Image
 from openslide import OpenSlide
 from torch.utils.data import DataLoader
 from .artifacts import Artifact
-from ..grand_qc.dataset import GrandQCDataset
-from ..grand_qc.visualisation import make_artifacts_color_map, make_overlay
+from .dataset import GrandQCDataset
+from .visualisation import make_artifacts_color_map, make_overlay
 from ..utils.file_utils import get_basename, save_rescaled
 from ..utils.image import gaussian_window
 from ..utils.matlab2python import list2cell

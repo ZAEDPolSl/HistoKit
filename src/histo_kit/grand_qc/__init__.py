@@ -4,4 +4,4 @@ from . import artifacts
 from . import dataset
 from . import model
 
-__all__ = [ 'visualisation', 'artifact_detection', 'dataset', 'model',]
+__all__ = [ 'visualisation', 'artifact_detection', 'dataset', 'model', 'artifacts']

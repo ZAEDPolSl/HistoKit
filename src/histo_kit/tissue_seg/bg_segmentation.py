@@ -5,8 +5,8 @@ import matplotlib.pyplot as plt
 import scipy
 from openslide import OpenSlide
 from scipy import ndimage as ndi
-from ..tissue_seg.find_thr import get_thr_image
-from ..tissue_seg.postprocessing import remove_black_pen, get_strel_disk, remove_small_objects, \
+from .find_thr import get_thr_image
+from .postprocessing import remove_black_pen, get_strel_disk, remove_small_objects, \
     remove_gray_stains
 from ..utils.apply_mask import apply_mask
 from ..utils.file_utils import get_basename, save_rescaled
