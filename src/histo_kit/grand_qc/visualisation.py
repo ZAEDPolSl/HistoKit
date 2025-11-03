@@ -1,7 +1,7 @@
 import numpy as np
 from PIL import Image
 import cv2
-from ..grand_qc.artifacts import Artifact
+from .artifacts import Artifact
 
 def make_overlay(slide, wsi_heatmap_im, bg_mask, vis_size):
     """
