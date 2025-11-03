@@ -1,6 +1,6 @@
 import numpy as np
 from torch.utils.data import Dataset
-from ..grand_qc.artifacts import Artifact
+from .artifacts import Artifact
 import segmentation_models_pytorch as smp
 from ..utils.image import to_tensor_x
 from ..utils.patches import get_patch_grid
