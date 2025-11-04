@@ -34,7 +34,9 @@ Which can be done with the following command:
    pip install -r requirements.txt
    
 Then OpenSlide library needs to be installed with:
+
 .. code-block:: bash
+
    pip install openslide-bin
 
 If everything has been installed correctly, now it is possible to use functions
@@ -55,7 +57,7 @@ Examples
 --------
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Examples
 
    Examples/TissueDetection
