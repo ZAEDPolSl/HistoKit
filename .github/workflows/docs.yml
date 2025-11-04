@@ -23,7 +23,9 @@ jobs:
           pip install openslide-bin
           pip install -e .
           pip install furo sphinx sphinx_rtd_theme myst_parser sphinx-autodoc-typehints sphinxcontrib-bibtex
-
+          
+      - name: Clean docs build dir
+        run: rm -rf docs/_build
 
       - name: Sphinx build
         run: |
