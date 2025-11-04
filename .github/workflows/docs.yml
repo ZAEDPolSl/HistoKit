@@ -30,6 +30,10 @@ jobs:
       - name: Sphinx build
         run: |
           sphinx-build -b html docs/source docs/_build/html
+          
+      - name: Ensure nojekyll
+        run: |
+           touch docs/_build/html/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
