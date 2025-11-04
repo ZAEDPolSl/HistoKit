@@ -15,57 +15,173 @@ To run the program with multiple threads, use the ``src/run_tissue_seg.py`` scri
 Configuration
 -------------
 
-Parameters
-^^^^^^^^^^
+Common settings
+~~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
-   :widths: 15 10 25 50
+   :widths: 22 12 12 54
 
    * - Parameter
      - Type
      - Default
      - Description
+
    * - ``--wsi_dir``
-     - str
-     - ``../data/``
-     - Input directory with WSIs (whole-slide images saved as SVS files).
+     - ``str``
+     - ``/Data/``
+     - Input directory containing WSIs.
+
    * - ``--out_dir``
-     - str
-     - ``../res/``
-     - Output directory for results.
-   * - ``--split_regions``
-     - bool
-     - True
-     - If multiple regions are present on the slide, save each region separately.
+     - ``str``
+     - ``/Results/``
+     - Directory where results will be saved.
+
+   * - ``--vis_mag``
+     - ``int``
+     - ``0.625``
+     - Magnification for saved visualizations.
+
+   * - ``--overwrite``
+     - ``bool``
+     - ``False``
+     - If set, existing output files are overwritten.
+
+Tissue detection settings
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 12 12 54
+
+   * - Parameter
+     - Type
+     - Default
+     - Description
+
+   * - ``--run_tis_det``
+     - ``bool``
+     - ``True``
+     - Run tissue/background detection.
+
    * - ``--fill_holes``
-     - bool
-     - False
-     - Fill holes in the tissue mask or not.
+     - ``bool``
+     - ``True``
+     - Fill holes inside tissue regions.
+
    * - ``--close_disk_r``
-     - int
-     - 2
-     - Radius of disk structuring element used for closing operation (mask cleaning).
+     - ``int``
+     - ``2``
+     - Radius for disk kernel during morphological closing.
+
    * - ``--open_disk_r``
-     - int
-     - 2
-     - Radius of disk structuring element used for opening operation (mask cleaning).
-   * - ``--save_mask_formats``
-     - list
-     - [``npy``, ``mat``]
-     - File formats for saving masks. Choose at least one: ``npy``, ``mat``.
-   * - ``--device``
-     - str
-     - cpu
-     - Device for artifacts detection: ``cuda`` or ``cpu`` (only for ``run_tissue_seg_single.py``)
-   * - ``--grandqc_model``
-     - str
-     - ``grand_qc/models/GrandQC_MPP1.pth``
-     - Path to GrandQC model weights (10x magnification model used by default).
+     - ``int``
+     - ``2``
+     - Radius for disk kernel during morphological opening.
+
+   * - ``--tissdet_mag``
+     - ``float``
+     - ``2.5``
+     - Magnification used for tissue detection.
+
+   * - ``--remove_small_objects``
+     - ``bool``
+     - ``True``
+     - Remove small speck-like tissue areas after segmentation.
+
    * - ``--workers``
-     - int
-     - 10
-     - Number of workers for parallel processing (max number: ``os.cpu_count()``).
+     - ``int``
+     - ``4``
+     - Number of workers used during tissue detection.
+
+Artifact detection settings
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. list-table::
+   :header-rows: 1
+   :widths: 22 12 12 54
+
+   * - Parameter
+     - Type
+     - Default
+     - Description
+
+   * - ``--run_artifacts_det``
+     - ``bool``
+     - ``True``
+     - Run artifact detection step.
+
+   * - ``--save_confidence_maps``
+     - ``bool``
+     - ``True``
+     - Save per-class confidence maps.
+
+   * - ``--device``
+     - ``str``
+     - ``cuda``
+     - Device used for inference (``cuda``/``cpu``).
+
+   * - ``--workers_per_slide``
+     - ``int``
+     - ``6``
+     - Number of workers used during patch extraction & batching.
+
+   * - ``--batch_size``
+     - ``int``
+     - ``64``
+     - Mini-batch size for inference.
+
+   * - ``--grandqc_model``
+     - ``str``
+     - ``../HE/models/GrandQC_MPP1.pth``
+     - Path to GrandQC checkpoint.
+
+   * - ``--grandqc_mpp``
+     - ``float``
+     - ``1.0``
+     - Micron-per-pixel for model (controls magnification).
+
+   * - ``--patch_size_model``
+     - ``int``
+     - ``512``
+     - Patch size for model input.
+
+   * - ``--save_mag``
+     - ``float``
+     - ``2.5``
+     - Magnification for saving final segmentation mask.
+
+   * - ``--encoder_model``
+     - ``str``
+     - ``timm-efficientnet-b0``
+     - Encoder architecture for GrandQC backbone.
+
+   * - ``--encoder_model_weights``
+     - ``str``
+     - ``imagenet``
+     - Pretrained weights for encoder initialization.
+
+   * - ``--overlap``
+     - ``float``
+     - ``0.75``
+     - Overlap ratio between extracted patches.
+
+   * - ``--blending_mode``
+     - ``str``
+     - ``gaussian``
+     - Method for merging overlapping patch predictions.
+
+   * - ``--blending_sigma``
+     - ``float``
+     - ``None``
+     - Sigma used for Gaussian blending (ignored for average mode).
+
+Artifacts Color Mapping
+-----------------------
+
+.. image:: https://github.com/user-attachments/assets/3e8726c1-3b24-4505-92dc-04ed852d28e7
+   :width: 452
+   :height: 190
 
 Output Folders
 ^^^^^^^^^^^^^^
@@ -77,53 +193,111 @@ Output Folders
    * - Folder name
      - Description
    * - masks/
-     - Masks with detected tissue and GrandQC results (saved as `.npy`, `.mat`, or both).
-   * - bg_masks_vis/
-     - Detected tissue region masks as small PNG thumbnails.
+     - Masks with detected tissue (two classes background and tissue), saved as `.mat` files.
+   * - masks_grandqc/
+     - Masks with detected artifacts using the GrandQC model, saved as `.mat` files.
+   * - grandqc_confidence_maps/
+     - Masks with confidence scores for each artifact type detected by the GrandQC model, saved as `.mat` files.
    * - bg_thr_hist/
-     - Histograms of background thresholds used for tissue detection (PNG).
+     - Histograms of background thresholds used for tissue detection.
    * - raw_small/
-     - Small PNG thumbnails of tissue images.
-   * - pen_vis/
-     - Results of pen removal (small PNG thumbnails).
-   * - bg_removal_vis/
-     - Background removal results (small PNG thumbnails).
+     - Tissue images before artifacts and background detection (images saved at magnification defined with `--vis_mag` parameter).
    * - bg_removal_contour_vis/
-     - Background removal with blue contours (small PNG thumbnails).
-   * - grandqc_map_vis/
-     - Artifact detection results from GrandQC as color maps (small PNG thumbnails).
+     - Background removal with blue contours (images saved at magnification defined with `--vis_mag` parameter).
    * - grandqc_overlay_vis/
-     - Artifact detection results overlaid on tissue regions (small PNG thumbnails).
-   * - grandqc_vis_region/
-     - Artifact detection results for each tissue region (color maps in PNG).
-
-Artifacts Color Mapping
------------------------
-
-.. image:: https://github.com/user-attachments/assets/3e8726c1-3b24-4505-92dc-04ed852d28e7
-   :width: 452
-   :height: 190
+     - Artifact detection results overlaid on tissue regions (images saved at magnification defined with `--vis_mag` parameter).
 
 Example Results
 ---------------
 
 masks
-^^^^^^
+^^^^^
+Folder containing .mat files with masks after tissue detection. Files have the following structure:
 
-.npz or .mat files are saved here.
+.. list-table::
+   :header-rows: 1
+   :widths: 15 50
 
-bg_masks_vis
+   * - Key
+     - Description
+   * - ``basename``
+     - Tissue file basename (without the `.svs` extension)
+   * - ``mask_bg``
+     - Mask with detected tissue - ``uint8`` 2D array with ``1`` for tissue and ``0`` for background. Regions are not separated. The mask is created for the entire slide.
+   * - ``ind_WSI``
+     - Indexes for WSI image layers (MATLAB-style indexing from 1)
+   * - ``ratio``
+     - Ratio for each image layer. Ratio is calculated as the dimension of the largest layer divided by the dimension of the given layer.
+   * - ``scale_val``
+     - Scale factor applied to masks. Scale factor is calculated as the mask magnification divided by the magnification of the largest WSI layer (``mag_l0``).
+   * - ``thr``
+     - Thresholds for R, G, B channels.
+   * - ``mask_mag``
+     - Magnification of saved masks.
+   * - ``mpp``
+     - MPP (microns per pixel) of the slide, if the information is not available, MPP is calculated as 10 divided by slide magnification of the larges layer.
+   * - ``mag_l0``
+     - Magnification of the largest WSI layer (the highest resolution).
+
+
+masks_grandqc
 ^^^^^^^^^^^^^
 
-Small mask visualisations, tissue region is white (255), background is black (0).
+Folder containing .mat files with masks after tissue detection. Files have the following structure:
 
-.. image:: raw_small.png
-   :width: 445
-   :height: 276
-   :align: center
+   * - Key
+     - Description
+   * - ``basename``
+     - Tissue file basename (without the `.svs` extension)
+   * - ``mask_art``
+     - List of masks with detected artifacts for each region - `uint8` 2D arrays filled with values from 0 to 7, that correspond to the assigned type of artifacts. Each region is saved as a 2D mask separately.
+   * - ``ind_WSI``
+     - Indexes for WSI image layers (MATLAB-style indexing from 1)
+   * - ``ratio``
+     - Ratio for each image layer
+   * - ``scale_val``
+     - Scale factor applied to masks. Scale factor is calculated as the mask magnification divided by the magnification of the largest WSI layer (``mag_l0``).
+   * - ``thr``
+     - Thresholds for R, G, B channels
+   * - ``bbox``
+     - List of bounding boxes coordinates for each region, saved in python notation (indexing from 0).
+   * - ``mask_mag``
+     - Magnification of the saved masks.
+   * - ``mpp``
+     - MPP (microns per pixel) of the slide, if the information is not available, MPP is calculated as 10 divided by slide magnification of the larges layer.
+   * - ``mag_l0``
+     - Magnification of the largest WSI layer (the highest resolution).
+
+grandqc_confidence_maps
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Folder containing .mat files with masks after tissue detection. Files have the following structure:
+
+   * - Key
+     - Description
+   * - ``basename``
+     - Tissue file basename (without the `.svs` extension)
+   * - ``mask_conf``
+     - List of masks with confidence scores for each class of artifacts for each region - `uint8` 3D arrays (width x height x artifact_class) filled with values from 0 to 7, that correspond to the assigned type of artifacts. Each region is saved as a 3D mask separately.
+   * - ``ind_WSI``
+     - Indexes for WSI image layers (MATLAB-style indexing from 1)
+   * - ``ratio``
+     - Ratio for each image layer
+   * - ``scale_val``
+     - Scale factor applied to masks. Scale factor is calculated as the mask magnification divided by the magnification of the largest WSI layer (``mag_l0``).
+   * - ``thr``
+     - Thresholds for R, G, B channels
+   * - ``bbox``
+     - List of bounding boxes coordinates for each region, saved in python notation (indexing from 0).
+   * - ``mask_mag``
+     - Magnification of the saved masks.
+   * - ``mpp``
+     - MPP (microns per pixel) of the slide, if the information is not available, MPP is calculated as 10 divided by slide magnification of the larges layer.
+   * - ``mag_l0``
+     - Magnification of the largest WSI layer (the highest resolution).
 
 bg_thr_hist
-^^^^^^^^^^^^
+^^^^^^^^^^^
 
 Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method when threshold obtained with GaMRed is too small.
 
@@ -133,146 +307,119 @@ Histograms with background threshold values for each color channel calculated wi
    :align: center
 
 raw_small
-^^^^^^^^^^
+^^^^^^^^^
 
 Small tissue thumbnails.
 
-.. image:: raw_small.png
-   :width: 445
-   :height: 320
-   :align: center
-
-pen_vis
-^^^^^^^^
-
-Small thumbnail with detected black pen regions.
-
-.. image:: pen_vis.png
-   :width: 445
-   :height: 320
-   :align: center
-
-bg_removal_vis
-^^^^^^^^^^^^^^^
-
-Small thumbnail of the tissue region with removed background.
-
-.. image:: bg_removal_vis.png
+.. image:: raw_small.tiff
    :width: 445
    :height: 320
    :align: center
 
 bg_removal_contour_vis
-^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
-Contours visualisation of the detected tissue regions. Contours are marked in blue.
-
-.. image:: bg_removal_contour_vis.png
-   :width: 445
-   :height: 320
-   :align: center
-
-grandqc_map_vis
-^^^^^^^^^^^^^^^^
-
-Visualisation of results obtained with GrandQC based on the tissue region detection map from GaMRed or Otsu algorithms.
-
-.. image:: grandqc_map_vis.png
+.. image:: bg_removal_contour_vis.tiff
    :width: 445
    :height: 320
    :align: center
 
 grandqc_overlay_vis
-^^^^^^^^^^^^^^^^^^^^
-
-Visualisation of the tissue region with contours of tissue area detected by GaMRed or Otsu algorithms marked in blue, and GrandQC results overlay.
+^^^^^^^^^^^^^^^^^^^
 
 .. image:: grandqc_overlay_vis.png
    :width: 445
    :height: 320
    :align: center
 
-grandqc_vis_region
-^^^^^^^^^^^^^^^^^^^
-
-Images with tissue regions are saved, background is black while other areas are colored by GrandQC. Each region is saved separately. Bounding boxes are stored in `.mat` or `.npz` files.
-
-.. image:: https://github.com/user-attachments/assets/63248351-083c-4725-8cf1-a1b46aad8b29
-   :width: 1000
-   :height: 800
-   :align: center
-
-Output `.mat` and `.npz` Files Descriptions
--------------------------------------------
-
-For a whole image:
-
-.. list-table::
-   :header-rows: 1
-   :widths: 15 50
-
-   * - Key
-     - Description
-   * - basename
-     - Tissue file basename (without the `.svs` extension)
-   * - mask_all
-     - Mask of detected tissue regions - 2D array with ``True`` for tissue and ``False`` for background
-   * - mask_art
-     - Mask of artifacts detected by GrandQC for the given region - 2D array with values 0–7
-   * - ind_WSI
-     - Indexes for WSI image layers (MATLAB-style indexing from 1)
-   * - ratio
-     - Ratio for each image layer
-   * - scale_val
-     - Scale factor applied to masks
-   * - thr
-     - Thresholds for R, G, B channels
-
-For splitted regions:
-
-.. list-table::
-   :header-rows: 1
-   :widths: 15 50
-
-   * - Key
-     - Description
-   * - basename
-     - Tissue file basename (without the `.svs` extension)
-   * - mask_all
-     - Cell array of 2D arrays for each region
-   * - mask_art
-     - Cell array of artifact masks for each region
-   * - ind_WSI
-     - Indexes for WSI image layers
-   * - ratio
-     - Ratio for each image layer
-   * - scale_val
-     - Scale factor applied to masks
-   * - thr
-     - Thresholds for R, G, B channels
-   * - tiss_stats
-     - Bounding box coordinates for each region
-
 How to Load Regions to Matlab
 -----------------------------
 
+Generated artifacts maps are saved to .mat files which can be loaded both with Matlab and Python.
+The following function can be used to load .mat files generated during artifacts detection step to Matlab.
+
 .. code-block:: matlab
 
-    function [img,mask_all] = load_tiss_masked_python(svs_name,mask_name,reg_ID,qual_ind)
-        load([mask_name],'mask_all','ratio','tiss_stats','ind_WSI','scale_val')
-        scale_val = scale_val/ratio(ind_WSI == qual_ind);
-        Box = tiss_stats(reg_ID,:)* scale_val;
-        region = {[Box(1),Box(3)], [Box(2),Box(4)]};
-        img = imread(svs_name,'Index',qual_ind,'PixelRegion',region);
-        mask_all = uint8(imresize(mask_all{reg_ID},[size(img,1),size(img,2)]));
-        for b=1:size(img,3)
-            tmp = img(:,:,b).*mask_all;
-            tmp(mask_all == 0) = 255;
-            img(:,:,b) = tmp;
-        end
-        clear tmp
-        figure;image(img)
+    function [img,mask_all] = load_tiss_masked_histokit(svs_name,mask_name,reg_ID, qual_ind, exclude_art)
+    % svs_name - name of the svs file
+    % mask_name - name of the corresponding .mat file
+    % reg_ID - region ID
+    % qual_ind - index for wsi layer
+    % exclude_art - vector of artifacts to exclude:
+
+    % BG_THR = 0       # BACKGROUND (after mask detection): black
+    % NORM = 1         # ART_NORM: gray
+    % ART_FOLD = 2     # ART_FOLD: orange
+    % ART_DARKSPOT = 3 # ART_DARKSPOT: green
+    % ART_PEN = 4      # ART_PEN: red
+    % ART_EDGE = 5     # ART_EDGE: pink
+    % ART_FOCUS = 6    # ART_FOCUS: violet
+    % BG_MODEL = 7     # BACKGROUND (predicted by artifact detection model): blue
+
+    % load info about mask
+    load([mask_name,'.mat'],'mask_art','ratio','bbox',...
+        'ind_WSI','scale_val')
+
+    % calculate scaling value for selected image resolution mask
+    scale_val = scale_val*ratio(ind_WSI == qual_ind);
+
+    % get bounding box for the region and resize
+    Box = (bbox(reg_ID,:)+1) / scale_val;
+
+    % get location of the region and load image
+    rows = [Box(1), Box(3)];
+    cols = [Box(2), Box(4)];
+
+    region = {rows,cols};
+    img = imread(svs_name,'Index',qual_ind,'PixelRegion',region);
+    figure;image(img)
+
+    % get mask of region, resize and apply to image
+    mask_all = uint8(imresize(mask_art{reg_ID},[size(img,1),size(img,2)]));
+
+    % variants we want to exclude are set to 0
+    mask_all(ismember(mask_all, exclude_art))=0;
+    mask_all(~ismember(mask_all, exclude_art))=1;
+
+    for b=1:size(img,3)
+        tmp = img(:,:,b).*mask_all;
+        tmp(mask_all == 0) = 255;
+        img(:,:,b) = tmp;
     end
+    clear tmp
+    figure;image(img)
+
+    end
+
+Example usage:
+
+.. code-block:: matlab
+
+    % search for original .svs file
+    svs_name = "example.svs";
+
+    % get info about .svs
+    info = imfinfo(svs_name);
+    n_lay = size(info,1);
+    ind_WSI = true(n_lay,1);
+    for c=1:n_lay
+        if isempty(info(c).TileWidth)
+            ind_WSI(c) = false;
+        end
+    end
+    ind_WSI = find(ind_WSI);
+
+    % check how many regions are there
+    load(mask_name, "bbox")
+    n3 = size(bbox,1);
+
+    %iterate over regions
+    for b=1:n3
+
+        % load region with 10x magnification, that is why are using ind_WSI(2) for our WSI
+        exclude_art = [0, 2, 3, 4, 5, 6, 7];
+        img = load_tiss_masked_histokit(svs_name,mask_name,b,ind_WSI(2), exclude_art);
+
 
 References
 ----------

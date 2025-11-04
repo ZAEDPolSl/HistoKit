@@ -76,7 +76,7 @@ if __name__ == "__main__":
                   "raw_small": create_folder(args.out_dir, 'raw_small'),
                   "bg_removal_contour_vis": create_folder(args.out_dir, 'bg_removal_contour_vis'),
                   "grandqc_overlay_vis": create_folder(args.out_dir, 'grandqc_overlay_vis'),
-                  "masks_grandqc_confidence_maps": create_folder(args.out_dir, 'grandqc_confidence_maps')
+                  "grandqc_confidence_maps": create_folder(args.out_dir, 'grandqc_confidence_maps')
                                                     if args.save_confidence_maps else None}
 
     # get slides names
