@@ -25,7 +25,11 @@ jobs:
           pip install furo sphinx sphinx_rtd_theme myst_parser sphinx-autodoc-typehints sphinxcontrib-bibtex
           
       - name: Clean docs build dir
-        run: rm -rf docs/_build
+        run: | 
+          rm -rf docs/_build
+          cd docs
+          make clean
+          cd ..
 
       - name: Sphinx build
         run: |
