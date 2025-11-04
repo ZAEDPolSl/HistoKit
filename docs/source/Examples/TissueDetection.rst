@@ -2,15 +2,15 @@ Tissue & Artifacts Detection
 ===============================
 
 
-Run with CUDA (and CPU with a single thread)
---------------------------------------------
+Tissue detection
+~~~~~~~~~~~~~~~~
 
-To run the program with CUDA, use the ``src/run_tissue_seg_single.py`` script and set the ``device`` parameter to ``cuda``.
+Artifact detection
+~~~~~~~~~~~~~~~~~~
 
-Run detection on many threads (CPU)
+
+Run tissue and artifacts detection
 -----------------------------------
-
-To run the program with multiple threads, use the ``src/run_tissue_seg.py`` script and set the ``workers`` parameter to the number of threads you want to use. Using ``cuda`` is not recommended for multiple workers due to competition for resources.
 
 Configuration
 -------------
@@ -20,7 +20,7 @@ Common settings
 
 .. list-table::
    :header-rows: 1
-   :widths: 22 12 12 54
+   :widths: 30 12 12 46
 
    * - Parameter
      - Type
@@ -52,7 +52,7 @@ Tissue detection settings
 
 .. list-table::
    :header-rows: 1
-   :widths: 22 12 12 54
+   :widths: 30 12 12 46
 
    * - Parameter
      - Type
@@ -99,7 +99,7 @@ Artifact detection settings
 
 .. list-table::
    :header-rows: 1
-   :widths: 22 12 12 54
+   :widths: 30 12 12 46
 
    * - Parameter
      - Type
@@ -191,34 +191,30 @@ Output Folders
    * - **Folder name**
      - **Description**
 
-   * - masks/
+   * - ``masks/``
      - Masks with detected tissue (two classes: background and tissue), saved as ``.mat`` files.
 
-   * - masks_grandqc/
+   * - ``masks_grandqc/``
      - Masks with detected artifacts using the GrandQC model, saved as ``.mat`` files.
 
-   * - grandqc_confidence_maps/
+   * - ``grandqc_confidence_maps/``
      - Confidence maps for each artifact type detected by the GrandQC model, saved as ``.mat`` files.
 
-   * - bg_thr_hist/
+   * - ``bg_thr_hist/``
      - Histograms of background thresholds used for tissue detection.
 
-   * - raw_small/
+   * - ``raw_small/``
      - Tissue images before artifact and background detection (images saved at the magnification specified by the ``--vis_mag`` parameter).
 
-   * - bg_removal_contour_vis/
+   * - ``bg_removal_contour_vis/``
      - Background removal visualizations with blue contours (images saved at the magnification specified by the ``--vis_mag`` parameter).
 
-   * - grandqc_overlay_vis/
+   * - ``grandqc_overlay_vis/``
      - Artifact detection results overlaid on tissue regions (images saved at the magnification specified by the ``--vis_mag`` parameter).
 
 
 Example Results
 ---------------
-
-masks
-^^^^^
-Folder containing .mat files with masks after tissue detection. Files have the following structure:
 
 masks
 ^^^^^
@@ -237,19 +233,19 @@ Each file contains the following fields:
 
    * - ``mask_bg``
      - Binary tissue mask (``uint8`` 2D array).
-       Tissue pixels are labeled as ``1`` and background pixels as ``0``.
+       Tissue pixels are labeled as 1 and background pixels as 0.
        The mask is generated for the entire slide (regions are not separated).
 
    * - ``ind_WSI``
-     - Indices of WSI pyramid levels (MATLAB-style indexing starting at ``1``).
+     - Indices of WSI pyramid levels (MATLAB-style indexing starting at 1).
 
    * - ``ratio``
      - Scaling ratio for each pyramid level, computed as:
-       *size of largest WSI layer / size of the given layer.*
+       ``size of largest WSI layer / size of the given layer``.
 
    * - ``scale_val``
      - Final scale factor applied to masks.
-       Computed as: *mask magnification / magnification of the largest WSI layer (``mag_l0``)*.
+       Computed as: ``mask magnification / magnification of the largest WSI layer``.
 
    * - ``thr``
      - Threshold values used for tissue detection for the R, G, and B channels.
@@ -260,7 +256,7 @@ Each file contains the following fields:
    * - ``mpp``
      - Microns-per-pixel (MPP) value of the slide.
        If unavailable in metadata, it is estimated as:
-       *10 / magnification of the largest WSI layer.*
+       ``10 / magnification of the largest WSI layer``.
 
    * - ``mag_l0``
      - Magnification of the largest-resolution WSI layer (highest detail level).
@@ -288,22 +284,22 @@ Folder containing .mat files with masks after tissue detection. Files have the f
        Each region is stored as a separate mask.
 
    * - ``ind_WSI``
-     - Indices of WSI pyramid layers (MATLAB-style indexing starting at ``1``).
+     - Indices of WSI pyramid layers (MATLAB-style indexing starting at 1).
 
    * - ``ratio``
      - Scaling ratio for each WSI pyramid layer.
-       Computed as: *dimension of the largest layer / dimension of the given layer.*
+       Computed as: ``dimension of the largest layer / dimension of the given layer``.
 
    * - ``scale_val``
      - Scale factor applied to masks, computed as:
-       *mask magnification / magnification of the largest WSI layer (``mag_l0``)*.
+       ``mask magnification / magnification of the largest WSI layer``.
 
    * - ``thr``
      - Threshold values used for tissue/background detection for the R, G, and B channels.
 
    * - ``bbox``
      - List of bounding box coordinates for each region.
-       Coordinates follow Python indexing (starting from ``0``).
+       Coordinates follow Python indexing (starting at 0).
 
    * - ``mask_mag``
      - Magnification at which the masks are stored.
@@ -311,7 +307,7 @@ Folder containing .mat files with masks after tissue detection. Files have the f
    * - ``mpp``
      - Microns-per-pixel (MPP) value of the slide.
        If metadata does not include MPP, it is estimated as:
-       *10 / magnification of the largest WSI layer.*
+       ``10/magnification of the largest WSI layer``
 
    * - ``mag_l0``
      - Magnification of the largest-resolution WSI layer (highest detail level).
@@ -373,7 +369,7 @@ bg_thr_hist
 
 Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method when threshold obtained with GaMRed is too small.
 
-.. image:: bg_thr_hist.png
+.. image:: hist.png
    :width: 400
    :height: 500
    :align: center
@@ -383,7 +379,7 @@ raw_small
 
 Small tissue thumbnails.
 
-.. image:: raw_small.tiff
+.. image:: raw_small.png
    :width: 445
    :height: 320
    :align: center
@@ -391,7 +387,7 @@ Small tissue thumbnails.
 bg_removal_contour_vis
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. image:: bg_removal_contour_vis.tiff
+.. image:: tissue_det.png
    :width: 445
    :height: 320
    :align: center
@@ -399,7 +395,7 @@ bg_removal_contour_vis
 grandqc_overlay_vis
 ^^^^^^^^^^^^^^^^^^^
 
-.. image:: grandqc_overlay_vis.png
+.. image:: artifacts.png
    :width: 445
    :height: 320
    :align: center

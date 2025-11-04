@@ -301,7 +301,7 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
         save_dict['mask_art'].append(pred_mask_region)
 
         if save_confidence_maps:
-            save_dict_raw['confidence_maps'].append(raw_mask_region)
+            save_dict_raw['mask_conf'].append(raw_mask_region)
 
     # convert to cells for matlab
     del pred_mask
@@ -311,7 +311,7 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
     sio.savemat(os.path.join(paths_dict["masks_grandqc"], f'{basename}.mat'), save_dict, do_compression=True)
 
     if save_confidence_maps:
-        save_dict['confidence_maps'] = list2cell(save_dict['confidence_maps'])
-        sio.savemat(os.path.join(paths_dict["grandqc_confidence_maps"], f'{basename}.mat'), save_dict, do_compression=True)
+        save_dict_raw['mask_conf'] = list2cell(save_dict_raw['mask_conf'])
+        sio.savemat(os.path.join(paths_dict["grandqc_confidence_maps"], f'{basename}.mat'),  save_dict_raw, do_compression=True)
 
     return save_dict
