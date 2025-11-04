@@ -87,7 +87,7 @@ Tissue detection settings
    * - ``--remove_small_objects``
      - ``bool``
      - ``True``
-     - Remove small speck-like tissue areas after segmentation.
+     - Remove small tissue areas (which are potentially too small for further analysis) after tissue segmentation.
 
    * - ``--workers``
      - ``int``
@@ -139,7 +139,7 @@ Artifact detection settings
    * - ``--grandqc_mpp``
      - ``float``
      - ``1.0``
-     - Micron-per-pixel for model (controls magnification).
+     - Micron-per-pixel for the GrandQC model (1.0 corresponds to 10x magnification).
 
    * - ``--patch_size_model``
      - ``int``
@@ -179,9 +179,7 @@ Artifact detection settings
 Artifacts Color Mapping
 -----------------------
 
-.. image:: https://github.com/user-attachments/assets/3e8726c1-3b24-4505-92dc-04ed852d28e7
-   :width: 452
-   :height: 190
+
 
 Output Folders
 ^^^^^^^^^^^^^^
@@ -190,22 +188,30 @@ Output Folders
    :header-rows: 1
    :widths: 20 60
 
-   * - Folder name
-     - Description
+   * - **Folder name**
+     - **Description**
+
    * - masks/
-     - Masks with detected tissue (two classes background and tissue), saved as `.mat` files.
+     - Masks with detected tissue (two classes: background and tissue), saved as ``.mat`` files.
+
    * - masks_grandqc/
-     - Masks with detected artifacts using the GrandQC model, saved as `.mat` files.
+     - Masks with detected artifacts using the GrandQC model, saved as ``.mat`` files.
+
    * - grandqc_confidence_maps/
-     - Masks with confidence scores for each artifact type detected by the GrandQC model, saved as `.mat` files.
+     - Confidence maps for each artifact type detected by the GrandQC model, saved as ``.mat`` files.
+
    * - bg_thr_hist/
      - Histograms of background thresholds used for tissue detection.
+
    * - raw_small/
-     - Tissue images before artifacts and background detection (images saved at magnification defined with `--vis_mag` parameter).
+     - Tissue images before artifact and background detection (images saved at the magnification specified by the ``--vis_mag`` parameter).
+
    * - bg_removal_contour_vis/
-     - Background removal with blue contours (images saved at magnification defined with `--vis_mag` parameter).
+     - Background removal visualizations with blue contours (images saved at the magnification specified by the ``--vis_mag`` parameter).
+
    * - grandqc_overlay_vis/
-     - Artifact detection results overlaid on tissue regions (images saved at magnification defined with `--vis_mag` parameter).
+     - Artifact detection results overlaid on tissue regions (images saved at the magnification specified by the ``--vis_mag`` parameter).
+
 
 Example Results
 ---------------
@@ -214,30 +220,51 @@ masks
 ^^^^^
 Folder containing .mat files with masks after tissue detection. Files have the following structure:
 
+masks
+^^^^^
+Folder containing ``.mat`` files with masks generated during tissue detection.
+Each file contains the following fields:
+
 .. list-table::
    :header-rows: 1
-   :widths: 15 50
+   :widths: 20 60
 
-   * - Key
-     - Description
+   * - **Key**
+     - **Description**
+
    * - ``basename``
-     - Tissue file basename (without the `.svs` extension)
+     - Basename of the corresponding tissue image (filename without the ``.svs`` extension).
+
    * - ``mask_bg``
-     - Mask with detected tissue - ``uint8`` 2D array with ``1`` for tissue and ``0`` for background. Regions are not separated. The mask is created for the entire slide.
+     - Binary tissue mask (``uint8`` 2D array).
+       Tissue pixels are labeled as ``1`` and background pixels as ``0``.
+       The mask is generated for the entire slide (regions are not separated).
+
    * - ``ind_WSI``
-     - Indexes for WSI image layers (MATLAB-style indexing from 1)
+     - Indices of WSI pyramid levels (MATLAB-style indexing starting at ``1``).
+
    * - ``ratio``
-     - Ratio for each image layer. Ratio is calculated as the dimension of the largest layer divided by the dimension of the given layer.
+     - Scaling ratio for each pyramid level, computed as:
+       *size of largest WSI layer / size of the given layer.*
+
    * - ``scale_val``
-     - Scale factor applied to masks. Scale factor is calculated as the mask magnification divided by the magnification of the largest WSI layer (``mag_l0``).
+     - Final scale factor applied to masks.
+       Computed as: *mask magnification / magnification of the largest WSI layer (``mag_l0``)*.
+
    * - ``thr``
-     - Thresholds for R, G, B channels.
+     - Threshold values used for tissue detection for the R, G, and B channels.
+
    * - ``mask_mag``
-     - Magnification of saved masks.
+     - Magnification at which the mask is stored.
+
    * - ``mpp``
-     - MPP (microns per pixel) of the slide, if the information is not available, MPP is calculated as 10 divided by slide magnification of the larges layer.
+     - Microns-per-pixel (MPP) value of the slide.
+       If unavailable in metadata, it is estimated as:
+       *10 / magnification of the largest WSI layer.*
+
    * - ``mag_l0``
-     - Magnification of the largest WSI layer (the highest resolution).
+     - Magnification of the largest-resolution WSI layer (highest detail level).
+
 
 
 masks_grandqc
@@ -245,56 +272,101 @@ masks_grandqc
 
 Folder containing .mat files with masks after tissue detection. Files have the following structure:
 
-   * - Key
-     - Description
+.. list-table::
+   :header-rows: 1
+   :widths: 20 60
+
+   * - **Key**
+     - **Description**
+
    * - ``basename``
-     - Tissue file basename (without the `.svs` extension)
+     - Basename of the tissue file (filename without the ``.svs`` extension).
+
    * - ``mask_art``
-     - List of masks with detected artifacts for each region - `uint8` 2D arrays filled with values from 0 to 7, that correspond to the assigned type of artifacts. Each region is saved as a 2D mask separately.
+     - List of artifact masks for each detected region.
+       Each element is a ``uint8`` 2D array containing values in the range ``0–7`` corresponding to artifact classes.
+       Each region is stored as a separate mask.
+
    * - ``ind_WSI``
-     - Indexes for WSI image layers (MATLAB-style indexing from 1)
+     - Indices of WSI pyramid layers (MATLAB-style indexing starting at ``1``).
+
    * - ``ratio``
-     - Ratio for each image layer
+     - Scaling ratio for each WSI pyramid layer.
+       Computed as: *dimension of the largest layer / dimension of the given layer.*
+
    * - ``scale_val``
-     - Scale factor applied to masks. Scale factor is calculated as the mask magnification divided by the magnification of the largest WSI layer (``mag_l0``).
+     - Scale factor applied to masks, computed as:
+       *mask magnification / magnification of the largest WSI layer (``mag_l0``)*.
+
    * - ``thr``
-     - Thresholds for R, G, B channels
+     - Threshold values used for tissue/background detection for the R, G, and B channels.
+
    * - ``bbox``
-     - List of bounding boxes coordinates for each region, saved in python notation (indexing from 0).
+     - List of bounding box coordinates for each region.
+       Coordinates follow Python indexing (starting from ``0``).
+
    * - ``mask_mag``
-     - Magnification of the saved masks.
+     - Magnification at which the masks are stored.
+
    * - ``mpp``
-     - MPP (microns per pixel) of the slide, if the information is not available, MPP is calculated as 10 divided by slide magnification of the larges layer.
+     - Microns-per-pixel (MPP) value of the slide.
+       If metadata does not include MPP, it is estimated as:
+       *10 / magnification of the largest WSI layer.*
+
    * - ``mag_l0``
-     - Magnification of the largest WSI layer (the highest resolution).
+     - Magnification of the largest-resolution WSI layer (highest detail level).
+
 
 grandqc_confidence_maps
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Folder containing .mat files with masks after tissue detection. Files have the following structure:
 
-   * - Key
-     - Description
+.. list-table::
+   :header-rows: 1
+   :widths: 20 60
+
+   * - **Key**
+     - **Description**
+
    * - ``basename``
-     - Tissue file basename (without the `.svs` extension)
+     - Basename of the tissue file (filename without the ``.svs`` extension).
+
    * - ``mask_conf``
-     - List of masks with confidence scores for each class of artifacts for each region - `uint8` 3D arrays (width x height x artifact_class) filled with values from 0 to 7, that correspond to the assigned type of artifacts. Each region is saved as a 3D mask separately.
+     - List of confidence score maps for artifact classes for each region.
+       Each element is a ``uint8`` 3D array with dimensions *(width × height × n_classes)*.
+       Each slice along the third dimension corresponds to the confidence map for one artifact type.
+       Each region is stored as a separate 3D mask.
+
    * - ``ind_WSI``
-     - Indexes for WSI image layers (MATLAB-style indexing from 1)
+     - Indices of WSI pyramid layers (MATLAB-style indexing starting at ``1``).
+
    * - ``ratio``
-     - Ratio for each image layer
+     - Scaling ratio for each WSI pyramid level, computed as:
+       *dimension of the largest layer / dimension of the given layer.*
+
    * - ``scale_val``
-     - Scale factor applied to masks. Scale factor is calculated as the mask magnification divided by the magnification of the largest WSI layer (``mag_l0``).
+     - Scale factor applied to the masks, computed as:
+       *mask magnification / magnification of the largest WSI layer (``mag_l0``)*.
+
    * - ``thr``
-     - Thresholds for R, G, B channels
+     - Threshold values used for tissue/background detection for the R, G, and B channels.
+
    * - ``bbox``
-     - List of bounding boxes coordinates for each region, saved in python notation (indexing from 0).
+     - List of bounding box coordinates for each region.
+       Coordinates follow Python indexing (starting at ``0``).
+
    * - ``mask_mag``
-     - Magnification of the saved masks.
+     - Magnification at which the confidence maps are stored.
+
    * - ``mpp``
-     - MPP (microns per pixel) of the slide, if the information is not available, MPP is calculated as 10 divided by slide magnification of the larges layer.
+     - Microns-per-pixel (MPP) value of the slide.
+       If metadata does not include MPP, it is estimated as:
+       *10 / magnification of the largest WSI layer.*
+
    * - ``mag_l0``
-     - Magnification of the largest WSI layer (the highest resolution).
+     - Magnification of the highest-resolution WSI layer.
+
 
 bg_thr_hist
 ^^^^^^^^^^^
