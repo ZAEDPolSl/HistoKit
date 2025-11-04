@@ -19,6 +19,8 @@ extensions = [
 
 bibtex_bibfiles = ['biblio.bib']
 
+html_static_path = []
+
 autosummary_generate = True
 autodoc_default_options = {
     'members': True,
