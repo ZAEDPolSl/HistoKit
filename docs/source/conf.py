@@ -19,7 +19,7 @@ extensions = [
 
 bibtex_bibfiles = ['biblio.bib']
 
-html_static_path = []
+html_static_path = ['_static']
 
 autosummary_generate = True
 autodoc_default_options = {
