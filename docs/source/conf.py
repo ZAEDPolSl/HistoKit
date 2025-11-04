@@ -16,7 +16,6 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinxcontrib.bibtex'
 ]
-html_static_path = ['images']
 
 bibtex_bibfiles = ['biblio.bib']
 
