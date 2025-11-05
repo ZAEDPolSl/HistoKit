@@ -60,8 +60,8 @@ Examples
    :maxdepth: 1
    :caption: Examples
 
-   Examples/TissueDetection
-   Examples/CreatingPatches
+   TissueDetection
+   CreatingPatches
 
 Documentation
 -------------
