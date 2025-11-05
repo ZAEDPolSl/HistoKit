@@ -157,7 +157,7 @@ if __name__ == "__main__":
         else:
             slides = all_slides
 
-        print(f"Found {len(all_slides)} WSIs in {args.wsi_dir} directory and {len(tis_det_files)} corresponding matfiles with tissue masks in {folder_tis_det} directory.\n")
+        print(f"Found {len(all_slides)} WSIs in {args.wsi_dir} directory and {len(tis_det_files)} corresponding .mat files with tissue masks in {folder_tis_det} directory.\n")
         print("====== STEP 2 =======: Artifacts detection with GrandQC.\n")
         print(f"Loading GrandQC model weights from {args.grandqc_model}...")
 
