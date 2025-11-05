@@ -186,6 +186,11 @@ Artifacts Color Mapping
 
 The GrandQC model generates masks with integer values from 0 to 7. During visualization, these values are mapped to corresponding colors. The table below presents the mapping between artifact classes and their visual representations, along with example artifacts marked on the slides. Note that the original model was not trained on some specific tissue types, which may lead to inaccurate artifact segmentation in certain cases.
 
+.. image:: ../img/mapping.jpg
+   :width: 753
+   :height: 378
+   :align: center
+
 Output Folders
 ^^^^^^^^^^^^^^
 
