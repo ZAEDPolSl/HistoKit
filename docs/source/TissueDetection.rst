@@ -369,7 +369,7 @@ bg_thr_hist
 
 Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method when threshold obtained with GaMRed is too small.
 
-.. image:: ../img/hists.png
+.. image:: ../img/hist.png
    :width: 400
    :height: 500
    :align: center
