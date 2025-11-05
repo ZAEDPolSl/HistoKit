@@ -1,6 +1,8 @@
 import os
 import cv2
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import scipy
 from openslide import OpenSlide
@@ -183,11 +185,6 @@ def segment_tissue(slide_file, args, paths_dict):
 
     res_dict = wsi_tissue_seg(region, args.fill_holes, args.close_disk_r, args.open_disk_r, args.remove_small_objects)
 
-    # save histograms with thresholds
-    fig, ax = plot_rgb_hist(res_dict['R'], res_dict['G'], res_dict['B'], res_dict['thr'])
-    fig.savefig(os.path.join(paths_dict["bg_thr_hist"], f'{basename}.png'))
-    plt.close(fig)
-
     # save borders visualisation on the tissue image
     contours, _ = cv2.findContours(res_dict['mask'].astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cv2.drawContours(region, contours, -1, (0, 0, 255), 2)
@@ -208,5 +205,10 @@ def segment_tissue(slide_file, args, paths_dict):
 
     # save data to .mat file
     scipy.io.savemat(os.path.join(paths_dict["masks"], f'{basename}.mat'), save_dict, do_compression=True)
+
+    # save histograms with thresholds
+    fig, ax = plot_rgb_hist(res_dict['R'], res_dict['G'], res_dict['B'], res_dict['thr'])
+    fig.savefig(os.path.join(paths_dict["bg_thr_hist"], f'{basename}.png'))
+    plt.close(fig)
 
     return basename

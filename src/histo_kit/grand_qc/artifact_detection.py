@@ -295,8 +295,8 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
         x0 = max(0, min(x0, w_res))
         x1 = max(0, min(x1, w_res))
 
-        pred_mask_region = pred_mask[y0:y1, x0:x1].astype('uint8')
-        raw_mask_region = (raw_mask[y0:y1, x0:x1, :]*255).astype('uint8')
+        pred_mask_region = pred_mask[y0:y1, x0:x1].astype(np.uint8)
+        raw_mask_region = (raw_mask[y0:y1, x0:x1, :]*255).astype(np.uint8)
 
         save_dict['mask_art'].append(pred_mask_region)
 

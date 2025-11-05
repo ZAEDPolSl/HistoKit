@@ -15,8 +15,8 @@ Script for tissue region and artifacts detection
 parser = argparse.ArgumentParser()
 
 # Common settings
-parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Tmp/jmerta/HE/test_data/tissue_seg/wsi/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/HE/test_data/tissue_seg/wsi_processed/')
+parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/Compass/HE/LMUM/20x/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/wsi_processed_test')
 parser.add_argument('--vis_mag', help='Magnification of saved visualisations.',default=0.625, type=int)
 parser.add_argument('--overwrite', help='Overwrite files with results if they exist in the output folder or not.',default=True, type=bool)
 
@@ -92,7 +92,6 @@ if __name__ == "__main__":
                  slides.append(s)
     else:
         slides = all_slides
-
     # calculate grandQC model magnification
     MAG_MODEL = 10/args.grandqc_mpp
 
