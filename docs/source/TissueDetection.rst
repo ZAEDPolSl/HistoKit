@@ -481,19 +481,9 @@ Example usage:
    svs_name = "224-20_he.svs";
    mask_name = "224-20_he.mat";
    
-   % get info about .svs
-   info = imfinfo(svs_name);
-   n_lay = size(info,1);
-   ind_WSI = true(n_lay,1);
-   for c=1:n_lay
-       if isempty(info(c).TileWidth)
-           ind_WSI(c) = false;
-       end
-   end
-   ind_WSI = find(ind_WSI);
-   
    % check how many regions are there
    load(mask_name, "bbox")
+   load(mask_name, "ind_WSI")
    n3 = size(bbox,1);
    
    %iterate over regions
