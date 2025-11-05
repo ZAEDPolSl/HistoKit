@@ -7,25 +7,6 @@ class Artifact(Enum):
     Each member corresponds to a specific type of artifact, background or tissue area
     defined during artifact detection with the GrandQC model.
 
-    Attributes
-    ----------
-    BG_THR : int
-        Background after mask detection (black).
-    NORM : int
-        Normal artifact (gray).
-    ART_FOLD : int
-        Tissue fold artifact (orange).
-    ART_DARKSPOT : int
-        Dark spot artifact (green).
-    ART_PEN : int
-        Pen marking artifact (red).
-    ART_EDGE : int
-        Edge artifact (pink).
-    ART_FOCUS : int
-        Out-of-focus region (violet).
-    BG_MODEL : int
-        Background predicted by the artifact detection model (blue).
-
     """
 
     BG_THR = 0       # BACKGROUND (after mask detection): black
