@@ -369,7 +369,7 @@ bg_thr_hist
 
 Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method when threshold obtained with GaMRed is too small.
 
-.. image:: ../images/hists.png
+.. image:: ../img/hists.png
    :width: 400
    :height: 500
    :align: center
@@ -379,7 +379,7 @@ raw_small
 
 Small tissue thumbnails.
 
-.. image:: ../images/raw.png
+.. image:: ../img/raw.png
    :width: 445
    :height: 320
    :align: center
@@ -387,7 +387,7 @@ Small tissue thumbnails.
 bg_removal_contour_vis
 ^^^^^^^^^^^^^^^^^^^^^^
 
-.. image:: ../images/det.png
+.. image:: ../img/det.png
    :width: 445
    :height: 320
    :align: center
@@ -395,7 +395,7 @@ bg_removal_contour_vis
 grandqc_overlay_vis
 ^^^^^^^^^^^^^^^^^^^
 
-.. image:: ../images/art.png
+.. image:: ../img/art.png
    :width: 445
    :height: 320
    :align: center
