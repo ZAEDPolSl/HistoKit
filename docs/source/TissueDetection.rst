@@ -342,7 +342,9 @@ Folder containing .mat files with masks after tissue detection. Files have the f
      - List of confidence score maps for artifact classes for each region.
        Each element is a ``uint8`` 3D array with dimensions *(width × height × n_classes)*.
        Each slice along the third dimension corresponds to the confidence map for one artifact type.
-       Each region is stored as a separate 3D mask.
+       Each region is stored as a separate 3D mask. Confidence scores are scaled to integer values from 0 to 255 
+       and can be displayed as a binary image. For background detected during the thresholding (0 layer) background is 
+       white (255 - 100% confidence that pixel belongs to the background) and the tissue area is black (0 - no background).
 
    * - ``ind_WSI``
      - Indices of WSI pyramid layers (MATLAB-style indexing starting at ``1``).
