@@ -23,21 +23,10 @@ jobs:
           pip install openslide-bin
           pip install -e .
           pip install furo sphinx sphinx_rtd_theme myst_parser sphinx-autodoc-typehints sphinxcontrib-bibtex
-          
-      - name: Clean docs build dir
-        run: | 
-          rm -rf docs/_build
-          cd docs
-          make clean
-          cd ..
 
       - name: Sphinx build
         run: |
           sphinx-build -b html docs/source docs/_build/html
-          
-      - name: Ensure nojekyll
-        run: |
-           touch docs/_build/html/.nojekyll
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
