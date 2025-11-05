@@ -1,6 +1,7 @@
 Tissue & Artifacts Detection
 ===============================
 
+HistoKit provides tissue detection and artifact identification on whole-slide images (WSI). These artifacts may negatively impact both the computational cost and the quality of results produced by downstream image analysis algorithms. Below is a brief description of the methods currently used.
 
 Tissue detection
 ~~~~~~~~~~~~~~~~
@@ -10,10 +11,10 @@ Artifact detection
 
 
 Run tissue and artifacts detection
------------------------------------
+==================================
 
-Configuration
--------------
+The script ``run_tissue_seg.py`` is used to execute the tissue segmentation and artifact detection algorithms. Below is a description of the parameters accepted by the script, along with explanations of their functionality.
+
 
 Common settings
 ~~~~~~~~~~~~~~~
@@ -50,9 +51,11 @@ Common settings
 Tissue detection settings
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+The tissue detection stage is executed on the CPU. It is possible to increase the number of workers to process multiple .svs files in parallel. However, when doing so, it is important to monitor your system’s RAM usage, particularly when working with large WSI images.
+
 .. list-table::
    :header-rows: 1
-   :widths: 30 12 12 46
+   :widths: 50 12 12 30
 
    * - Parameter
      - Type
@@ -96,6 +99,8 @@ Tissue detection settings
 
 Artifact detection settings
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The artifact detection stage using the GrandQC model can be accelerated by leveraging CUDA-enabled GPU processing. This stage makes use of the tissue masks obtained from the thresholding-based detection step. This significantly reduces the computation time, as artifact prediction is performed only on regions that contain tissue.
 
 .. list-table::
    :header-rows: 1
@@ -179,7 +184,7 @@ Artifact detection settings
 Artifacts Color Mapping
 -----------------------
 
-
+The GrandQC model generates masks with integer values from 0 to 7. During visualization, these values are mapped to corresponding colors. The table below presents the mapping between artifact classes and their visual representations, along with example artifacts marked on the slides. Note that the original model was not trained on some specific tissue types, which may lead to inaccurate artifact segmentation in certain cases.
 
 Output Folders
 ^^^^^^^^^^^^^^
@@ -367,7 +372,7 @@ Folder containing .mat files with masks after tissue detection. Files have the f
 bg_thr_hist
 ^^^^^^^^^^^
 
-Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method when threshold obtained with GaMRed is too small.
+Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method when threshold obtained with GaMRed is too small (smaller than ``0.7*255``).
 
 .. image:: ../img/hist.jpg
    :width: 282
@@ -377,7 +382,7 @@ Histograms with background threshold values for each color channel calculated wi
 raw_small
 ^^^^^^^^^
 
-Small tissue thumbnails.
+Original tissue image saved with the magnification defined by the ``--vis_mag`` parameter.
 
 .. image:: ../img/raw_small.jpg
    :width: 282
@@ -387,6 +392,8 @@ Small tissue thumbnails.
 bg_removal_contour_vis
 ^^^^^^^^^^^^^^^^^^^^^^
 
+In this folder, the visualizations of tissue detection using the thresholding methods are stored. The contours of detected tissue are drawn on the original image. Image is saved with the magnification defined by the ``--vis_mag`` parameter.
+
 .. image:: ../img/tissue_det.jpg
    :width: 282
    :height: 311
@@ -394,6 +401,8 @@ bg_removal_contour_vis
 
 grandqc_overlay_vis
 ^^^^^^^^^^^^^^^^^^^
+
+In this folder, the visualizations of artifact detection using the GrandQC model are stored. The original image is overlaid with the generated artifact mask, and then the contours of the detected tissue are drawn. Image is saved with the magnification defined by the ``--vis_mag`` parameter.
 
 .. image:: ../img/artifacts.jpg
    :width: 282
@@ -492,13 +501,14 @@ Example usage:
 References
 ----------
 
-- Weng, Z., Seper, A., Pryalukhin, A. et al.
-  *GrandQC: A comprehensive solution to quality control problem in digital pathology.*
-  Nature Communications 15, 10685 (2024).
+- Weng, Z., Seper, A., Pryalukhin, A., *et al.*  
+  *GrandQC: A comprehensive solution to quality control problem in digital pathology.*  
+  *Nature Communications* **15**, 10685 (2024).  
   `DOI <https://doi.org/10.1038/s41467-024-54769-y>`_ | `GitHub <https://github.com/cpath-ukk/grandqc>`_
 
-- Marczyk, M., Wrobel, A., Merta, J. and Polanska, J. (2025).
-  *Post-Processing of Thresholding or Deep Learning Methods for Enhanced Tissue Segmentation of Whole-Slide Histopathological Images.*
-  In Proceedings of the 18th International Joint Conference on Biomedical Engineering Systems and Technologies - Volume 1: BIOIMAGING;
-  ISBN 978-989-758-731-3, SciTePress, pp. 229–238.
+- Marczyk, M., Wrobel, A., Merta, J., and Polanska, J. (2025).  
+  *Post-Processing of Thresholding or Deep Learning Methods for Enhanced Tissue Segmentation of Whole-Slide Histopathological Images.*  
+  In: *Proceedings of the 18th International Joint Conference on Biomedical Engineering Systems and Technologies* – Volume 1: BIOIMAGING.  
+  SciTePress, pp. 229–238. ISBN 978-989-758-731-3.  
   `DOI <https://doi.org/10.5220/0013174700003911>`_ | `GitHub <https://github.com/ZAEDPolSl/WSI_TissueSeg>`_
+
