@@ -5,7 +5,6 @@ import segmentation_models_pytorch as smp
 from ..utils.image import to_tensor_x
 from ..utils.patches import get_patch_grid
 
-
 class GrandQCDataset(Dataset):
     """
     Pytorch Dataset for extracting fixed-size patches from a region while applying padding
@@ -16,9 +15,9 @@ class GrandQCDataset(Dataset):
     ----------
     region : np.ndarray
         Source RGB region image from which patches will be extracted.
-        Expected shape is ``(H, W, 3)``.
+        Expected shape is (H, W, 3).
     bg : np.ndarray
-        Background mask associated with `region`, matching spatial dimensions
+        Background mask associated with region, matching spatial dimensions
         ``(H, W)``.
     bbox_list : list of tuples
         List of bounding boxes defining areas of interest. Each bounding box should be
