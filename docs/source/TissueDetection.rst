@@ -439,7 +439,7 @@ The following function can be used to load .mat files generated during artifacts
     % BG_MODEL = 7     # BACKGROUND (predicted by artifact detection model): blue
 
     % load info about mask
-    load([mask_name,'.mat'],'mask_art','ratio','bbox',...
+    load(mask_name,'mask_art','ratio','bbox',...
         'ind_WSI','scale_val')
 
     % calculate scaling value for selected image resolution mask
@@ -477,30 +477,33 @@ Example usage:
 
 .. code-block:: matlab
 
-    % search for original .svs file
-    svs_name = "example.svs";
-
-    % get info about .svs
-    info = imfinfo(svs_name);
-    n_lay = size(info,1);
-    ind_WSI = true(n_lay,1);
-    for c=1:n_lay
-        if isempty(info(c).TileWidth)
-            ind_WSI(c) = false;
-        end
-    end
-    ind_WSI = find(ind_WSI);
-
-    % check how many regions are there
-    load(mask_name, "bbox")
-    n3 = size(bbox,1);
-
-    %iterate over regions
-    for b=1:n3
-
-        % load region with 10x magnification, that is why are using ind_WSI(2) for our WSI
-        exclude_art = [0, 2, 3, 4, 5, 6, 7];
-        img = load_tiss_masked_histokit(svs_name,mask_name,b,ind_WSI(2), exclude_art);
+   % search for original .svs file
+   svs_name = "224-20_he.svs";
+   mask_name = "224-20_he.mat";
+   
+   % get info about .svs
+   info = imfinfo(svs_name);
+   n_lay = size(info,1);
+   ind_WSI = true(n_lay,1);
+   for c=1:n_lay
+       if isempty(info(c).TileWidth)
+           ind_WSI(c) = false;
+       end
+   end
+   ind_WSI = find(ind_WSI);
+   
+   % check how many regions are there
+   load(mask_name, "bbox")
+   n3 = size(bbox,1);
+   
+   %iterate over regions
+   for b=1:n3
+   
+       % load region with 10x magnification, that is why are using ind_WSI(2) for our WSI
+       exclude_art = [0, 2, 3, 4, 5, 6, 7];
+       img = load_tiss_masked_histokit(svs_name,mask_name,b,ind_WSI(2), exclude_art);
+       imshow(img);
+   end
 
 
 References
