@@ -370,8 +370,8 @@ bg_thr_hist
 Histograms with background threshold values for each color channel calculated with GaMRed algorithm, or with Otsu method when threshold obtained with GaMRed is too small.
 
 .. image:: ../img/hist.jpg
-   :width: 400
-   :height: 500
+   :width: 282
+   :height: 311
    :align: center
 
 raw_small
@@ -380,24 +380,24 @@ raw_small
 Small tissue thumbnails.
 
 .. image:: ../img/raw_small.jpg
-   :width: 445
-   :height: 320
+   :width: 282
+   :height: 311
    :align: center
 
 bg_removal_contour_vis
 ^^^^^^^^^^^^^^^^^^^^^^
 
 .. image:: ../img/tissue_det.jpg
-   :width: 445
-   :height: 320
+   :width: 282
+   :height: 311
    :align: center
 
 grandqc_overlay_vis
 ^^^^^^^^^^^^^^^^^^^
 
 .. image:: ../img/artifacts.jpg
-   :width: 445
-   :height: 320
+   :width: 282
+   :height: 311
    :align: center
 
 How to Load Regions to Matlab
