@@ -3,6 +3,9 @@ Tissue & Artifacts Detection
 
 HistoKit provides tissue detection and artifact identification on whole-slide images (WSI). These artifacts may negatively impact both the computational cost and the quality of results produced by downstream image analysis algorithms. Below is a brief description of the methods currently used.
 
+Algorithms description
+----------------------
+
 Tissue detection
 ~~~~~~~~~~~~~~~~
 
@@ -11,13 +14,15 @@ Artifact detection
 
 
 Run tissue and artifacts detection
-==================================
+----------------------------------
 
 The script ``run_tissue_seg.py`` is used to execute the tissue segmentation and artifact detection algorithms. Below is a description of the parameters accepted by the script, along with explanations of their functionality.
 
+Configuration
+~~~~~~~~~~~~~
 
 Common settings
-~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^
 
 .. list-table::
    :header-rows: 1
@@ -49,13 +54,13 @@ Common settings
      - If set, existing output files are overwritten.
 
 Tissue detection settings
-~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The tissue detection stage is executed on the CPU. It is possible to increase the number of workers to process multiple .svs files in parallel. However, when doing so, it is important to monitor your system’s RAM usage, particularly when working with large WSI images.
 
 .. list-table::
    :header-rows: 1
-   :widths: 50 12 12 30
+   :widths: 36 12 12 45
 
    * - Parameter
      - Type
@@ -98,7 +103,7 @@ The tissue detection stage is executed on the CPU. It is possible to increase th
      - Number of workers used during tissue detection.
 
 Artifact detection settings
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The artifact detection stage using the GrandQC model can be accelerated by leveraging CUDA-enabled GPU processing. This stage makes use of the tissue masks obtained from the thresholding-based detection step. This significantly reduces the computation time, as artifact prediction is performed only on regions that contain tissue.
 
@@ -182,7 +187,7 @@ The artifact detection stage using the GrandQC model can be accelerated by lever
      - Sigma used for Gaussian blending (ignored for average mode).
 
 Artifacts Color Mapping
------------------------
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The GrandQC model generates masks with integer values from 0 to 7. During visualization, these values are mapped to corresponding colors. The table below presents the mapping between artifact classes and their visual representations, along with example artifacts marked on the slides. Note that the original model was not trained on some specific tissue types, which may lead to inaccurate artifact segmentation in certain cases.
 
@@ -192,7 +197,7 @@ The GrandQC model generates masks with integer values from 0 to 7. During visual
    :align: center
 
 Output Folders
-^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~
 
 .. list-table::
    :header-rows: 1
@@ -224,7 +229,7 @@ Output Folders
 
 
 Example Results
----------------
+~~~~~~~~~~~~~~~
 
 masks
 ^^^^^
@@ -416,8 +421,8 @@ In this folder, the visualizations of artifact detection using the GrandQC model
    :height: 311
    :align: center
 
-How to Load Regions to Matlab
------------------------------
+How to Load Regions to Matlab?
+------------------------------
 
 Generated artifacts maps are saved to .mat files which can be loaded both with Matlab and Python.
 The following function can be used to load .mat files generated during artifacts detection step to Matlab.
@@ -501,12 +506,12 @@ Example usage:
 References
 ----------
 
-- Weng, Z., Seper, A., Pryalukhin, A., *et al.*  
+- Z. Weng, A. Seper, A. Pryalukhin, *et al.*  
   *GrandQC: A comprehensive solution to quality control problem in digital pathology.*  
   *Nature Communications* **15**, 10685 (2024).  
   `DOI <https://doi.org/10.1038/s41467-024-54769-y>`_ | `GitHub <https://github.com/cpath-ukk/grandqc>`_
 
-- Marczyk, M., Wrobel, A., Merta, J., and Polanska, J. (2025).  
+- M. Marczyk, A. Wrobel, J. Merta, and J. Polanska (2025).  
   *Post-Processing of Thresholding or Deep Learning Methods for Enhanced Tissue Segmentation of Whole-Slide Histopathological Images.*  
   In: *Proceedings of the 18th International Joint Conference on Biomedical Engineering Systems and Technologies* – Volume 1: BIOIMAGING.  
   SciTePress, pp. 229–238. ISBN 978-989-758-731-3.  
