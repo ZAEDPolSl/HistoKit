@@ -277,7 +277,7 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
         'ratio': data['ratio'],  # ratio for each layer
         'scale_val': scale_val,  # scale factor of masks
         'thr': data['thr'],  # thresholds calculated for R, G, B color channels
-        'bbox': bbox.astype(np.uint32), # bboxes for tissue regions (indexing from 0)
+        'bbox': bbox.astype(np.uint64), # bboxes for tissue regions (indexing from 0)
         'mask_mag': save_mag, # magnification of the final mask
         'mpp': mpp_slide, # mpp of the slide
         'mag_l0': mag_l0 # magnification of the largest WSI layer
@@ -291,7 +291,7 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
         'ratio': data['ratio'],  # ratio for each layer
         'scale_val': scale_val,  # scale factor of masks
         'thr': data['thr'],  # thresholds calculated for R, G, B color channels
-        'bbox': bbox.astype(np.uint32), # bboxes for tissue regions (indexing from 0)
+        'bbox': bbox.astype(np.uint64), # bboxes for tissue regions (indexing from 0)
         'mask_mag': save_mag, # magnification of the final mask
         'mpp': mpp_slide, # mpp of the slide
         'mag_l0': mag_l0 # magnification of the largest WSI layer
