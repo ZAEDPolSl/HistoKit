@@ -120,12 +120,15 @@ def get_regions_location(bg_mask):
     props = measure.regionprops(label_img)
 
     bbox_list = []
+    image_list = []
 
     for region in props:
         bbox = region.bbox
+        image = region.image
         # y_min, x_min, y_max, x_max
         bbox_list.append([bbox[0], bbox[1], bbox[2], bbox[3]])
-    return bbox_list
+        image_list.append(image)
+    return bbox_list, image_list
 
 
 def load_wsi_mag(wsi, desired_mag, rescale_method=Image.LANCZOS, verbose=False, allow_upscaling=True):
