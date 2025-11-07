@@ -15,10 +15,10 @@ Script for tissue region and artifacts detection
 parser = argparse.ArgumentParser()
 
 # Common settings
-parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/Compass/HE/LMUM/20x/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/wsi_processed_test')
+parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Tmp/jmerta/test_data_bbox/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/test_data_bbox_res/')
 parser.add_argument('--vis_mag', help='Magnification of saved visualisations.',default=0.625, type=int)
-parser.add_argument('--overwrite', help='Overwrite files with results if they exist in the output folder or not.',default=True, type=bool)
+parser.add_argument('--overwrite', help='Overwrite files with results if they exist in the output folder or not.',default=False, type=bool)
 
 # Settings for background detection with thresholding methods
 parser.add_argument('--run_tis_det', type=bool, help='Run tissue detection step or not.', default=True)
@@ -183,7 +183,6 @@ if __name__ == "__main__":
                     mode=args.blending_mode, sigma=args.blending_sigma, save_mag=args.save_mag,
                     save_confidence_maps=args.save_confidence_maps
                 )
-
                 with open(log_file, 'a') as f:
                     f.write(f"{basename}\n")
             except Exception as e:

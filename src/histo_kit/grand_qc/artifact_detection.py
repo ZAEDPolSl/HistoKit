@@ -151,7 +151,7 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
     data = sio.loadmat(res_dict_path)
     tis_det = data["mask_bg"]
     tis_det = np.array(Image.fromarray(tis_det).resize((W, H), Image.Resampling.NEAREST))
-    bbox = get_regions_location(tis_det)
+    bbox, images_list = get_regions_location(tis_det)
 
     dataset = GrandQCDataset(region, tis_det, bbox,  patch_size, overlap)
     dataloader = DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, pin_memory=True)
@@ -257,6 +257,16 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
         bbox = np.array(bbox, dtype=float)
         bbox = np.round(bbox / scale).astype(int)
 
+        images_list_scaled = []
+        for n, image_bbox in enumerate(images_list):
+            image_bbox = Image.fromarray(image_bbox)
+            ymin, xmin, ymax, xmax = bbox[n]
+            width = xmax - xmin
+            height = ymax - ymin
+            image_bbox = image_bbox.resize((width, height), Image.Resampling.NEAREST)
+            images_list_scaled.append(np.array(image_bbox, dtype=np.uint8))
+        images_list = images_list_scaled
+
     h_res, w_res = pred_mask.shape
     scale_val = save_mag/mag_l0
 
@@ -287,7 +297,7 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
         'mag_l0': mag_l0 # magnification of the largest WSI layer
     }
 
-    for n, region_bbox in enumerate(bbox):
+    for n, (region_bbox, image_bbox) in enumerate(zip(bbox, images_list)):
         y0, x0, y1, x1 = map(int, region_bbox)
 
         y0 = max(0, min(y0, h_res))
@@ -295,8 +305,10 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
         x0 = max(0, min(x0, w_res))
         x1 = max(0, min(x1, w_res))
 
-        pred_mask_region = pred_mask[y0:y1, x0:x1].astype(np.uint8)
-        raw_mask_region = (raw_mask[y0:y1, x0:x1, :]*255).astype(np.uint8)
+        pred_mask_region = pred_mask[y0:y1, x0:x1].astype(np.uint8)*image_bbox
+
+
+        raw_mask_region = (raw_mask[y0:y1, x0:x1, :]*255).astype(np.uint8)*image_bbox[...,None]
 
         save_dict['mask_art'].append(pred_mask_region)
 

@@ -87,7 +87,7 @@ def test_vis_grid():
 
     region = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/region_test.png"))
     bg = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/bg_test.png").convert("1"))
-    region_list = get_regions_location(bg)
+    region_list, images_list = get_regions_location(bg)
     bg_rgb = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/bg_test.png").convert("RGB"))
 
     for r in region_list:
