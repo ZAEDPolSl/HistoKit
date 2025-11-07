@@ -1,0 +1,1028 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../../">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 -->
+        <title>histo_kit.tissue_seg.find_thr - HistoKit 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../../index.html"><div class="brand">HistoKit 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../../index.html">
+  
+  <span class="sidebar-brand-text">HistoKit 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../TissueDetection.html">Tissue &amp; Artifacts Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../CreatingPatches.html">Creating Patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../api.html">Documentation</a><input aria-label="Toggle navigation of Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.grand_qc.artifact_detection.html">histo_kit.grand_qc.artifact_detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.grand_qc.artifacts.html">histo_kit.grand_qc.artifacts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.grand_qc.visualisation.html">histo_kit.grand_qc.visualisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.grand_qc.dataset.html">histo_kit.grand_qc.dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.grand_qc.model.html">histo_kit.grand_qc.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.tissue_seg.bg_segmentation.html">histo_kit.tissue_seg.bg_segmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.tissue_seg.postprocessing.html">histo_kit.tissue_seg.postprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.tissue_seg.find_thr.html">histo_kit.tissue_seg.find_thr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.utils.patches.html">histo_kit.utils.patches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.utils.matlab2python.html">histo_kit.utils.matlab2python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.utils.file_utils.html">histo_kit.utils.file_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.utils.apply_mask.html">histo_kit.utils.apply_mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.utils.image.html">histo_kit.utils.image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.utils.wsi.html">histo_kit.utils.wsi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.stain_normalisation.html">histo_kit.stain_normalisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.mil.html">histo_kit.mil</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../generated/histo_kit.foundation_models.html">histo_kit.foundation_models</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for histo_kit.tissue_seg.find_thr</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">scipy.stats</span><span class="w"> </span><span class="kn">import</span> <span class="n">norm</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.cluster</span><span class="w"> </span><span class="kn">import</span> <span class="n">KMeans</span>
+
+<div class="viewcode-block" id="GaMRed_hist">
+<a class="viewcode-back" href="../../../generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.GaMRed_hist">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">GaMRed_hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">K</span><span class="p">,</span> <span class="n">draw</span><span class="p">,</span> <span class="n">SW</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Estimate noise components using a Gaussian Mixture Model (GMM) fitted to histogram data.</span>
+
+<span class="sd">    This function fits a Gaussian mixture model to histogrammed data using the</span>
+<span class="sd">    Expectation-Maximization (EM) algorithm. It computes the Bayesian Information</span>
+<span class="sd">    Criterion (BIC) for model evaluation and determines a threshold separating</span>
+<span class="sd">    the mixture components, if applicable. The function returns the threshold,</span>
+<span class="sd">    BIC value, and a dictionary of fitted model statistics.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ndarray of shape (M,)</span>
+<span class="sd">        Bin centers of the histogram (can be unsorted; will be sorted internally).</span>
+<span class="sd">    y : ndarray of shape (M,)</span>
+<span class="sd">        Bin counts (frequency of observations for each bin).</span>
+<span class="sd">    K : int</span>
+<span class="sd">        Number of Gaussian components to fit in the mixture model.</span>
+<span class="sd">    draw : bool</span>
+<span class="sd">        Whether to print diagnostic information or draw plots.</span>
+<span class="sd">    SW : object</span>
+<span class="sd">        Settings structure or dictionary controlling the EM algorithm behavior</span>
+<span class="sd">        (e.g., convergence criteria, maximum iterations). The exact format</span>
+<span class="sd">        depends on the helper functions (e.g., :func:`EM_iter_hist`).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    thr : float</span>
+<span class="sd">        Threshold value separating mixture components along the x-axis.</span>
+<span class="sd">        If no threshold can be determined, returns ``np.nan``.</span>
+<span class="sd">    bic : float</span>
+<span class="sd">        Bayesian Information Criterion (BIC) value for the fitted model.</span>
+<span class="sd">    stats : dict</span>
+<span class="sd">        Dictionary containing model statistics and parameters:</span>
+<span class="sd">        - ``&quot;thr&quot;`` : float, threshold value</span>
+<span class="sd">        - ``&quot;alpha&quot;`` : ndarray, mixture component weights</span>
+<span class="sd">        - ``&quot;mu&quot;`` : ndarray, component means</span>
+<span class="sd">        - ``&quot;K&quot;`` : int, number of fitted components</span>
+<span class="sd">        - ``&quot;sigma&quot;`` : ndarray, component standard deviations</span>
+<span class="sd">        - ``&quot;logL&quot;`` : float, log-likelihood of the fitted model</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the EM algorithm fails (e.g., returns invalid log-likelihood leading</span>
+<span class="sd">        to infinite or zero BIC), prompting a rerun with different initialization.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - For ``K == 1``, no separation is possible, and the threshold is set</span>
+<span class="sd">      below the minimum x value.</span>
+<span class="sd">    - For ``K == 2``, the threshold is computed directly between the two Gaussian</span>
+<span class="sd">      components.</span>
+<span class="sd">    - For ``K &gt; 2``, components are grouped into two clusters using</span>
+<span class="sd">      :class:`sklearn.cluster.KMeans` before determining the separating threshold.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    MATLAB implementation : Michal Marczyk (Michal.Marczyk@polsl.pl)</span>
+<span class="sd">    Algorithm is described in \ :footcite:p:`Marczyk2018GaMRed`</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; thr_back = {&quot;R&quot;: 0.6, &quot;G&quot;: 0.6, &quot;B&quot;: 0.6}</span>
+<span class="sd">    &gt;&gt;&gt; thr, bic, stats = GaMRed_hist(x, y, K=2, draw=False, SW=my_settings)</span>
+<span class="sd">    &gt;&gt;&gt; print(f&quot;Threshold: {thr:.3f}, BIC: {bic:.2f}&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Component means:&quot;, stats[&quot;mu&quot;])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="c1">#nb of measurements</span>
+    <span class="n">bic</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="c1"># remove no signal at the beginning or the end</span>
+    <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># initial conditions</span>
+    <span class="k">if</span> <span class="n">K</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">alpha_init</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">mi_init</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="n">sigma_init</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">alpha_init</span><span class="p">,</span> <span class="n">mi_init</span><span class="p">,</span> <span class="n">sigma_init</span> <span class="o">=</span> <span class="n">gmm_init_dp_hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">K</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">draw</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Starting values&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alpha_init: </span><span class="si">{</span><span class="n">alpha_init</span><span class="si">}</span><span class="s2">, mi_init: </span><span class="si">{</span><span class="n">mi_init</span><span class="si">}</span><span class="s2">, sigma_init: </span><span class="si">{</span><span class="n">sigma_init</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="n">bic</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="ow">or</span> <span class="n">bic</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># EM algorithm</span>
+        <span class="n">alpha</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">logL</span> <span class="o">=</span> <span class="n">EM_iter_hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha_init</span><span class="p">,</span> <span class="n">mi_init</span><span class="p">,</span> <span class="n">sigma_init</span><span class="p">,</span> <span class="n">SW</span><span class="p">)</span>
+
+        <span class="c1"># calculating BIC</span>
+        <span class="n">bic</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="n">logL</span> <span class="o">+</span> <span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">K</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">bic</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span> <span class="ow">or</span> <span class="n">bic</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;EM crash. Repeat calculations.&quot;</span><span class="p">)</span>
+
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">mi</span><span class="p">)</span>
+    <span class="n">mi</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">mi</span><span class="p">)</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">draw</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Final values&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;alpha: </span><span class="si">{</span><span class="n">alpha</span><span class="si">}</span><span class="s2">, mi: </span><span class="si">{</span><span class="n">mi</span><span class="si">}</span><span class="s2">, sigma: </span><span class="si">{</span><span class="n">sigma</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># find threshold between components</span>
+    <span class="k">if</span> <span class="n">K</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">thr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mf">1e-10</span>
+    <span class="k">elif</span> <span class="n">K</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">thr</span> <span class="o">=</span> <span class="n">find_thr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">draw</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">alpha</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">sigma</span><span class="p">))</span>
+        <span class="n">kmeans</span> <span class="o">=</span> <span class="n">KMeans</span><span class="p">(</span><span class="n">n_clusters</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">n_init</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">kmeans</span><span class="o">.</span><span class="n">labels_</span>
+        <span class="n">thr</span> <span class="o">=</span> <span class="n">find_thr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span><span class="n">idx</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">draw</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">thr</span>
+    <span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+        <span class="n">thr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="n">stats</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;thr&quot;</span><span class="p">:</span> <span class="n">thr</span><span class="p">,</span>
+        <span class="s2">&quot;alpha&quot;</span><span class="p">:</span> <span class="n">alpha</span><span class="p">,</span>
+        <span class="s2">&quot;mu&quot;</span><span class="p">:</span> <span class="n">mi</span><span class="p">,</span>
+        <span class="s2">&quot;K&quot;</span><span class="p">:</span> <span class="n">K</span><span class="p">,</span>
+        <span class="s2">&quot;sigma&quot;</span><span class="p">:</span> <span class="n">sigma</span><span class="p">,</span>
+        <span class="s2">&quot;logL&quot;</span><span class="p">:</span> <span class="n">logL</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">thr</span><span class="p">,</span> <span class="n">bic</span><span class="p">,</span> <span class="n">stats</span></div>
+
+
+<div class="viewcode-block" id="EM_iter_hist">
+<a class="viewcode-back" href="../../../generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.EM_iter_hist">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">EM_iter_hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sig</span><span class="p">,</span> <span class="n">SW</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Perform one iteration of the Expectation-Maximization (EM) algorithm for a Gaussian Mixture Model (GMM) on binned data.</span>
+
+<span class="sd">    The function iteratively updates the mixture weights, means, and standard deviations</span>
+<span class="sd">    of a GMM fitted to histogram data using the EM procedure until convergence or</span>
+<span class="sd">    a maximum number of iterations is reached. It returns the updated parameters</span>
+<span class="sd">    and the log-likelihood of the fitted model.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ndarray of shape (N,)</span>
+<span class="sd">        Bin centers of the histogram.</span>
+<span class="sd">    y : ndarray of shape (N,)</span>
+<span class="sd">        Counts or frequencies for each bin.</span>
+<span class="sd">    alpha : ndarray of shape (K,)</span>
+<span class="sd">        Initial weights of the Gaussian components (sum to 1).</span>
+<span class="sd">    mu : ndarray of shape (K,)</span>
+<span class="sd">        Initial means of the Gaussian components.</span>
+<span class="sd">    sig : ndarray of shape (K,)</span>
+<span class="sd">        Initial standard deviations of the Gaussian components.</span>
+<span class="sd">    SW : float</span>
+<span class="sd">        Minimum allowed standard deviation (safeguard against too small variances).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    alpha : ndarray of shape (K,)</span>
+<span class="sd">        Updated weights of the Gaussian components.</span>
+<span class="sd">    mu : ndarray of shape (K,)</span>
+<span class="sd">        Updated means of the Gaussian components, sorted in ascending order.</span>
+<span class="sd">    sig : ndarray of shape (K,)</span>
+<span class="sd">        Updated standard deviations of the Gaussian components, sorted according to `mu`.</span>
+<span class="sd">    logL : float</span>
+<span class="sd">        Log-likelihood of the histogram data under the fitted GMM.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - The algorithm stops when the change in parameters is below a threshold (1e-6)</span>
+<span class="sd">      or after 10,000 iterations.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; alpha, mu, sig, logL = EM_iter_hist(x, y, alpha_init, mu_init, sig_init, SW=0.01)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Updated means:&quot;, mu)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Log-likelihood:&quot;, logL)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">sig2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">sig</span> <span class="o">**</span> <span class="mi">2</span><span class="p">,</span> <span class="n">SW</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">change</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">SW</span> <span class="o">=</span> <span class="n">SW</span> <span class="o">**</span> <span class="mi">2</span>
+    <span class="n">eps_change</span> <span class="o">=</span> <span class="mf">1e-6</span>
+    <span class="n">KS</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="n">change</span> <span class="o">&gt;</span> <span class="n">eps_change</span> <span class="ow">and</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">10000</span><span class="p">:</span>
+        <span class="n">old_alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">old_sig2</span> <span class="o">=</span> <span class="n">sig2</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">KS</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+        <span class="n">sig</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sig2</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">KS</span><span class="p">):</span>
+            <span class="n">f</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">norm_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">sig</span><span class="p">[</span><span class="n">a</span><span class="p">])</span>
+
+        <span class="n">px</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">@</span> <span class="n">f</span>
+        <span class="n">px</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">px</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">px</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="mf">5e-324</span>
+
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">KS</span><span class="p">):</span>
+            <span class="n">pk</span> <span class="o">=</span> <span class="p">((</span><span class="n">alpha</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">*</span> <span class="n">f</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="p">:])</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span> <span class="o">/</span> <span class="n">px</span>
+            <span class="n">denom</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pk</span><span class="p">)</span>
+            <span class="n">mu</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">pk</span> <span class="o">@</span> <span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">denom</span>
+            <span class="n">sig2num</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">pk</span> <span class="o">@</span> <span class="p">((</span><span class="n">x</span> <span class="o">-</span> <span class="n">mu</span><span class="p">[</span><span class="n">a</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">sig2</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">SW</span><span class="p">,</span> <span class="n">sig2num</span> <span class="o">/</span> <span class="n">denom</span><span class="p">)</span>
+            <span class="n">alpha</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">denom</span> <span class="o">/</span> <span class="n">n</span>
+
+        <span class="n">change</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">alpha</span> <span class="o">-</span> <span class="n">old_alpha</span><span class="p">))</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">sig2</span> <span class="o">-</span> <span class="n">old_sig2</span><span class="p">)</span> <span class="o">/</span> <span class="n">sig2</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># return results</span>
+    <span class="n">logL</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">px</span><span class="p">)</span> <span class="o">*</span> <span class="n">y</span><span class="p">)</span>
+    <span class="n">mu_est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+    <span class="n">sig_est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sig2</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+    <span class="n">pp_est</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">pp_est</span><span class="p">,</span> <span class="n">mu_est</span><span class="p">,</span> <span class="n">sig_est</span><span class="p">,</span> <span class="n">logL</span></div>
+
+
+<div class="viewcode-block" id="gmm_init_dp_hist">
+<a class="viewcode-back" href="../../../generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.gmm_init_dp_hist">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gmm_init_dp_hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">K</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute initial parameters for a Gaussian Mixture Model using dynamic programming on binned data.</span>
+
+<span class="sd">    This function estimates starting values for the mixture weights, means, and standard deviations</span>
+<span class="sd">    of a GMM by partitioning the histogram (binned data) into K segments.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ndarray of shape (N,)</span>
+<span class="sd">        Bin centers of the histogram.</span>
+<span class="sd">    y : ndarray of shape (N,)</span>
+<span class="sd">        Counts (frequencies) of each bin.</span>
+<span class="sd">    K : int</span>
+<span class="sd">        Number of Gaussian components (partitions) to initialize.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    alpha : ndarray of shape (K,)</span>
+<span class="sd">        Initial weights of the Gaussian components, proportional to the sum of counts in each partition.</span>
+<span class="sd">    mu : ndarray of shape (K,)</span>
+<span class="sd">        Initial means of the Gaussian components, computed as weighted averages of bin centers within each partition.</span>
+<span class="sd">    sigma : ndarray of shape (K,)</span>
+<span class="sd">        Initial standard deviations of the Gaussian components, corrected for binned data using Sheppard&#39;s correction.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Sheppard&#39;s correction is applied to account for variance underestimation due to binning:</span>
+<span class="sd">      `s_corr = ((x[1] - x[0]) ** 2) / 12`.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; alpha_init, mu_init, sigma_init = gmm_init_dp_hist(x, y, K=3)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Initial weights:&quot;, alpha_init)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Initial means:&quot;, mu_init)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Initial standard deviations:&quot;, sigma_init)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># parameters</span>
+    <span class="n">par1</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># for robustness (fine for data in range 0-20)</span>
+    <span class="n">par2</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># min number of points in signal fragment</span>
+
+    <span class="c1"># initialize</span>
+    <span class="n">s_corr</span> <span class="o">=</span> <span class="p">((</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mi">12</span>  <span class="c1"># sheppards correction for binned data</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="n">K</span> <span class="o">-</span> <span class="mi">1</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">p_opt_idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">p_aux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">N</span><span class="p">)</span>
+    <span class="n">opt_pals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">K</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">invec</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">a</span><span class="p">:</span><span class="n">N</span><span class="p">]</span>
+        <span class="n">yinvec</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">a</span><span class="p">:</span><span class="n">N</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">yinvec</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">par2</span><span class="p">:</span>
+            <span class="n">p_opt_idx</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wwec</span> <span class="o">=</span> <span class="n">yinvec</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">yinvec</span><span class="p">))</span>
+            <span class="n">var_bin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(((</span><span class="n">invec</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">invec</span> <span class="o">*</span> <span class="n">wwec</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">wwec</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">var_bin</span> <span class="o">&gt;</span> <span class="n">s_corr</span><span class="p">:</span>
+                <span class="n">p_opt_idx</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">par1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_bin</span> <span class="o">-</span> <span class="n">s_corr</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">invec</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">invec</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">p_opt_idx</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="c1"># diff p_opt_idx =&gt; e-17</span>
+
+    <span class="c1"># aux mx</span>
+    <span class="n">aux_mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+            <span class="n">invec</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">a</span><span class="p">:</span><span class="n">b</span><span class="p">]</span>
+            <span class="n">yinvec</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">a</span><span class="p">:</span><span class="n">b</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">yinvec</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">par2</span><span class="p">:</span>
+                <span class="n">aux_mx</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">wwec</span> <span class="o">=</span> <span class="n">yinvec</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">yinvec</span><span class="p">))</span>
+                <span class="n">var_bin</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(((</span><span class="n">invec</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">invec</span> <span class="o">*</span> <span class="n">wwec</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">wwec</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">var_bin</span> <span class="o">&gt;</span> <span class="n">s_corr</span><span class="p">:</span>
+                    <span class="n">aux_mx</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">par1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">var_bin</span> <span class="o">-</span> <span class="n">s_corr</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">invec</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">invec</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">aux_mx</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+
+    <span class="c1"># iterate</span>
+    <span class="k">for</span> <span class="n">kster</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+        <span class="c1"># kster</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span> <span class="o">-</span> <span class="n">kster</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">N</span> <span class="o">-</span> <span class="n">kster</span><span class="p">):</span>
+                <span class="n">p_aux</span><span class="p">[</span><span class="n">b</span><span class="p">]</span> <span class="o">=</span> <span class="n">aux_mx</span><span class="p">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">]</span> <span class="o">+</span> <span class="n">p_opt_idx</span><span class="p">[</span><span class="n">b</span><span class="p">]</span>
+            <span class="n">mm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">p_aux</span><span class="p">[</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">N</span> <span class="o">-</span> <span class="n">kster</span><span class="p">])</span>
+            <span class="n">ix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">p_aux</span><span class="p">[</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span><span class="n">N</span> <span class="o">-</span> <span class="n">kster</span><span class="p">])</span>
+            <span class="n">p_opt_idx</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">mm</span>  <span class="c1"># e-16</span>
+            <span class="n">opt_pals</span><span class="p">[</span><span class="n">kster</span><span class="p">,</span> <span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">a</span> <span class="o">+</span> <span class="n">ix</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="c1"># restore optimal decisions</span>
+    <span class="n">opt_part</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span><span class="p">)</span>
+    <span class="n">opt_part</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">opt_pals</span><span class="p">[</span><span class="n">K</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">kster</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">opt_part</span><span class="p">[</span><span class="n">K</span> <span class="o">-</span> <span class="n">kster</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">opt_pals</span><span class="p">[</span><span class="n">kster</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">opt_part</span><span class="p">[</span><span class="n">K</span> <span class="o">-</span> <span class="n">kster</span> <span class="o">-</span> <span class="mi">2</span><span class="p">])]</span>
+
+    <span class="c1"># find initial conditions</span>
+    <span class="n">opt_part</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(([</span><span class="mi">0</span><span class="p">],</span> <span class="n">opt_part</span><span class="p">,</span> <span class="p">[</span><span class="n">N</span><span class="p">]))</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">K</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">invec</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">opt_part</span><span class="p">[</span><span class="n">a</span><span class="p">]):</span><span class="nb">int</span><span class="p">(</span><span class="n">opt_part</span><span class="p">[</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])]</span>
+        <span class="n">yinvec</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">opt_part</span><span class="p">[</span><span class="n">a</span><span class="p">]):</span><span class="nb">int</span><span class="p">(</span><span class="n">opt_part</span><span class="p">[</span><span class="n">a</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])]</span>
+        <span class="n">wwec</span> <span class="o">=</span> <span class="n">yinvec</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">yinvec</span><span class="p">))</span>
+        <span class="n">alpha</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">yinvec</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">mu</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">invec</span> <span class="o">*</span> <span class="n">wwec</span><span class="p">)</span>
+        <span class="n">sigma</span><span class="p">[</span><span class="n">a</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(((</span><span class="n">invec</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">invec</span> <span class="o">*</span> <span class="n">wwec</span><span class="p">))</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">wwec</span><span class="p">)</span> <span class="o">-</span> <span class="n">s_corr</span><span class="p">)</span>
+
+
+    <span class="k">return</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span></div>
+
+
+<div class="viewcode-block" id="norm_pdf">
+<a class="viewcode-back" href="../../../generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.norm_pdf">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">norm_pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Evaluate the probability density function (PDF) of a normal distribution.</span>
+
+<span class="sd">    Computes the PDF values of a normal (Gaussian) distribution with specified</span>
+<span class="sd">    mean and standard deviation at the given input points.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : array_like</span>
+<span class="sd">        Input values where the PDF is evaluated.</span>
+<span class="sd">    mu : float</span>
+<span class="sd">        Mean of the normal distribution.</span>
+<span class="sd">    sigma : float</span>
+<span class="sd">        Standard deviation of the normal distribution.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    y : ndarray of shape (1, N)</span>
+<span class="sd">        PDF values evaluated at `x`, returned as a 2D array with one row.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; y = norm_pdf(np.array([0, 1, 2]), mu=0, sigma=1)</span>
+<span class="sd">    &gt;&gt;&gt; print(y)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">norm</span><span class="o">.</span><span class="n">pdf</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">y</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="find_thr">
+<a class="viewcode-back" href="../../../generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.find_thr">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_thr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">mi</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">idx</span><span class="p">,</span> <span class="n">draw</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine the threshold separating informative and non-informative GMM components.</span>
+
+<span class="sd">    The function evaluates the Gaussian Mixture Model (GMM) over a finely spaced grid,</span>
+<span class="sd">    computes the combined densities of informative and non-informative components,</span>
+<span class="sd">    and identifies the threshold where the absolute difference between these densities</span>
+<span class="sd">    is minimized. Optionally, plots the component densities.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : ndarray</span>
+<span class="sd">        Input data points used to determine the threshold range.</span>
+<span class="sd">    alpha : ndarray of shape (K,)</span>
+<span class="sd">        Weights of the GMM components.</span>
+<span class="sd">    mi : ndarray of shape (K,)</span>
+<span class="sd">        Means of the GMM components.</span>
+<span class="sd">    sigma : ndarray of shape (K,)</span>
+<span class="sd">        Standard deviations of the GMM components.</span>
+<span class="sd">    idx : array_like of shape (K,)</span>
+<span class="sd">        Boolean index indicating which components are considered informative (True)</span>
+<span class="sd">        and non-informative (False).</span>
+<span class="sd">    draw : bool</span>
+<span class="sd">        If True, plots the component densities, their difference, and the threshold.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    thr : float</span>
+<span class="sd">        Threshold value along the data axis that best separates informative from</span>
+<span class="sd">        non-informative components.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - The function uses a high-resolution grid (`1e7` points) for precise threshold determination.</span>
+<span class="sd">    - If no valid index is found within the constraints, a ValueError is raised.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; idx = np.array([False, True])</span>
+<span class="sd">    &gt;&gt;&gt; thr = find_thr(data, alpha, mu, sigma, idx, draw=True)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Threshold value:&quot;, thr)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+
+    <span class="c1"># generate data with better precision</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mi</span><span class="p">)</span>
+    <span class="n">f_temp</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="mf">1e7</span><span class="p">),</span> <span class="n">K</span><span class="p">))</span>
+    <span class="n">x_temp</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1e7</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">K</span><span class="p">):</span>
+        <span class="n">f_temp</span><span class="p">[:,</span> <span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">*</span><span class="n">norm_pdf</span><span class="p">(</span><span class="n">x_temp</span><span class="p">,</span> <span class="n">mi</span><span class="p">[</span><span class="n">k</span><span class="p">],</span> <span class="n">sigma</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+
+    <span class="c1"># find GMM for informative and non-informative components</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">f_temp</span><span class="p">[:,</span> <span class="o">~</span><span class="n">idx</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">f2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">f_temp</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># calculate difference of f1 and f2 and find its global minimum</span>
+    <span class="n">f_diff</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">f1</span> <span class="o">-</span> <span class="n">f2</span><span class="p">)</span>
+    <span class="n">ind1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">f1</span><span class="p">)</span>
+    <span class="n">ind2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">f2</span><span class="p">)</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">f_diff</span><span class="p">)</span>
+
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[(</span><span class="n">ind</span><span class="o">&lt;</span><span class="n">ind1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">ind</span><span class="o">&gt;</span><span class="n">ind2</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">f_diff</span><span class="p">)</span>
+        <span class="n">a</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">thr_ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+
+        <span class="k">while</span> <span class="n">thr_ind</span><span class="o">&lt;</span><span class="n">ind1</span> <span class="ow">or</span> <span class="n">thr_ind</span><span class="o">&gt;</span><span class="n">ind2</span><span class="p">:</span>
+            <span class="n">a</span><span class="o">+=</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="n">a</span><span class="o">&gt;=</span><span class="nb">len</span><span class="p">(</span><span class="n">ind</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Missing index&quot;</span><span class="p">)</span>
+            <span class="n">thr_ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="n">a</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">thr_ind</span> <span class="o">=</span> <span class="n">ind</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">thr</span> <span class="o">=</span> <span class="n">x_temp</span><span class="p">[</span><span class="n">thr_ind</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">draw</span><span class="p">:</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_temp</span><span class="p">,</span> <span class="n">f1</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;f1&#39;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_temp</span><span class="p">,</span> <span class="n">f2</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;f2&#39;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Variable&quot;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Model&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+
+        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_temp</span><span class="p">,</span> <span class="n">f_diff</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;f_diff&#39;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Variable&quot;</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Models difference&quot;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+        <span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Threshold: </span><span class="si">{</span><span class="n">thr</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">thr</span></div>
+
+
+<div class="viewcode-block" id="get_pixel_distribution">
+<a class="viewcode-back" href="../../../generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.get_pixel_distribution">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_pixel_distribution</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute the pixel value distribution for each RGB channel of an image.</span>
+
+<span class="sd">    This function calculates histograms of pixel intensities (0–255) separately</span>
+<span class="sd">    for the Red, Green, and Blue channels of an input RGB image. Counts for</span>
+<span class="sd">    near-white pixels (values 254 and 255) are set to zero to remove artificial</span>
+<span class="sd">    or background artifacts.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img : ndarray of shape (M, N, 3)</span>
+<span class="sd">        Input RGB image as a NumPy array with values in the range [0, 255].</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    R : ndarray of shape (256,)</span>
+<span class="sd">        Histogram of Red channel pixel intensities (with counts for 254 and 255 set to zero).</span>
+<span class="sd">    G : ndarray of shape (256,)</span>
+<span class="sd">        Histogram of Green channel pixel intensities (with counts for 254 and 255 set to zero).</span>
+<span class="sd">    B : ndarray of shape (256,)</span>
+<span class="sd">        Histogram of Blue channel pixel intensities (with counts for 254 and 255 set to zero).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; R, G, B = get_pixel_distribution(image)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Red channel counts:&quot;, R)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Green channel counts:&quot;, G)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Blue channel counts:&quot;, B)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># get distribution of pixel values per color channel</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">img</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+    <span class="n">bins</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">256.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">R</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">R</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
+    <span class="n">B</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
+    <span class="n">G</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">bins</span><span class="p">)</span>
+
+    <span class="c1"># remove counts from artificial white pixels</span>
+    <span class="n">R</span><span class="p">[</span><span class="mi">254</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">G</span><span class="p">[</span><span class="mi">254</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">B</span><span class="p">[</span><span class="mi">254</span><span class="p">:]</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">R</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">B</span></div>
+
+
+
+<div class="viewcode-block" id="get_thr_image">
+<a class="viewcode-back" href="../../../generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.get_thr_image">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_thr_image</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">thr_min</span> <span class="o">=</span> <span class="mf">0.7</span><span class="o">*</span><span class="mi">255</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute per-channel thresholds for an RGB image using the GaMRed algorithm.</span>
+
+<span class="sd">    This function estimates thresholds for each color channel (Red, Green, Blue)</span>
+<span class="sd">    of an RGB image using the Gaussian Mixture Reduction (GaMRed) method. If a</span>
+<span class="sd">    computed threshold is lower than `thr_min`, the function falls back to Otsu&#39;s</span>
+<span class="sd">    method for that channel. The function also returns the histogram of pixel</span>
+<span class="sd">    values for each channel.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    img : ndarray of shape (M, N, 3)</span>
+<span class="sd">        Input RGB image with pixel values in the range [0, 255].</span>
+<span class="sd">    thr_min : float, optional</span>
+<span class="sd">        Minimum allowable threshold. If a GaMRed threshold is below this value,</span>
+<span class="sd">        Otsu&#39;s method is used instead. Default is 0.7*255.</span>
+<span class="sd">    verbose : bool, optional</span>
+<span class="sd">        If True, prints messages when Otsu&#39;s method is used due to low thresholds.</span>
+<span class="sd">        Default is False.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    thr : dict</span>
+<span class="sd">        Dictionary of thresholds for each color channel:</span>
+<span class="sd">        - ``&quot;R&quot;`` : float, threshold for the Red channel</span>
+<span class="sd">        - ``&quot;G&quot;`` : float, threshold for the Green channel</span>
+<span class="sd">        - ``&quot;B&quot;`` : float, threshold for the Blue channel</span>
+<span class="sd">    R : ndarray of shape (256,)</span>
+<span class="sd">        Histogram of Red channel pixel values.</span>
+<span class="sd">    G : ndarray of shape (256,)</span>
+<span class="sd">        Histogram of Green channel pixel values.</span>
+<span class="sd">    B : ndarray of shape (256,)</span>
+<span class="sd">        Histogram of Blue channel pixel values.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Uses :func:`get_pixel_distribution` to compute per-channel histograms.</span>
+<span class="sd">    - Thresholds are initially estimated using :func:`GaMRed_hist`.</span>
+<span class="sd">    - If a threshold is below `thr_min`, the function uses :func:`two_step_otsu`</span>
+<span class="sd">      as a fallback for robustness.</span>
+<span class="sd">    - `K=2` and `SW=5` are fixed parameters for the GaMRed algorithm.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; thr, R, G, B = get_thr_image(image, thr_min=180, verbose=True)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Thresholds:&quot;, thr)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Red channel histogram:&quot;, R)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">256</span><span class="p">)</span>
+    <span class="n">K</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">SW</span> <span class="o">=</span> <span class="mi">5</span>
+    <span class="n">draw</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">R</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">get_pixel_distribution</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">hist</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;R&quot;</span><span class="p">:</span> <span class="n">R</span><span class="p">,</span>
+            <span class="s2">&quot;G&quot;</span><span class="p">:</span> <span class="n">G</span><span class="p">,</span>
+            <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="n">B</span><span class="p">}</span>
+
+    <span class="n">thr</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;R&quot;</span><span class="p">:</span> <span class="n">GaMRed_hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">hist</span><span class="p">[</span><span class="s2">&quot;R&quot;</span><span class="p">],</span> <span class="n">K</span><span class="p">,</span> <span class="n">draw</span><span class="p">,</span> <span class="n">SW</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+           <span class="s2">&quot;G&quot;</span><span class="p">:</span> <span class="n">GaMRed_hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">hist</span><span class="p">[</span><span class="s2">&quot;G&quot;</span><span class="p">],</span> <span class="n">K</span><span class="p">,</span> <span class="n">draw</span><span class="p">,</span> <span class="n">SW</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+           <span class="s2">&quot;B&quot;</span><span class="p">:</span> <span class="n">GaMRed_hist</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">hist</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">],</span> <span class="n">K</span><span class="p">,</span> <span class="n">draw</span><span class="p">,</span> <span class="n">SW</span><span class="p">)[</span><span class="mi">0</span><span class="p">]}</span>
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">thr</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="n">thr_min</span><span class="p">:</span>
+            <span class="n">thr</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">two_step_otsu</span><span class="p">(</span><span class="n">hist</span><span class="o">=</span><span class="n">hist</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Too low threshold for </span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2"> channel, use Otsu instead.&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">thr</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">G</span><span class="p">,</span> <span class="n">B</span></div>
+
+
+<div class="viewcode-block" id="two_step_otsu">
+<a class="viewcode-back" href="../../../generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.two_step_otsu">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">two_step_otsu</span><span class="p">(</span><span class="n">hist</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute a threshold using a two-step Otsu algorithm.</span>
+
+<span class="sd">    This function applies a hierarchical, two-step version of Otsu&#39;s method</span>
+<span class="sd">    to determine a threshold from a histogram. The first Otsu threshold divides</span>
+<span class="sd">    the histogram roughly in half, and the second Otsu threshold refines the</span>
+<span class="sd">    separation within the upper segment of the histogram. This is useful for</span>
+<span class="sd">    images with uneven lighting or bimodal intensity distributions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    hist : ndarray of shape (256,)</span>
+<span class="sd">        Histogram of pixel intensities (counts per bin).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    thr : float</span>
+<span class="sd">        Computed threshold value in the range [0, 255].</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Relies on :func:`otsuthresh` (assumed available) for standard Otsu threshold computation.</span>
+<span class="sd">    - The second step focuses on the upper portion of the histogram to refine</span>
+<span class="sd">      the threshold.</span>
+<span class="sd">    - The final threshold is scaled to the 0–255 range and rounded to the nearest integer.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; thr = two_step_otsu(hist)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Two-step Otsu threshold:&quot;, thr)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">tmp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">otsuthresh</span><span class="p">(</span><span class="n">hist</span><span class="p">)</span>
+    <span class="n">tmp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmp</span><span class="o">*</span><span class="mi">255</span><span class="p">)</span>
+    <span class="n">tmp2</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">otsuthresh</span><span class="p">(</span><span class="n">hist</span><span class="p">[</span><span class="n">tmp</span><span class="o">-</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="n">thr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">tmp</span><span class="o">+</span><span class="p">(</span><span class="mi">255</span><span class="o">-</span><span class="n">tmp</span><span class="p">)</span><span class="o">*</span><span class="n">tmp2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">thr</span></div>
+
+
+<div class="viewcode-block" id="otsuthresh">
+<a class="viewcode-back" href="../../../generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.otsuthresh">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">otsuthresh</span><span class="p">(</span><span class="n">counts</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Compute Otsu&#39;s threshold and effectiveness metric for a histogram.</span>
+
+<span class="sd">    This function implements Otsu&#39;s method in Python, based on the MATLAB implementation.</span>
+<span class="sd">    It calculates the threshold that maximizes the between-class variance for a histogram</span>
+<span class="sd">    of pixel counts, along with an effectiveness metric indicating the separation quality.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    counts : array_like</span>
+<span class="sd">        Histogram of pixel intensities (counts per bin).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    t : float</span>
+<span class="sd">        Normalized threshold value in the range [0, 1].</span>
+<span class="sd">    em : float</span>
+<span class="sd">        Effectiveness metric of the threshold (ratio of between-class variance</span>
+<span class="sd">        to total variance). Higher values indicate better separation.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    - Counts are converted to probabilities and cumulative sums are computed</span>
+<span class="sd">      to calculate the between-class variance.</span>
+<span class="sd">    - NaN values arising from division by zero are safely replaced with `-inf`.</span>
+<span class="sd">    - Function is based on MATLAB&#39;s implementation.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; t, em = otsuthresh(hist)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Normalized Otsu threshold:&quot;, t)</span>
+<span class="sd">    &gt;&gt;&gt; print(&quot;Effectiveness metric:&quot;, em)</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+
+<span class="sd">    Algorithm is described in \ :footcite:p:`Otsu`</span>
+
+<span class="sd">    .. footbibliography::</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">counts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">counts</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+    <span class="n">num_bins</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="c1"># Probabilities</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">counts</span> <span class="o">/</span> <span class="n">counts</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+    <span class="c1"># Cumulative sums</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_bins</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+    <span class="n">mu_t</span> <span class="o">=</span> <span class="n">mu</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># Between-class variance</span>
+    <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+        <span class="c1"># Ignore invalid value encountered in divide (handled in the next lines of code)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">simplefilter</span><span class="p">(</span><span class="s2">&quot;ignore&quot;</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="ne">RuntimeWarning</span><span class="p">)</span>
+        <span class="n">sigma_b_squared</span> <span class="o">=</span> <span class="p">(</span><span class="n">mu_t</span> <span class="o">*</span> <span class="n">omega</span> <span class="o">-</span> <span class="n">mu</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">omega</span><span class="p">))</span>
+
+    <span class="c1"># Handle NaNs (avoid division by zero cases)</span>
+    <span class="n">sigma_b_squared</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan_to_num</span><span class="p">(</span><span class="n">sigma_b_squared</span><span class="p">,</span> <span class="n">nan</span><span class="o">=-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">)</span>
+
+    <span class="n">maxval</span> <span class="o">=</span> <span class="n">sigma_b_squared</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">maxval</span><span class="p">)</span> <span class="ow">and</span> <span class="n">maxval</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">sigma_b_squared</span> <span class="o">==</span> <span class="n">maxval</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="c1"># Normalize threshold</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">idx</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_bins</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="c1"># Effectiveness metric</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">maxval</span><span class="p">)</span> <span class="ow">and</span> <span class="n">maxval</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">em</span> <span class="o">=</span> <span class="n">maxval</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_bins</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span> <span class="o">-</span> <span class="n">mu_t</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">em</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+    <span class="k">return</span> <span class="n">t</span><span class="p">,</span> <span class="n">em</span></div>
+
+
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

@@ -1,0 +1,12 @@
+﻿histo\_kit.grand\_qc.artifacts
+==============================
+
+.. automodule:: histo_kit.grand_qc.artifacts
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Artifact
+   

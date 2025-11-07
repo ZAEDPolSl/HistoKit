@@ -1,0 +1,15 @@
+﻿histo\_kit.utils.wsi
+====================
+
+.. automodule:: histo_kit.utils.wsi
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_regions_location
+      load_wsi_mag
+      read_region
+      slide_info
+   

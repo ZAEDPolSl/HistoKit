@@ -1,0 +1,14 @@
+﻿histo\_kit.utils.patches
+========================
+
+.. automodule:: histo_kit.utils.patches
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      get_patch_grid
+      merge_patches
+      patch_wsi
+   

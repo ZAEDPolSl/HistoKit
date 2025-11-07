@@ -1,0 +1,844 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="#"><link rel="search" title="Search" href="search.html">
+
+    <!-- Generated with Sphinx 8.2.3 and Furo 2025.09.25 --><title>Index - HistoKit 0.0.1 documentation</title>
+<link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d111a655" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=580074bf" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=8dab3a3b" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f2f2f2;
+  --color-code-foreground: #1e1e1e;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation" aria-label="Toggle site navigation sidebar">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc" aria-label="Toggle table of contents sidebar">
+<label class="overlay sidebar-overlay" for="__navigation"></label>
+<label class="overlay toc-overlay" for="__toc"></label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <span class="icon"><svg><use href="#svg-menu"></use></svg></span>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">HistoKit 0.0.1 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <span class="sidebar-brand-text">HistoKit 0.0.1 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="TissueDetection.html">Tissue &amp; Artifacts Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="CreatingPatches.html">Creating Patches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Reference</span></p>
+<ul>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api.html">Documentation</a><input aria-label="Toggle navigation of Documentation" class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.grand_qc.artifact_detection.html">histo_kit.grand_qc.artifact_detection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.grand_qc.artifacts.html">histo_kit.grand_qc.artifacts</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.grand_qc.visualisation.html">histo_kit.grand_qc.visualisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.grand_qc.dataset.html">histo_kit.grand_qc.dataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.grand_qc.model.html">histo_kit.grand_qc.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.tissue_seg.bg_segmentation.html">histo_kit.tissue_seg.bg_segmentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.tissue_seg.postprocessing.html">histo_kit.tissue_seg.postprocessing</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.tissue_seg.find_thr.html">histo_kit.tissue_seg.find_thr</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.utils.patches.html">histo_kit.utils.patches</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.utils.matlab2python.html">histo_kit.utils.matlab2python</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.utils.file_utils.html">histo_kit.utils.file_utils</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.utils.apply_mask.html">histo_kit.utils.apply_mask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.utils.image.html">histo_kit.utils.image</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.utils.wsi.html">histo_kit.utils.wsi</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.stain_normalisation.html">histo_kit.stain_normalisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.mil.html">histo_kit.mil</a></li>
+<li class="toctree-l2"><a class="reference internal" href="generated/histo_kit.foundation_models.html">histo_kit.foundation_models</a></li>
+</ul>
+</li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle" aria-label="Toggle Light / Dark / Auto color theme">
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <span class="icon"><svg><use href="#svg-toc"></use></svg></span>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          
+<section class="genindex-section">
+  <h1 id="index">Index</h1>
+  <div class="genindex-jumpbox"><a href="#A"><strong>A</strong></a> | <a href="#B"><strong>B</strong></a> | <a href="#C"><strong>C</strong></a> | <a href="#D"><strong>D</strong></a> | <a href="#E"><strong>E</strong></a> | <a href="#F"><strong>F</strong></a> | <a href="#G"><strong>G</strong></a> | <a href="#H"><strong>H</strong></a> | <a href="#I"><strong>I</strong></a> | <a href="#L"><strong>L</strong></a> | <a href="#M"><strong>M</strong></a> | <a href="#N"><strong>N</strong></a> | <a href="#O"><strong>O</strong></a> | <a href="#P"><strong>P</strong></a> | <a href="#R"><strong>R</strong></a> | <a href="#S"><strong>S</strong></a> | <a href="#T"><strong>T</strong></a> | <a href="#W"><strong>W</strong></a> | <a href="#X"><strong>X</strong></a> | <a href="#Z"><strong>Z</strong></a></div>
+</section>
+<section id="A" class="genindex-section">
+  <h2>A</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.add_module">add_module() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.apply">apply() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.apply_mask.html#histo_kit.utils.apply_mask.apply_mask">apply_mask() (in module histo_kit.utils.apply_mask)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.artifacts.html#histo_kit.grand_qc.artifacts.Artifact.ART_DARKSPOT">ART_DARKSPOT (histo_kit.grand_qc.artifacts.Artifact attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.artifacts.html#histo_kit.grand_qc.artifacts.Artifact.ART_EDGE">ART_EDGE (histo_kit.grand_qc.artifacts.Artifact attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.artifacts.html#histo_kit.grand_qc.artifacts.Artifact.ART_FOCUS">ART_FOCUS (histo_kit.grand_qc.artifacts.Artifact attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.artifacts.html#histo_kit.grand_qc.artifacts.Artifact.ART_FOLD">ART_FOLD (histo_kit.grand_qc.artifacts.Artifact attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.artifacts.html#histo_kit.grand_qc.artifacts.Artifact.ART_PEN">ART_PEN (histo_kit.grand_qc.artifacts.Artifact attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.artifacts.html#histo_kit.grand_qc.artifacts.Artifact">Artifact (class in histo_kit.grand_qc.artifacts)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="B" class="genindex-section">
+  <h2>B</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.bfloat16">bfloat16() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.artifacts.html#histo_kit.grand_qc.artifacts.Artifact.BG_MODEL">BG_MODEL (histo_kit.grand_qc.artifacts.Artifact attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.artifacts.html#histo_kit.grand_qc.artifacts.Artifact.BG_THR">BG_THR (histo_kit.grand_qc.artifacts.Artifact attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.buffers">buffers() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="C" class="genindex-section">
+  <h2>C</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.call_super_init">call_super_init (histo_kit.grand_qc.model.GrandQC attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.children">children() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.postprocessing.html#histo_kit.tissue_seg.postprocessing.cluster_regions">cluster_regions() (in module histo_kit.tissue_seg.postprocessing)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.artifacts.html#histo_kit.grand_qc.artifacts.Artifact.color">color() (histo_kit.grand_qc.artifacts.Artifact method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.dataset.html#histo_kit.grand_qc.dataset.GrandQCDataset.coords">coords (histo_kit.grand_qc.dataset.GrandQCDataset attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.cpu">cpu() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.file_utils.html#histo_kit.utils.file_utils.create_folder">create_folder() (in module histo_kit.utils.file_utils)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.cuda">cuda() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="D" class="genindex-section">
+  <h2>D</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.artifact_detection.html#histo_kit.grand_qc.artifact_detection.detect_artifacts_slide">detect_artifacts_slide() (in module histo_kit.grand_qc.artifact_detection)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.double">double() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.dump_patches">dump_patches (histo_kit.grand_qc.model.GrandQC attribute)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="E" class="genindex-section">
+  <h2>E</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.EM_iter_hist">EM_iter_hist() (in module histo_kit.tissue_seg.find_thr)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.eval">eval() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.extra_repr">extra_repr() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="F" class="genindex-section">
+  <h2>F</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.find_thr">find_thr() (in module histo_kit.tissue_seg.find_thr)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.float">float() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.forward">forward() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="G" class="genindex-section">
+  <h2>G</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.GaMRed_hist">GaMRed_hist() (in module histo_kit.tissue_seg.find_thr)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.image.html#histo_kit.utils.image.gaussian_window">gaussian_window() (in module histo_kit.utils.image)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.file_utils.html#histo_kit.utils.file_utils.get_basename">get_basename() (in module histo_kit.utils.file_utils)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.get_buffer">get_buffer() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.get_extra_state">get_extra_state() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.get_parameter">get_parameter() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.patches.html#histo_kit.utils.patches.get_patch_grid">get_patch_grid() (in module histo_kit.utils.patches)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.get_pixel_distribution">get_pixel_distribution() (in module histo_kit.tissue_seg.find_thr)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.utils.wsi.html#histo_kit.utils.wsi.get_regions_location">get_regions_location() (in module histo_kit.utils.wsi)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.matlab2python.html#histo_kit.utils.matlab2python.get_strel_disk">get_strel_disk() (in module histo_kit.utils.matlab2python)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.get_submodule">get_submodule() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.get_thr_image">get_thr_image() (in module histo_kit.tissue_seg.find_thr)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.matlab2python.html#histo_kit.utils.matlab2python.get_wsi_ind_matlab">get_wsi_ind_matlab() (in module histo_kit.utils.matlab2python)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.gmm_init_dp_hist">gmm_init_dp_hist() (in module histo_kit.tissue_seg.find_thr)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC">GrandQC (class in histo_kit.grand_qc.model)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.grandQC">grandQC (histo_kit.grand_qc.model.GrandQC attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.dataset.html#histo_kit.grand_qc.dataset.GrandQCDataset">GrandQCDataset (class in histo_kit.grand_qc.dataset)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="H" class="genindex-section">
+  <h2>H</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.half">half() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li>
+    histo_kit.foundation_models
+
+        <ul>
+          <li><a href="generated/histo_kit.foundation_models.html#module-histo_kit.foundation_models">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.grand_qc.artifact_detection
+
+        <ul>
+          <li><a href="generated/histo_kit.grand_qc.artifact_detection.html#module-histo_kit.grand_qc.artifact_detection">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.grand_qc.artifacts
+
+        <ul>
+          <li><a href="generated/histo_kit.grand_qc.artifacts.html#module-histo_kit.grand_qc.artifacts">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.grand_qc.dataset
+
+        <ul>
+          <li><a href="generated/histo_kit.grand_qc.dataset.html#module-histo_kit.grand_qc.dataset">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.grand_qc.model
+
+        <ul>
+          <li><a href="generated/histo_kit.grand_qc.model.html#module-histo_kit.grand_qc.model">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.grand_qc.visualisation
+
+        <ul>
+          <li><a href="generated/histo_kit.grand_qc.visualisation.html#module-histo_kit.grand_qc.visualisation">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.mil
+
+        <ul>
+          <li><a href="generated/histo_kit.mil.html#module-histo_kit.mil">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.stain_normalisation
+
+        <ul>
+          <li><a href="generated/histo_kit.stain_normalisation.html#module-histo_kit.stain_normalisation">module</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li>
+    histo_kit.tissue_seg.bg_segmentation
+
+        <ul>
+          <li><a href="generated/histo_kit.tissue_seg.bg_segmentation.html#module-histo_kit.tissue_seg.bg_segmentation">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.tissue_seg.find_thr
+
+        <ul>
+          <li><a href="generated/histo_kit.tissue_seg.find_thr.html#module-histo_kit.tissue_seg.find_thr">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.tissue_seg.postprocessing
+
+        <ul>
+          <li><a href="generated/histo_kit.tissue_seg.postprocessing.html#module-histo_kit.tissue_seg.postprocessing">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.utils.apply_mask
+
+        <ul>
+          <li><a href="generated/histo_kit.utils.apply_mask.html#module-histo_kit.utils.apply_mask">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.utils.file_utils
+
+        <ul>
+          <li><a href="generated/histo_kit.utils.file_utils.html#module-histo_kit.utils.file_utils">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.utils.image
+
+        <ul>
+          <li><a href="generated/histo_kit.utils.image.html#module-histo_kit.utils.image">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.utils.matlab2python
+
+        <ul>
+          <li><a href="generated/histo_kit.utils.matlab2python.html#module-histo_kit.utils.matlab2python">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.utils.patches
+
+        <ul>
+          <li><a href="generated/histo_kit.utils.patches.html#module-histo_kit.utils.patches">module</a>
+</li>
+        </ul></li>
+        <li>
+    histo_kit.utils.wsi
+
+        <ul>
+          <li><a href="generated/histo_kit.utils.wsi.html#module-histo_kit.utils.wsi">module</a>
+</li>
+        </ul></li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="I" class="genindex-section">
+  <h2>I</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.ipu">ipu() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="L" class="genindex-section">
+  <h2>L</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.utils.matlab2python.html#histo_kit.utils.matlab2python.list2cell">list2cell() (in module histo_kit.utils.matlab2python)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.load_state_dict">load_state_dict() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.wsi.html#histo_kit.utils.wsi.load_wsi_mag">load_wsi_mag() (in module histo_kit.utils.wsi)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="M" class="genindex-section">
+  <h2>M</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.visualisation.html#histo_kit.grand_qc.visualisation.make_artifacts_color_map">make_artifacts_color_map() (in module histo_kit.grand_qc.visualisation)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.visualisation.html#histo_kit.grand_qc.visualisation.make_overlay">make_overlay() (in module histo_kit.grand_qc.visualisation)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.patches.html#histo_kit.utils.patches.merge_patches">merge_patches() (in module histo_kit.utils.patches)</a>
+</li>
+        <li>
+    module
+
+        <ul>
+          <li><a href="generated/histo_kit.foundation_models.html#module-histo_kit.foundation_models">histo_kit.foundation_models</a>
+</li>
+          <li><a href="generated/histo_kit.grand_qc.artifact_detection.html#module-histo_kit.grand_qc.artifact_detection">histo_kit.grand_qc.artifact_detection</a>
+</li>
+          <li><a href="generated/histo_kit.grand_qc.artifacts.html#module-histo_kit.grand_qc.artifacts">histo_kit.grand_qc.artifacts</a>
+</li>
+          <li><a href="generated/histo_kit.grand_qc.dataset.html#module-histo_kit.grand_qc.dataset">histo_kit.grand_qc.dataset</a>
+</li>
+          <li><a href="generated/histo_kit.grand_qc.model.html#module-histo_kit.grand_qc.model">histo_kit.grand_qc.model</a>
+</li>
+          <li><a href="generated/histo_kit.grand_qc.visualisation.html#module-histo_kit.grand_qc.visualisation">histo_kit.grand_qc.visualisation</a>
+</li>
+          <li><a href="generated/histo_kit.mil.html#module-histo_kit.mil">histo_kit.mil</a>
+</li>
+          <li><a href="generated/histo_kit.stain_normalisation.html#module-histo_kit.stain_normalisation">histo_kit.stain_normalisation</a>
+</li>
+          <li><a href="generated/histo_kit.tissue_seg.bg_segmentation.html#module-histo_kit.tissue_seg.bg_segmentation">histo_kit.tissue_seg.bg_segmentation</a>
+</li>
+          <li><a href="generated/histo_kit.tissue_seg.find_thr.html#module-histo_kit.tissue_seg.find_thr">histo_kit.tissue_seg.find_thr</a>
+</li>
+          <li><a href="generated/histo_kit.tissue_seg.postprocessing.html#module-histo_kit.tissue_seg.postprocessing">histo_kit.tissue_seg.postprocessing</a>
+</li>
+          <li><a href="generated/histo_kit.utils.apply_mask.html#module-histo_kit.utils.apply_mask">histo_kit.utils.apply_mask</a>
+</li>
+          <li><a href="generated/histo_kit.utils.file_utils.html#module-histo_kit.utils.file_utils">histo_kit.utils.file_utils</a>
+</li>
+          <li><a href="generated/histo_kit.utils.image.html#module-histo_kit.utils.image">histo_kit.utils.image</a>
+</li>
+          <li><a href="generated/histo_kit.utils.matlab2python.html#module-histo_kit.utils.matlab2python">histo_kit.utils.matlab2python</a>
+</li>
+          <li><a href="generated/histo_kit.utils.patches.html#module-histo_kit.utils.patches">histo_kit.utils.patches</a>
+</li>
+          <li><a href="generated/histo_kit.utils.wsi.html#module-histo_kit.utils.wsi">histo_kit.utils.wsi</a>
+</li>
+        </ul></li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.modules">modules() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="N" class="genindex-section">
+  <h2>N</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.named_buffers">named_buffers() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.named_children">named_children() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.named_modules">named_modules() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.named_parameters">named_parameters() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.artifacts.html#histo_kit.grand_qc.artifacts.Artifact.NORM">NORM (histo_kit.grand_qc.artifacts.Artifact attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.norm_pdf">norm_pdf() (in module histo_kit.tissue_seg.find_thr)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="O" class="genindex-section">
+  <h2>O</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.otsuthresh">otsuthresh() (in module histo_kit.tissue_seg.find_thr)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="P" class="genindex-section">
+  <h2>P</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.dataset.html#histo_kit.grand_qc.dataset.GrandQCDataset.pad_value">pad_value (histo_kit.grand_qc.dataset.GrandQCDataset attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.parameters">parameters() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.dataset.html#histo_kit.grand_qc.dataset.GrandQCDataset.patch_size">patch_size (histo_kit.grand_qc.dataset.GrandQCDataset attribute)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.utils.patches.html#histo_kit.utils.patches.patch_wsi">patch_wsi() (in module histo_kit.utils.patches)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.bg_segmentation.html#histo_kit.tissue_seg.bg_segmentation.plot_rgb_hist">plot_rgb_hist() (in module histo_kit.tissue_seg.bg_segmentation)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.dataset.html#histo_kit.grand_qc.dataset.GrandQCDataset.prep_fn">prep_fn (histo_kit.grand_qc.dataset.GrandQCDataset attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.dataset.html#histo_kit.grand_qc.dataset.GrandQCDataset.preprocess">preprocess() (histo_kit.grand_qc.dataset.GrandQCDataset method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="R" class="genindex-section">
+  <h2>R</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.utils.wsi.html#histo_kit.utils.wsi.read_region">read_region() (in module histo_kit.utils.wsi)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.register_backward_hook">register_backward_hook() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.register_buffer">register_buffer() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.register_forward_hook">register_forward_hook() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.register_forward_pre_hook">register_forward_pre_hook() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.register_full_backward_hook">register_full_backward_hook() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.register_full_backward_pre_hook">register_full_backward_pre_hook() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.register_load_state_dict_post_hook">register_load_state_dict_post_hook() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.register_module">register_module() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.register_parameter">register_parameter() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.register_state_dict_pre_hook">register_state_dict_pre_hook() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.postprocessing.html#histo_kit.tissue_seg.postprocessing.remove_black_pen">remove_black_pen() (in module histo_kit.tissue_seg.postprocessing)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.postprocessing.html#histo_kit.tissue_seg.postprocessing.remove_gray_stains">remove_gray_stains() (in module histo_kit.tissue_seg.postprocessing)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.postprocessing.html#histo_kit.tissue_seg.postprocessing.remove_small_objects">remove_small_objects() (in module histo_kit.tissue_seg.postprocessing)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.requires_grad_">requires_grad_() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="S" class="genindex-section">
+  <h2>S</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.utils.file_utils.html#histo_kit.utils.file_utils.save_rescaled">save_rescaled() (in module histo_kit.utils.file_utils)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.bg_segmentation.html#histo_kit.tissue_seg.bg_segmentation.segment_tissue">segment_tissue() (in module histo_kit.tissue_seg.bg_segmentation)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.set_extra_state">set_extra_state() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.share_memory">share_memory() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.wsi.html#histo_kit.utils.wsi.slide_info">slide_info() (in module histo_kit.utils.wsi)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.state_dict">state_dict() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="T" class="genindex-section">
+  <h2>T</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.T_destination">T_destination (histo_kit.grand_qc.model.GrandQC attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.to">to() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.to_empty">to_empty() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.utils.image.html#histo_kit.utils.image.to_tensor_x">to_tensor_x() (in module histo_kit.utils.image)</a>
+</li>
+    </ul></td>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.train">train() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.training">training (histo_kit.grand_qc.model.GrandQC attribute)</a>
+</li>
+        <li><a href="generated/histo_kit.tissue_seg.find_thr.html#histo_kit.tissue_seg.find_thr.two_step_otsu">two_step_otsu() (in module histo_kit.tissue_seg.find_thr)</a>
+</li>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.type">type() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="W" class="genindex-section">
+  <h2>W</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.tissue_seg.bg_segmentation.html#histo_kit.tissue_seg.bg_segmentation.wsi_tissue_seg">wsi_tissue_seg() (in module histo_kit.tissue_seg.bg_segmentation)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="X" class="genindex-section">
+  <h2>X</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.xpu">xpu() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+<section id="Z" class="genindex-section">
+  <h2>Z</h2>
+  <table style="width: 100%" class="indextable genindextable"><tr>
+    <td style="width: 33%; vertical-align: top;"><ul>
+        <li><a href="generated/histo_kit.grand_qc.model.html#histo_kit.grand_qc.model.GrandQC.zero_grad">zero_grad() (histo_kit.grand_qc.model.GrandQC method)</a>
+</li>
+    </ul></td>
+  </tr></table>
+</section>
+
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=46bd48cc"></script>
+    </body>
+</html>

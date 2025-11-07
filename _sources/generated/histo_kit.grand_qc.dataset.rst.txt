@@ -1,0 +1,12 @@
+﻿histo\_kit.grand\_qc.dataset
+============================
+
+.. automodule:: histo_kit.grand_qc.dataset
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      GrandQCDataset
+   

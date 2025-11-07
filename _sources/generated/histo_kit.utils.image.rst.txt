@@ -1,0 +1,13 @@
+﻿histo\_kit.utils.image
+======================
+
+.. automodule:: histo_kit.utils.image
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      gaussian_window
+      to_tensor_x
+   

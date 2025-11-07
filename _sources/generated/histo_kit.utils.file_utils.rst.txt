@@ -1,0 +1,14 @@
+﻿histo\_kit.utils.file\_utils
+============================
+
+.. automodule:: histo_kit.utils.file_utils
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      create_folder
+      get_basename
+      save_rescaled
+   
