@@ -15,8 +15,8 @@ Script for tissue region and artifacts detection
 parser = argparse.ArgumentParser()
 
 # Common settings
-parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Tmp/jmerta/test_data_bbox/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/test_data_bbox_res/')
+parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/Compass/HE/')
+parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/HE-masks-compass_30_11_2025/')
 parser.add_argument('--vis_mag', help='Magnification of saved visualisations.',default=0.625, type=int)
 parser.add_argument('--overwrite', help='Overwrite files with results if they exist in the output folder or not.',default=False, type=bool)
 
@@ -27,10 +27,10 @@ parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
 parser.add_argument('--tissdet_mag', help='Magnification used for tissue detection',default=2.5, type=float)
 parser.add_argument('--remove_small_objects', help='Remove small tissue areas during post-processing or not.',default=True, type=bool)
-parser.add_argument('--workers', help='Number of workers used for background tissue detection.',default=4, type=int,choices=range(1, os.cpu_count() + 1))
+parser.add_argument('--workers', help='Number of workers used for background tissue detection.',default=8, type=int,choices=range(1, os.cpu_count() + 1))
 
 # Settings for artifact detection with GrandQC
-parser.add_argument('--run_artifacts_det', type=bool, help='Run artifacts detection step or not.', default=True)
+parser.add_argument('--run_artifacts_det', type=bool, help='Run artifacts detection step or not.', default=False)
 parser.add_argument('--save_confidence_maps', help='Save confidence maps or not.',default=True, type=bool)
 parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu', choices=["cuda", "cpu"],default="cuda")
 parser.add_argument('--workers_per_slide', help='Number of workers used in Pytorch dataset during artifact segmentation.',default=6, type=int,choices=range(1, os.cpu_count() + 1))

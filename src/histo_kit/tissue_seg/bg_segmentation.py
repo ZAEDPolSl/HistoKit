@@ -8,7 +8,7 @@ import scipy
 from openslide import OpenSlide
 from scipy import ndimage as ndi
 from .find_thr import get_thr_image
-from .postprocessing import remove_black_pen, get_strel_disk, remove_small_objects, \
+from .postprocessing import remove_pen, get_strel_disk, remove_small_objects, \
     remove_gray_stains
 from ..utils.apply_mask import apply_mask
 from ..utils.file_utils import get_basename, save_rescaled
@@ -75,8 +75,13 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2, rem_
     thr, R, G, B = get_thr_image(img_np, thr_min=0.7 * 255, verbose=False)
 
     # remove black pen
-    mask_pen = remove_black_pen(img_np, 10,  thr, 5)
-    img_np = apply_mask(img_np, mask_pen, inv=True)
+    mask_pen = remove_pen(img_np, "black", 12,  0, thr, 9, "RGB")
+    if np.any(mask_pen):
+        img_np = apply_mask(img_np, mask_pen, inv=True)
+
+    mask_pen = remove_pen(img_np, "green", 12, 150, thr, 9, "RGB")
+    if np.any(mask_pen):
+        img_np = apply_mask(img_np, mask_pen, inv=True)
 
     # get regions above background
     mask = ~(((img_np[..., 0] > thr["R"]) & (img_np[..., 1] > thr["G"])) |
@@ -86,15 +91,17 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2, rem_
     # remove gray stains with low Chroma component
     mask = remove_gray_stains(img_np, mask)
 
-    # fill holes in mask (if fill_holes==True)
-    if fill_holes:
-        mask = ndi.binary_fill_holes(mask)
-
     # morphological operations to clean the mask
     SE_close = get_strel_disk(close_disk_r)
     SE_open = get_strel_disk(open_disk_r)
+    #mask = ndi.binary_closing(mask, SE_close)
+
     mask = ndi.binary_closing(mask, SE_close)
     mask = ndi.binary_opening(mask, SE_open)
+
+    # fill holes in mask (if fill_holes==True)
+    if fill_holes:
+        mask = ndi.binary_fill_holes(mask)
 
     # remove small regions
     if rem_small_obj:
