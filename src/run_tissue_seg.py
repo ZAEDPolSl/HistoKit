@@ -8,6 +8,8 @@ from histo_kit.tissue_seg.bg_segmentation import segment_tissue
 from histo_kit.utils.file_utils import create_folder, get_basename
 from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from histo_kit.grand_qc.statistics import calculate_stats
+
 """
 Script for tissue region and artifacts detection
 """
@@ -15,10 +17,13 @@ Script for tissue region and artifacts detection
 parser = argparse.ArgumentParser()
 
 # Common settings
-parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/Compass/HE/')
-parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/HE-masks-compass_30_11_2025/')
+parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default=None)
+parser.add_argument('--files_to_process', type=str, help='Path to the text file with absolute .svs filepaths to process. '
+                                                         'This argument will be ignored if wsi_dir is provided', default="/mnt/data/Tmp/jmerta/HE/svs_to_process.svs")
+parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/test/')
 parser.add_argument('--vis_mag', help='Magnification of saved visualisations.',default=0.625, type=int)
 parser.add_argument('--overwrite', help='Overwrite files with results if they exist in the output folder or not.',default=False, type=bool)
+parser.add_argument('--save_mag', help='The magnification for background and artifacts masks.',default=2.5, type=float)
 
 # Settings for background detection with thresholding methods
 parser.add_argument('--run_tis_det', type=bool, help='Run tissue detection step or not.', default=True)
@@ -30,7 +35,7 @@ parser.add_argument('--remove_small_objects', help='Remove small tissue areas du
 parser.add_argument('--workers', help='Number of workers used for background tissue detection.',default=8, type=int,choices=range(1, os.cpu_count() + 1))
 
 # Settings for artifact detection with GrandQC
-parser.add_argument('--run_artifacts_det', type=bool, help='Run artifacts detection step or not.', default=False)
+parser.add_argument('--run_artifacts_det', type=bool, help='Run artifacts detection step or not.', default=True)
 parser.add_argument('--save_confidence_maps', help='Save confidence maps or not.',default=True, type=bool)
 parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu', choices=["cuda", "cpu"],default="cuda")
 parser.add_argument('--workers_per_slide', help='Number of workers used in Pytorch dataset during artifact segmentation.',default=6, type=int,choices=range(1, os.cpu_count() + 1))
@@ -38,13 +43,12 @@ parser.add_argument('--batch_size', help='Batch size used during artifact segmen
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="/mnt/data/Tmp/jmerta/HE/models/GrandQC_MPP1.pth", type=str)
 parser.add_argument('--grandqc_mpp', help='MPP for grand qc model (mpp=1 corresponds to magnification 10x, mpp=2.0 - 5x, mpp=1.5 - 7.5x)',default=1.0, type=float)
 parser.add_argument('--patch_size_model', help='Patch size for grand QC.',default=512, type=int)
-parser.add_argument('--save_mag', help='The magnification for final tissue regions.',default=2.5, type=float)
 parser.add_argument('--encoder_model', help='Name of a model used as encoder for GrandQC', default='timm-efficientnet-b0', type=str)
 parser.add_argument('--encoder_model_weights', help='Name of weights used for encoder model in GrandQC', default='imagenet', type=str)
 parser.add_argument('--overlap', help='Overlap factor during image patching, set 0 for no overlap and 1 for full overlap', default=0.75, type=float)
 parser.add_argument('--blending_mode', help='Method used to merge GrandQC predictions for overlapping patches. Use one of: gaussian (for weighted average with gaussian kernel), average (for weighted average)', default="gaussian", choices=["gaussian", "average"], type=str)
 parser.add_argument('--blending_sigma', help='Sigma used for gaussian blending mode. When sigma is none it will be set as 0.5*patch_size. This parameter is not used for the average mode.', default=None, type=float)
-
+parser.add_argument('--calculate_stats', type=bool, help='Calculate artifacts statistics or not.', default=True)
 
 def detect_bg_slides(slide_arr):
     error_slides = []
@@ -80,8 +84,14 @@ if __name__ == "__main__":
                                                     if args.save_confidence_maps else None}
 
     # get slides names
-    all_slides = glob.glob(os.path.join(args.wsi_dir, '*.svs'))
-    all_slides.sort(key=os.path.getsize)
+    if args.wsi_dir is not None:
+        all_slides = glob.glob(os.path.join(args.wsi_dir, '*.svs'))
+    elif args.files_to_process is not None:
+        with open(args.files_to_process, 'r') as f:
+            all_slides = [line.strip() for line in f.readlines()]
+    else:
+        print("Please provide either wsi_dir or files_to_process argument.")
+        exit(1)
 
     # exclude slides that exists in the output folder
     if not args.overwrite:
@@ -110,8 +120,16 @@ if __name__ == "__main__":
                 os.remove(f)
 
         with ThreadPoolExecutor(args.workers) as executor:
-            k, m = divmod(len(slides), args.workers)
-            slides_arr = [slides[i * k + min(i, m):(i + 1) * k + min(i + 1, m)] for i in range(args.workers)]
+            # create more futures than workers to keep them busy
+            num_chunks = min(args.workers * 4, len(slides))
+            if num_chunks <= 0:
+                slides_arr = []
+            else:
+                k, m = divmod(len(slides), num_chunks)
+                slides_arr = [
+                    slides[i * k + min(i, m): (i + 1) * k + min(i + 1, m)]
+                    for i in range(num_chunks)
+                ]
             futures = {executor.submit(detect_bg_slides, s): s for s in slides_arr}
 
             with  tqdm(total=len(slides),
@@ -156,16 +174,18 @@ if __name__ == "__main__":
         else:
             slides = all_slides
 
-        print(f"Found {len(all_slides)} WSIs in {args.wsi_dir} directory and {len(tis_det_files)} corresponding .mat files with tissue masks in {folder_tis_det} directory.\n")
-        print("====== STEP 2 =======: Artifacts detection with GrandQC.\n")
+
+        print("====== STEP 2.1 =======: Artifacts detection with GrandQC.\n")
+        print(
+            f"Found {len(all_slides)} WSIs in {args.wsi_dir} directory and {len(tis_det_files)} corresponding .mat files with tissue masks in {folder_tis_det} directory.\n")
         print(f"Loading GrandQC model weights from {args.grandqc_model}...")
 
         model = torch.load(args.grandqc_model, map_location=args.device)
 
         time_start = time.time()
 
-        error_file = os.path.join(args.out_dir, "grandqc_error.txt")
-        log_file = os.path.join(args.out_dir, "grandqc_log.txt")
+        error_file = os.path.join(args.out_dir, "grandqc_error_step_2A.txt")
+        log_file = os.path.join(args.out_dir, "grandqc_log_step_2A.txt")
 
         # remove old log files
         for f in [error_file, log_file]:
@@ -189,6 +209,46 @@ if __name__ == "__main__":
                 print(f"There was an error processing slide: {basename} - {str(e)}")
                 with open(error_file, 'a') as f:
                     f.write(f"{basename} - {str(e)}\n")
+
+        print("Finished STEP 2A (Artifacts detection) - in time: {:.2f} min".format((time.time() - time_start) / 60))
+    if args.calculate_stats:
+        print("====== STEP 2B =======: Calculate artifacts statistics\n")
+
+        time_start = time.time()
+
+        error_file = os.path.join(args.out_dir, "grandqc_error_step_2B.txt")
+        log_file = os.path.join(args.out_dir, "grandqc_log_step_2B.txt")
+
+        # remove old log files
+        for f in [error_file, log_file]:
+            if os.path.exists(f):
+                os.remove(f)
+
+        out_csv = os.path.join(args.out_dir, 'artifacts_stats.csv')
+        if os.path.exists(out_csv):
+            os.remove(out_csv)
+
+        tis_art = glob.glob(paths_dict["masks_grandqc"] + '/*.mat')
+
+        for s_f in tqdm(tis_art, total=len(tis_art), desc="Calculating artifacts statistics..."):
+            basename = get_basename(s_f)
+            try:
+                df = calculate_stats(s_f)
+
+                write_header = not os.path.exists(out_csv)
+                df.to_csv(out_csv, mode='a', index=False, header=write_header)
+
+                with open(log_file, 'a') as f:
+                    f.write(f"{basename}\n")
+            except Exception as e:
+                print(f"There was an error during calculations for slide: {basename} - {str(e)}")
+                with open(error_file, 'a') as f:
+                    f.write(f"{basename} - {str(e)}\n")
+
+    print("Finished STEP 2B (Artifacts detection) - in time: {:.2f} min".format((time.time() - time_start) / 60))
+
+
+
 
 
 

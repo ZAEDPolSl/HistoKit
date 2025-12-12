@@ -250,15 +250,15 @@ def get_patch_grid(regions, patch_size=256, overlap=0.7):
     """
     coords = {"x_start": [], "y_start": [], "x_end": [], "y_end": []}
 
-    for bbox in regions:
-
+    for idx, bbox in enumerate(regions):
+        y_min, x_min, y_max, x_max = bbox
         stride = max(int(round(patch_size * (1.0 - overlap))), 1)
 
-        y_0 = bbox[0] - stride
-        x_0 = bbox[1] - stride
+        y_0 = y_min - stride
+        x_0 = x_min - stride
 
-        tis_h = bbox[2] - y_0  # y_max - y_min
-        tis_w = bbox[3] - x_0  # x_max - x_min
+        tis_h = y_max - y_0  # y_max - y_min
+        tis_w = x_max - x_0  # x_max - x_min
 
         num_x = ceil((tis_w - patch_size) / stride) + 1 if tis_w > patch_size else 1
         num_y = ceil((tis_h - patch_size) / stride) + 1 if tis_h > patch_size else 1
