@@ -18,7 +18,6 @@ parser.add_argument("--out_folder", type=str, help="Input directory with masks c
 parser.add_argument('--desired_mag', help="Desired slide magnification.", default=1, type = float)
 
 
-
 if __name__ == "__main__":
     args = parser.parse_args()
     os.makedirs(args.out_folder, exist_ok=True)

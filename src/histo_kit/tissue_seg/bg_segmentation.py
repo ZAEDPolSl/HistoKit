@@ -2,6 +2,8 @@ import os
 import cv2
 import numpy as np
 import matplotlib
+from PIL import Image
+
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import scipy
@@ -198,9 +200,23 @@ def segment_tissue(slide_file, args, paths_dict):
     save_rescaled(region, vis_size, os.path.join(paths_dict["bg_removal_contour_vis"], f'{basename}.tiff'), writer="tifffile")
     del region
 
+    scale_save = args.save_mag / args.tissdet_mag
+    h, w = res_dict['mask'].shape
+    mask_rescaled = Image.fromarray(res_dict['mask'])
+
+    if args.save_mag < args.tissdet_mag:
+        # rescale mask to desired magnification for saving
+        mask_rescaled = mask_rescaled.resize((int(w / scale_save), int(h / scale_save)), Image.NEAREST)
+        res_dict['mask'] = np.array(mask_rescaled).astype(np.uint8)
+    elif args.save_mag > args.tissdet_mag:
+        mask_rescaled = mask_rescaled.resize((int(w * scale_save), int(h * scale_save)), Image.NEAREST)
+        res_dict['mask'] = np.array(mask_rescaled).astype(np.uint8)
+    else:
+        res_dict['mask'] = np.array(mask_rescaled).astype(np.uint8)
+
     save_dict = {
             'basename': basename,  # tissue file basename (without .svs extension)
-            'mask_bg': res_dict['mask'].astype(np.uint8),  # mask with detected tissue region
+            'mask_bg': res_dict['mask'],  # mask with detected tissue region
             'ind_WSI': get_wsi_ind_matlab(slide_file),  # indexes for WSI image layers (idx from 1)
             'ratio': ratio,  # ratio for each layer
             'scale_val': scale_val,  # scale factor of masks
