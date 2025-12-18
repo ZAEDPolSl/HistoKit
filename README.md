@@ -3,6 +3,9 @@
 HistoKit is a Python package for processing Whole Slide Images (WSI).  
 It provides a toolkit for common operations in digital pathology workflows.
 
+<img width="1461" height="821" alt="obraz" src="https://github.com/user-attachments/assets/5987b387-7b6d-4a5e-9a8d-bff75968955e" />
+
+
 ## Features
 
 - **Stain normalization** — standardizes H&E slides for consistent analysis.
