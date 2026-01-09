@@ -15,7 +15,7 @@ from .postprocessing import remove_pen, get_strel_disk, remove_small_objects, \
 from ..utils.apply_mask import apply_mask
 from ..utils.file_utils import get_basename, save_rescaled
 from ..utils.matlab2python import get_wsi_ind_matlab
-from ..utils.wsi import load_wsi_mag
+from ..utils.wsi import load_wsi_mag, get_objective_power
 
 
 def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2, rem_small_obj=True):
@@ -182,7 +182,7 @@ def segment_tissue(slide_file, args, paths_dict):
 
     # size for visualisations
     w_l0, h_l0 = slide.level_dimensions[0]
-    mag_l0 = float(slide.properties["openslide.objective-power"])
+    mag_l0 = float(get_objective_power(slide))
     scale_vis = args.vis_mag/mag_l0
     vis_size = (int(w_l0 * scale_vis), int(h_l0 * scale_vis))
 
@@ -191,10 +191,10 @@ def segment_tissue(slide_file, args, paths_dict):
 
     # save scaled region thumbnail
     save_rescaled(region, vis_size, os.path.join(paths_dict["raw_small"], f'{basename}.tiff'), writer="tifffile")
-
     res_dict = wsi_tissue_seg(region, args.fill_holes, args.close_disk_r, args.open_disk_r, args.remove_small_objects)
 
     # save borders visualisation on the tissue image
+
     contours, _ = cv2.findContours(res_dict['mask'].astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     cv2.drawContours(region, contours, -1, (0, 0, 255), 2)
     save_rescaled(region, vis_size, os.path.join(paths_dict["bg_removal_contour_vis"], f'{basename}.tiff'), writer="tifffile")

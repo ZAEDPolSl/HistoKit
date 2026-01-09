@@ -223,7 +223,7 @@ def remove_pen2(img, pen_color, thr_low, thr_high, thr_back, radius =9, mode = "
 
     return mask
 
-def remove_small_objects(mask, mode="kmeans", area_thr = "wsi"):
+def remove_small_objects(mask, mode="thr", area_thr = "wsi"):
     """
         Remove small objects from a binary mask based on area.
 

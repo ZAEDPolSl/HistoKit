@@ -10,7 +10,7 @@ from .visualisation import make_artifacts_color_map, make_overlay
 from ..utils.file_utils import get_basename, save_rescaled
 from ..utils.image import gaussian_window
 from ..utils.matlab2python import list2cell
-from ..utils.wsi import load_wsi_mag, get_regions_location
+from ..utils.wsi import load_wsi_mag, get_regions_location, get_objective_power
 import scipy.io as sio
 
 
@@ -144,7 +144,7 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
 
     # size for visualisations
     w_l0, h_l0 = slide.level_dimensions[0]
-    mag_l0 = float(slide.properties["openslide.objective-power"])
+    mag_l0 = float(get_objective_power(slide))
     scale_vis = vis_mag / mag_l0
     vis_size = (int(w_l0 * scale_vis), int(h_l0 * scale_vis))
 
@@ -226,6 +226,7 @@ def detect_artifacts_slide(slide_file, res_dict_path, batch_size, num_workers,
 
     # make color visualisation
     artifacts_color_map = Image.fromarray(make_artifacts_color_map(pred_mask))
+    save_rescaled(artifacts_color_map, vis_size, os.path.join(paths_dict["grandqc_overlay_vis"], f'color_map_{basename}.png'))
 
     # overlay heatmap on the image
     overlay = make_overlay(region, artifacts_color_map, tis_det, vis_size)

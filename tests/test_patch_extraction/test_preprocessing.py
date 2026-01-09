@@ -95,26 +95,18 @@ def test_convert_mask_bg():
 
 def test_patches_extractor():
 
-    des_mag = 10
-    wsi_path = "/mnt/data/Datasets/Compass/HE/4-13_he_2.svs"
-
-    mask_bg = "/mnt/data/Tmp/jmerta/HE-masks-compass_30_11_2025/masks/4-13_he_2.mat"
+    des_mag = 2.5
+    wsi_path = "/mnt/warehouse/jmerta/jwandas_data/114S.tif"
+    mask_bg = "/mnt/warehouse/jmerta/jwandas_data/114S.mat"
     mask_bg = sio.loadmat(mask_bg)
-
-    mask_qc = "/mnt/data/Tmp/jmerta/HE-masks-compass_30_11_2025/masks_grandqc/4-13_he_2.mat"
+    mask_qc = "/mnt/warehouse/jmerta/jwandas_data/114S_gqc.mat"
     mask_qc = sio.loadmat(mask_qc)
-
     wsi = openslide.OpenSlide(wsi_path)
-
     region, scale_val, info, mpp_slide, ratio = load_wsi_mag(wsi, des_mag, allow_upscaling=True)
 
     reg_list, bbox = convert_mask_grandqc(mask_qc, np.array(region), des_mag,
                                           art_include=[Artifact.NORM.value, Artifact.BG_MODEL.value], mode="wsi")
 
 
-    transform = T.Compose([
-        T.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),
-    ])
-
-    extractor = PatchesExtractor(reg_list,"wsi1", out_dir="test_extract_wsi",out_dir_aug="aug", patch_size=256, overlap=0.5, aug = transform)
+    extractor = PatchesExtractor(reg_list,"wsi_tiff", out_dir="test_extract_wsi",out_dir_aug="aug", patch_size=256, overlap=0.5)
     extractor.extract_patches()
