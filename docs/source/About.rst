@@ -9,17 +9,17 @@ You can also connect with us on `LinkedIn <https://www.linkedin.com/company/depa
 
 For more information, visit the `Department of Data Science and Engineering <https://www.polsl.pl/rau4/en/>`_.
 
-GitHub: `HistoKit Repository <https://github.com/ZAEDPolSl>`_
+Our software can be found on: `GitHub <https://github.com/ZAEDPolSl>`_
 
 HistoKit Developers
 -------------------
 
 .. list-table:: HistoKit Developers
-   :widths: 20 40
+   :widths: 25 45
    :header-rows: 1
 
-   * - Name
-     - Role
+   * - **Name**
+     - **Role**
    * - **Julia Merta**
      - PhD Student, Department of Data Science and Engineering, Silesian University of Technology, Gliwice, Poland
        `ORCID <https://orcid.org/0009-0005-8999-5036>`__
@@ -36,11 +36,11 @@ Consultants
 -----------
 
 .. list-table:: Consultants
-   :widths: 20 40
+   :widths: 25 45
    :header-rows: 1
 
-   * - Name
-     - Role
+   * - **Name**
+     - **Role**
    * - **Milosz Pietrus**
      - Medical Doctor, PhD, Department of Gynaecology and Oncology, Faculty of Medicine, Jagiellonian University Medical College, Kraków, Poland
        `ORCID <https://orcid.org/0000-0001-9938-7249>`__
