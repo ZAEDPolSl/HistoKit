@@ -50,7 +50,8 @@ pip install {path-to-histokit-archive}.zip
 
 **Article describing the first version of HistoKit (1.0.0)**
 
-``@inproceedings{Merta2026HistoKit,
+```
+@inproceedings{Merta2026HistoKit,
   author    = {Merta, Julia and Marczyk, Micha{\l}},
   title     = {HistoKit: Fast and Accurate Tissue and Artifact Detection and Data Processing for Whole Slide Histopathological Imaging},
   booktitle = {Proceedings of the 19th International Joint Conference on Biomedical Engineering Systems and Technologies (BIOSTEC 2026), Volume 2: BIODEVICES, BIOIMAGING, BIOINFORMATICS},
@@ -62,11 +63,13 @@ pip install {path-to-histokit-archive}.zip
   issn      = {2184-4305},
   doi       = {10.5220/0000222000004070},
   url       = {https://doi.org/10.5220/0000222000004070}
-}``
+}
+```
 
 **Post-processing for tissue segmentation**
 
-``@inproceedings{Marczyk2025PostProcessing,
+```
+@inproceedings{Marczyk2025PostProcessing,
   author    = {Marczyk, M. and Wrobel, A. and Merta, J. and Polanska, J.},
   title     = {Post-Processing of Thresholding or Deep Learning Methods for Enhanced Tissue Segmentation of Whole-Slide Histopathological Images},
   booktitle = {Proceedings of the 18th International Joint Conference on Biomedical Engineering Systems and Technologies (BIOIMAGING 2025), Volume 1},
@@ -77,11 +80,13 @@ pip install {path-to-histokit-archive}.zip
   doi       = {10.5220/0013174700003911},
   url       = {https://doi.org/10.5220/0013174700003911},
   note      = {GitHub: https://github.com/ZAEDPolSl/WSI_TissueSeg}
-}``
+}
+```
 
 **GrandQC artifact detection model**
 
-``@article{Weng2024GrandQC,
+```
+@article{Weng2024GrandQC,
   author  = {Weng, Z. and Seper, A. and Pryalukhin, A. and others},
   title   = {GrandQC: A comprehensive solution to quality control problem in digital pathology},
   journal = {Nature Communications},
@@ -91,6 +96,6 @@ pip install {path-to-histokit-archive}.zip
   doi     = {10.1038/s41467-024-54769-y},
   url     = {https://doi.org/10.1038/s41467-024-54769-y},
   note    = {GitHub: https://github.com/cpath-ukk/grandqc}} 
-  ``
+  ```
 
 
