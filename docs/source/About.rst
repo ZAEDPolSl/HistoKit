@@ -1,52 +1,57 @@
 About Us
 ========
 
-Meet the Team
+We are a group of researchers from the Department of Data Science and Engineering at Silesian University of Technology.
+We collaborate closely with clinicians and pathologists from the Department of Gynaecology and Oncology at the Faculty
+of Medicine of the Jagiellonian University Medical College in Kraków, Poland.
+
+You can also connect with us on LinkedIn_.
+
+.. _Department of Data Science and Engineering: https://www.polsl.pl/rau4/en/
+.. _LinkedIn: https://www.linkedin.com/company/department-of-data-science-and-engineering
+.. _Github: https://github.com/ZAEDPolSl
+
+HistoKit Developers
 -------------
 
-.. list-table:: Our Team
+.. list-table:: HistoKit Developers
    :widths: 25 25 25 25
    :header-rows: 0
 
-   * - .. figure:: img/artifacts.jpg
-         :alt: Person 1
-         :width: 150px
-
-         **Julia Merta**
+   * -   **Julia Merta**
          PhD Student
+         Department of Data Science and Engineering, Silesian University of Technology, Gliwice, Poland
+         `ORCID <https://orcid.org/0009-0005-8999-5036>`__
+         `GitHub <https://github.com/julimer228>`__
+          E-mail: `julia.merta@polsl.pl <julia.merta@polsl.pl>`__
 
-         `ORCID <https://www.linkedin.com/in/person1>`__
-         `Department Page <https://www.example.edu/department>`__
-         `GitHub <https://github.com/person1>`__
+     -   **Michal Marczyk**
+         Assistant Professor
+         Department of Data Science and Engineering, Silesian University of Technology, Gliwice, Poland
+         Yale Cancer Centre, Yale University, New Haven, CT, United States
+         `ORCID <https://orcid.org/0000-0003-2508-5736>`__
+         `Department Page <https://www.polsl.pl/rau4/en/>`__
+         E-mail: `michal.marczyk@polsl.pl <michal.marczyk@polsl.pl>`__
 
-     - .. figure:: _static/person2.jpg
-         :alt: Person 2
-         :width: 150px
 
-         **Michal Marczyk**
-         Role / Position
+Consultants
+-------------
 
-         `ORCID <https://www.linkedin.com/in/person2>`__
-         `Department Page <https://www.example.edu/department>`__
-         `GitHub <https://github.com/person2>`__
-     - .. figure:: _static/collaborator1.jpg
-         :alt: Collaborator 1
-         :width: 150px
+.. list-table:: Consultants
+   :widths: 25 25 25 25
+   :header-rows: 0
 
-         **Milosz Pietrus**
-         Role / Position
+   * -   **Milosz Pietrus**
+         Medical Doctor, PhD
+         Department of Gynaecology and Oncology, Faculty of Medicine, Jagiellonian University Medical College, Kraków, Poland
+         `ORCID <https://orcid.org/0000-0001-9938-7249>`__
+         E-mail: `milosz.pietrus@uj.edu.pl <milosz.pietrus@uj.edu.pl>`__
 
-         `ORCID <https://www.linkedin.com/in/collab1>`__
-         `Department Page <https://www.example.edu/department>`__
-         `GitHub <https://github.com/collab1>`__
-     - .. figure:: _static/collaborator2.jpg
-         :alt: Collaborator 2
-         :width: 150px
+     -   **Iwona Gawron**
+         Medical Doctor, PhD
+         Clinic of Gynaecological Endocrinology, Faculty of Medicine, Jagiellonian University Medical College, Kraków, Poland
+         `ORCID <https://orcid.org/0000-0002-9254-1298>`__
+         E-mail: `iwona.gawron@uj.edu.pl <iwona.gawron@uj.edu.pl>`__
 
-         **Iwona Gawron**
-         Role / Position
 
-         `ORCID <https://www.linkedin.com/in/collab2>`__
-         `Department Page <https://www.example.edu/department>`__
-         `GitHub <https://github.com/collab2>`__
 
