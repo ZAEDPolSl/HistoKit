@@ -16,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
-license = "Apache-2.0"
+license = { text = "CC BY-NC-SA 4.0 International" }
 license-files = ["LICEN[CS]E*"]
 
 [project.urls]
