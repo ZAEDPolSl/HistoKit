@@ -6,19 +6,20 @@ It provides a comprehensive toolkit for common WSI operations:
 
 Features
 --------
-
-- **Staining normalization** – standardize H&E images for consistent analysis.
 - **Tissue detection** – identify tissue regions within slides.
 - **Artifact detection** – detect artifacts using the **GrandQC** model.
-- **Feature extraction** – extract image features using foundation models.
 - **Patch extraction** – divide slides into patches at a specified zoom level and step size.
+- **Staining normalization and augmentation** – standardize H&E images for consistent analysis.
+
+Features in Progeress
+---------------------
 - **Visualization** – explore extracted features with **UMAP** embeddings.
+- **Feature extraction** – extract image features using foundation models.
 
 GitHub Repository
 -----------------
 
 You can find the source code on  🔗  `GitHub <https://github.com/ZAEDPolSl/HistoKit>`_
-
 
 Installation
 ------------
@@ -61,7 +62,10 @@ Examples
    :caption: Examples
 
    TissueDetection
-   CreatingPatches
+   WsiLoading
+   PatchExtraction
+   AugmentationNormalization
+   About
 
 Documentation
 -------------
