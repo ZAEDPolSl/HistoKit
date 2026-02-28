@@ -30,7 +30,7 @@ HistoKit Developers
      - `julia.merta@polsl.pl <julia.merta@polsl.pl>`__
    * - **Michal Marczyk**
      - Assistant Professor
-     - Department of Data Science and Engineering, Silesian University of Technology, Gliwice, Poland \n
+     - Department of Data Science and Engineering, Silesian University of Technology, Gliwice, Poland
 
        Yale Cancer Centre, Yale University, New Haven, CT, United States
 

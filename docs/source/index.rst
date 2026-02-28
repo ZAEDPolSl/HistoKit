@@ -19,7 +19,7 @@ Features in Progeress
 GitHub Repository
 -----------------
 
-You can find the source code on  🔗  `GitHub <https://github.com/ZAEDPolSl/HistoKit>`_
+You can find the source code on   `GitHub <https://github.com/ZAEDPolSl/HistoKit>`_
 
 Installation
 ------------
@@ -53,6 +53,20 @@ You just have to install histo_kit from your .zip file with the following comman
 .. code-block:: bash
 
    pip install {path-to-histokit-archive}.zip
+
+License
+--------
+
+HistoKit is licensed under the CC BY-NC-SA 4.0 International license. This means that you are free to share and adapt the material for non-commercial purposes, as long as you give appropriate credit, provide a link to the license, and indicate if changes were made. You may not use the material for commercial purposes, and if you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
+
+About Us
+--------
+
+.. toctree::
+   :maxdepth: 1
+   :caption: About Us
+
+   About
 
 Examples
 --------
