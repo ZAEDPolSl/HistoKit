@@ -21,16 +21,16 @@ HistoKit Developers
    * - **Name**
      - **Role**
      - **ORCID**
-     - **GitHub**
+     - **E-mail**
    * - **Julia Merta**
      - PhD Student, Department of Data Science and Engineering, Silesian University of Technology, Gliwice, Poland
      - `0009-0005-8999-5036 <https://orcid.org/0009-0005-8999-5036>`__
-     - `GitHub <https://github.com/julimer228>`__
+     - `julia.merta@polsl.pl <julia.merta@polsl.pl>`__
    * - **Michal Marczyk**
      - Assistant Professor, Department of Data Science and Engineering, Silesian University of Technology, Gliwice, Poland
        Yale Cancer Centre, Yale University, New Haven, CT, United States
      - `0000-0003-2508-5736 <https://orcid.org/0000-0003-2508-5736>`__
-     - `Department Page <https://www.polsl.pl/rau4/en/>`__
+     - `michal.marczyk@polsl.pl <michal.marczyk@polsl.pl>`__
 
 Consultants
 -----------
