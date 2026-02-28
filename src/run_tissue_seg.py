@@ -17,17 +17,19 @@ Script for tissue region and artifacts detection
 parser = argparse.ArgumentParser()
 
 # Common settings
-parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default=None)
+parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default="/mnt/warehouse/jmerta/jwandas_data/data/grandqc_overlay_vis/tiger-training/wsirois/wsi-level-annotations/images/")
 parser.add_argument('--files_to_process', type=str, help='Path to the text file with absolute .svs filepaths to process. '
-                                                         'This argument will be ignored if wsi_dir is provided', default="/mnt/data/Tmp/jmerta/HE/svs_to_process.svs")
-parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/test/')
-parser.add_argument('--vis_mag', help='Magnification of saved visualisations.',default=0.625, type=int)
-parser.add_argument('--overwrite', help='Overwrite files with results if they exist in the output folder or not.',default=False, type=bool)
-parser.add_argument('--save_mag', help='The magnification for background and artifacts masks.',default=2.5, type=float)
+                                                         'This argument will be ignored if wsi_dir is provided', default=None)
+parser.add_argument('--ext', type=str, help='File extension for wsi.', default="tif")
+
+parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/warehouse/jmerta/jwandas_data/HistoKit_res/')
+parser.add_argument('--vis_mag', help='Magnification of saved visualisations.',default=1, type=int)
+parser.add_argument('--overwrite', help='Overwrite files with results if they exist in the output folder or not.',default=True, type=bool)
+parser.add_argument('--save_mag', help='The magnification for background and artifacts masks.',default=0.625, type=float)
 
 # Settings for background detection with thresholding methods
-parser.add_argument('--run_tis_det', type=bool, help='Run tissue detection step or not.', default=True)
-parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not.', default=True)
+parser.add_argument('--run_tis_det', type=bool, help='Run tissue detection step or not.', default=False)
+parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not.', default=False)
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
 parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
 parser.add_argument('--tissdet_mag', help='Magnification used for tissue detection',default=2.5, type=float)
@@ -38,9 +40,9 @@ parser.add_argument('--workers', help='Number of workers used for background tis
 parser.add_argument('--run_artifacts_det', type=bool, help='Run artifacts detection step or not.', default=True)
 parser.add_argument('--save_confidence_maps', help='Save confidence maps or not.',default=True, type=bool)
 parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu', choices=["cuda", "cpu"],default="cuda")
-parser.add_argument('--workers_per_slide', help='Number of workers used in Pytorch dataset during artifact segmentation.',default=6, type=int,choices=range(1, os.cpu_count() + 1))
+parser.add_argument('--workers_per_slide', help='Number of workers used in Pytorch dataset during artifact segmentation.',default=8, type=int,choices=range(1, os.cpu_count() + 1))
 parser.add_argument('--batch_size', help='Batch size used during artifact segmentation.', default=64, type=int)
-parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="/mnt/data/Tmp/jmerta/HE/models/GrandQC_MPP1.pth", type=str)
+parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="/mnt/warehouse/jmerta/jwandas_data/HistoKit/models/GrandQC_MPP1.pth", type=str)
 parser.add_argument('--grandqc_mpp', help='MPP for grand qc model (mpp=1 corresponds to magnification 10x, mpp=2.0 - 5x, mpp=1.5 - 7.5x)',default=1.0, type=float)
 parser.add_argument('--patch_size_model', help='Patch size for grand QC.',default=512, type=int)
 parser.add_argument('--encoder_model', help='Name of a model used as encoder for GrandQC', default='timm-efficientnet-b0', type=str)
@@ -75,6 +77,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     paths_dict = {"masks": create_folder(args.out_dir, 'masks'),
+                  'grandqc_whole': create_folder(args.out_dir, 'grandqc_whole'),
                   "masks_grandqc": create_folder(args.out_dir, 'masks_grandqc'),
                   "bg_thr_hist": create_folder(args.out_dir, 'bg_thr_hist'),
                   "raw_small": create_folder(args.out_dir, 'raw_small'),
@@ -85,7 +88,7 @@ if __name__ == "__main__":
 
     # get slides names
     if args.wsi_dir is not None:
-        all_slides = glob.glob(os.path.join(args.wsi_dir, '*.svs'))
+        all_slides = glob.glob(os.path.join(args.wsi_dir, f'*.{args.ext}'))
     elif args.files_to_process is not None:
         with open(args.files_to_process, 'r') as f:
             all_slides = [line.strip() for line in f.readlines()]
@@ -192,6 +195,8 @@ if __name__ == "__main__":
             if os.path.exists(f):
                 os.remove(f)
 
+        slides = sorted(slides, key=os.path.getsize)
+
         for s_f in tqdm(slides, total=len(slides), desc="Processing slides"):
             try:
                 basename = get_basename(s_f)
@@ -246,6 +251,8 @@ if __name__ == "__main__":
                     f.write(f"{basename} - {str(e)}\n")
 
     print("Finished STEP 2B (Artifacts detection) - in time: {:.2f} min".format((time.time() - time_start) / 60))
+
+
 
 
 

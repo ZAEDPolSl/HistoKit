@@ -2,6 +2,45 @@ from PIL import Image
 import numpy as np
 from skimage import measure
 
+def get_objective_power(slide):
+    """
+    Get the objective magnification (objective power) of a WSI slide.
+
+    Tries the following in order:
+    1. 'openslide.objective-power' (standard OpenSlide)
+    2. 'aperio.AppMag' (Aperio slides)
+    3. 'openslide.mpp-x' → approximate from MPP (default: 20x = 0.457 µm/px)
+
+    Parameters:
+    - slide: OpenSlide object
+
+    Returns:
+    - obj_power: float, approximate objective magnification
+    """
+    reference_mpp = 0.457  # µm/px at 20x
+    reference_mag = 20      # reference magnification
+
+    try:
+        obj_power = float(slide.properties["openslide.objective-power"])
+        return obj_power
+    except KeyError:
+        pass
+
+    try:
+        obj_power = float(slide.properties["aperio.AppMag"])
+        return obj_power
+    except KeyError:
+        pass
+
+    try:
+        mpp = float(slide.properties["openslide.mpp-x"])
+        obj_power = reference_mag * reference_mpp / mpp
+        return obj_power
+    except KeyError:
+
+        return None
+
+
 def slide_info(slide, verbose=False):
     """
     Retrieve basic information about a whole-slide image (WSI).
@@ -37,10 +76,7 @@ def slide_info(slide, verbose=False):
 
     """
     # Objective power
-    try:
-        obj_power = float(slide.properties["openslide.objective-power"])
-    except:
-        obj_power = 99
+    obj_power = get_objective_power(slide)
 
     # Vendor
     vendor = slide.properties["openslide.vendor"]
