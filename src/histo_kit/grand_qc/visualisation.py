@@ -41,14 +41,16 @@ def make_overlay(slide, wsi_heatmap_im, bg_mask, vis_size):
     slide = Image.fromarray(slide)
     slide_reduced = slide.resize(vis_size, Image.Resampling.LANCZOS)
     heatmap_temp = wsi_heatmap_im.resize(slide_reduced.size, Image.Resampling.NEAREST)
-    overlay = cv2.addWeighted(np.array(slide_reduced), 0.25, np.array(heatmap_temp), 0.75, 0)
+    overlay = cv2.addWeighted(np.array(slide_reduced), 0.4, np.array(heatmap_temp), 0.6, 0)
+    mask = np.all(overlay == [255, 255, 255], axis=-1)
+    overlay[mask] = np.array(slide_reduced)[mask]
     bg_mask = Image.fromarray(bg_mask)
     bg_mask = np.array(bg_mask.resize(vis_size, Image.Resampling.NEAREST))
     contours, _ = cv2.findContours(bg_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     heatmap_np = np.array(heatmap_temp)
     mask = np.all(heatmap_np == (128, 128, 128), axis=-1)
     overlay[mask] = np.array(slide_reduced)[mask]
-    overlay = cv2.drawContours(overlay, contours, -1, (0, 0, 255), 2)
+    overlay = cv2.drawContours(overlay, contours, -1, (0, 0, 255), 1)
     return overlay
 
 def make_artifacts_color_map(mask):

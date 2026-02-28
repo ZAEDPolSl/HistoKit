@@ -1,8 +1,13 @@
 import os
+import random
+
 import cv2
+import h5py
 import numpy as np
 import matplotlib
+import skimage
 from PIL import Image
+from skimage.color import rgb2gray
 
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -13,10 +18,21 @@ from .find_thr import get_thr_image
 from .postprocessing import remove_pen, get_strel_disk, remove_small_objects, \
     remove_gray_stains
 from ..utils.apply_mask import apply_mask
-from ..utils.file_utils import get_basename, save_rescaled
+from ..utils.file_utils import get_basename, save_rescaled, save_mat_v73
 from ..utils.matlab2python import get_wsi_ind_matlab
 from ..utils.wsi import load_wsi_mag
 
+
+def calculate_blur_map(region, ksize=5):
+
+    region = rgb2gray(region)
+
+
+    gx = cv2.Sobel(region, cv2.CV_64F, 1, 0, ksize=ksize)
+    gy = cv2.Sobel(region, cv2.CV_64F, 0, 1, ksize=ksize)
+    energy = gx**2 + gy**2
+    blur_map = cv2.GaussianBlur(energy, (0, ), 0)
+    return blur_map
 
 def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2, rem_small_obj=True):
     """
@@ -72,16 +88,19 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2, rem_
 
     .. footbibliography::
     """
+
     img_np = np.array(region)
     # get thresholds for each channel (GaMRed or Otsu when threshold is too low)
     thr, R, G, B = get_thr_image(img_np, thr_min=0.7 * 255, verbose=False)
 
     # remove black pen
     mask_pen = remove_pen(img_np, "black", 12,  0, thr, 9, "RGB")
+
     if np.any(mask_pen):
         img_np = apply_mask(img_np, mask_pen, inv=True)
 
     mask_pen = remove_pen(img_np, "green", 12, 150, thr, 9, "RGB")
+
     if np.any(mask_pen):
         img_np = apply_mask(img_np, mask_pen, inv=True)
 
@@ -91,25 +110,30 @@ def wsi_tissue_seg(region, fill_holes=False, open_disk_r=2, close_disk_r=2, rem_
              ((img_np[..., 1] > thr["G"]) & (img_np[..., 2] > thr["B"])))
 
     # remove gray stains with low Chroma component
-    mask = remove_gray_stains(img_np, mask)
+    mask_chroma = remove_gray_stains(img_np)
+    mask = mask & mask_chroma
+
+    img_chroma_pen = apply_mask(img_np, mask_chroma , inv=False)
 
     # morphological operations to clean the mask
-    SE_close = get_strel_disk(close_disk_r)
+    # SE_close = get_strel_disk(close_disk_r)
     SE_open = get_strel_disk(open_disk_r)
     #mask = ndi.binary_closing(mask, SE_close)
 
-    mask = ndi.binary_closing(mask, SE_close)
+    #mask = ndi.binary_closing(mask, SE_close)
     mask = ndi.binary_opening(mask, SE_open)
 
     # fill holes in mask (if fill_holes==True)
     if fill_holes:
         mask = ndi.binary_fill_holes(mask)
 
+    mask = ndi.binary_opening(mask, SE_open)
+
     # remove small regions
     if rem_small_obj:
         mask = remove_small_objects(mask)
 
-    return {"mask": mask, "mask_pen": mask_pen, "R": R, "G": G, "B": B, "thr":thr}
+    return {"mask": mask, "R": R, "G": G, "B": B, "thr":thr, "img_chroma_pen": img_chroma_pen}
 
 def plot_rgb_hist(R, G, B, thr):
     """
@@ -195,10 +219,13 @@ def segment_tissue(slide_file, args, paths_dict):
     res_dict = wsi_tissue_seg(region, args.fill_holes, args.close_disk_r, args.open_disk_r, args.remove_small_objects)
 
     # save borders visualisation on the tissue image
+    region_chr_pen = res_dict['img_chroma_pen']
     contours, _ = cv2.findContours(res_dict['mask'].astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(region, contours, -1, (0, 0, 255), 2)
-    save_rescaled(region, vis_size, os.path.join(paths_dict["bg_removal_contour_vis"], f'{basename}.tiff'), writer="tifffile")
+    cv2.drawContours(region_chr_pen, contours, -1, (0, 0, 255), 5)
+    save_rescaled(region_chr_pen, vis_size, os.path.join(paths_dict["bg_removal_contour_vis"], f'{basename}.tiff'), writer="tifffile")
+
     del region
+    del region_chr_pen
 
     scale_save = args.save_mag / args.tissdet_mag
     h, w = res_dict['mask'].shape
@@ -214,20 +241,19 @@ def segment_tissue(slide_file, args, paths_dict):
     else:
         res_dict['mask'] = np.array(mask_rescaled).astype(np.uint8)
 
-    save_dict = {
-            'basename': basename,  # tissue file basename (without .svs extension)
-            'mask_bg': res_dict['mask'],  # mask with detected tissue region
-            'ind_WSI': get_wsi_ind_matlab(slide_file),  # indexes for WSI image layers (idx from 1)
-            'ratio': ratio,  # ratio for each layer
-            'scale_val': scale_val,  # scale factor of masks
-            'mask_mag': args.tissdet_mag, # magnification of tissue detection
-            'thr': res_dict['thr'],  # thresholds calculated for R, G, B color channels,
-            'mpp': mpp_slide,
-            'mag_l0': mag_l0
-        }
+    file_path = os.path.join(paths_dict["masks"], f'{basename}.h5')
 
-    # save data to .mat file
-    scipy.io.savemat(os.path.join(paths_dict["masks"], f'{basename}.mat'), save_dict, do_compression=True)
+    thr = res_dict['thr']
+    with h5py.File(file_path, 'w') as f:
+        f.create_dataset('mask_bg', data=res_dict['mask'], chunks=(512, 512), compression='gzip')
+        f.create_dataset('ind_WSI', data=np.array(get_wsi_ind_matlab(slide_file)))
+        f.create_dataset('ratio', data=np.array(ratio))
+        f.create_dataset('scale_val', data=np.array(scale_val))
+        f.create_dataset('mask_mag', data=np.array(args.tissdet_mag))
+        f.create_dataset('thr', data=np.array([thr["R"], thr["G"], thr["B"]]))
+        f.create_dataset('mpp', data=np.array(mpp_slide) if mpp_slide is not None else np.array([0.0]))
+        f.create_dataset('mag_l0', data=np.array(mag_l0))
+        f.create_dataset('basename', data=np.string_(basename))
 
     # save histograms with thresholds
     fig, ax = plot_rgb_hist(res_dict['R'], res_dict['G'], res_dict['B'], res_dict['thr'])

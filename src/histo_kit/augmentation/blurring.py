@@ -1,56 +1,54 @@
+from PIL import Image, ImageFilter, ImageEnhance, ImageOps
+import numpy as np
+import random
+import io
+from ..augmentation.base import Transform
 
-def gaussian_blur(image, kernel_size=(5, 5), sigma=1.0):
-    """
-    Apply Gaussian blur to the input image.
+class GaussianBlur(Transform):
+    def __init__(self, radius_range=(0.5, 3.0), prob=1.0):
+        super().__init__(prob)
+        self.radius_range = radius_range
 
-    Parameters:
-    - image: Input image as a NumPy array.
-    - kernel_size: Size of the Gaussian kernel.
-    - sigma: Standard deviation for Gaussian kernel.
+    def apply(self, img: Image.Image) -> Image.Image:
+        radius = random.uniform(*self.radius_range)
+        return img.filter(ImageFilter.GaussianBlur(radius))
 
-    Returns:
-    - Blurred image as a NumPy array.
-    """
-    import cv2
-    blurred_image = cv2.GaussianBlur(image, kernel_size, sigma)
-    return blurred_image
+class MedianBlur(Transform):
+    def __init__(self, size_range=(3, 7), prob=1.0):
+        super().__init__(prob)
+        self.size_range = size_range
 
-def motion_blur(image, kernel_size=15, angle=0):
-    """
-    Apply motion blur to the input image.
+    def apply(self, img: Image.Image) -> Image.Image:
+        size = random.randint(*self.size_range)
+        return img.filter(ImageFilter.MedianFilter(size))
 
-    Parameters:
-    - image: Input image as a NumPy array.
-    - kernel_size: Size of the motion blur kernel.
-    - angle: Angle of motion blur in degrees.
+class MotionBlur(Transform):
+    def __init__(self, degree_range=(5, 15), angle_range=(0, 360), prob=1.0):
+        super().__init__(prob)
+        self.degree_range = degree_range
+        self.angle_range = angle_range
 
-    Returns:
-    - Blurred image as a NumPy array.
-    """
-    import cv2
-    import numpy as np
+    def apply(self, img: Image.Image) -> Image.Image:
+        import cv2
+        degree = random.randint(*self.degree_range)
+        angle = random.uniform(*self.angle_range)
+        img_cv = np.array(img)
+        k = np.zeros((degree, degree))
+        k[int((degree - 1) / 2), :] = np.ones(degree)
+        k = k / degree
+        M = cv2.getRotationMatrix2D((degree / 2 - 0.5, degree / 2 - 0.5), angle, 1)
+        k = cv2.warpAffine(k, M, (degree, degree))
+        img_cv = cv2.filter2D(img_cv, -1, k)
+        return Image.fromarray(img_cv)
 
-    # Create the motion blur kernel
-    kernel = np.zeros((kernel_size, kernel_size))
-    kernel[int((kernel_size - 1) / 2), :] = np.ones(kernel_size)
-    kernel = cv2.warpAffine(kernel, cv2.getRotationMatrix2D((kernel_size / 2 - 0.5, kernel_size / 2 - 0.5), angle, 1.0), (kernel_size, kernel_size))
-    kernel = kernel / kernel_size
+class JPEGCompression(Transform):
+    def __init__(self, quality_range=(10, 50), prob=1.0):
+        super().__init__(prob)
+        self.quality_range = quality_range
 
-    # Apply the kernel to the image
-    blurred_image = cv2.filter2D(image, -1, kernel)
-    return blurred_image
-
-def median_blur(image, kernel_size=5):
-    """
-    Apply median blur to the input image.
-
-    Parameters:
-    - image: Input image as a NumPy array.
-    - kernel_size: Size of the median blur kernel.
-
-    Returns:
-    - Blurred image as a NumPy array.
-    """
-    import cv2
-    blurred_image = cv2.medianBlur(image, kernel_size)
-    return blurred_image
+    def apply(self, img: Image.Image) -> Image.Image:
+        quality = random.randint(*self.quality_range)
+        buffer = io.BytesIO()
+        img.save(buffer, format="JPEG", quality=quality)
+        buffer.seek(0)
+        return Image.open(buffer)

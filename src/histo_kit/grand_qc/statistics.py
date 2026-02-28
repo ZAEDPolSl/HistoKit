@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 import scipy.io as sio
 from src.histo_kit.grand_qc.artifacts import Artifact
 
@@ -84,6 +85,56 @@ def calculate_stats(mask_mat_path):
                         "Percent_ART_ALL": 100 - (percent_dict["NORM"])}
 
         stats_list.append(stats_region)
-    return pd.DataFrame(stats_list)
+
+    stats_region_df = pd.DataFrame(stats_list)
+    stats_df = stats_region_df[['basename', 'scale_val', 'mask_mag', "mpp", "mag_l0", "Total_pixels", "Num_NORM", "Num_ART_FOLD", "Num_ART_DARKSPOT", "Num_ART_PEN", "Num_ART_EDGE", "Num_ART_FOCUS", "Num_BG_MODEL"]]
+    stats_df = (stats_df.groupby(['basename'])[['Total_pixels', "Num_NORM", "Num_ART_FOLD",
+        "Num_ART_DARKSPOT", "Num_ART_PEN", "Num_ART_EDGE", "Num_ART_FOCUS", "Num_BG_MODEL"]].sum().reset_index())
+
+    art_names = ["NORM", "ART_FOLD", "ART_DARKSPOT", "ART_PEN", "ART_EDGE", "ART_FOCUS", "BG_MODEL"]
+
+    stats_df[[f"Percent_{art}" for art in art_names]] = stats_df[[f"Num_{art}" for art in art_names]].div(stats_df["Total_pixels"], axis=0) * 100
+
+    return stats_region_df, stats_df
+
+
+def plot_stats(stats_df, output_path, title):
+    art_names = ["NORM", "ART_FOLD", "ART_DARKSPOT",
+                 "ART_PEN", "ART_EDGE", "ART_FOCUS", "BG_MODEL"]
+
+
+    colors = [
+        [128/255, 128/255, 128/255],  # NORM: gray
+        [255/255, 99/255, 71/255],    # ART_FOLD: orange
+        [0, 1, 0],                     # ART_DARKSPOT: green
+        [1, 0, 0],                     # ART_PEN: red
+        [1, 0, 1],                     # ART_EDGE: pink/magenta
+        [75/255, 0, 130/255],          # ART_FOCUS: violet
+        [50/255, 120/255, 230/255]     # BG_MODEL: blue
+    ]
+
+    pct_cols = [f"Percent_{art}" for art in art_names]
+
+    data = [stats_df[col].dropna() for col in pct_cols]
+
+    fig, ax = plt.subplots(figsize=(12, 8))
+
+    bp = ax.boxplot(data, patch_artist=True)
+
+    for patch, color in zip(bp['boxes'], colors):
+        patch.set_facecolor(color)
+
+    for median in bp['medians']:
+        median.set_color('black')
+        median.set_linewidth(2)
+
+    ax.set_xticks(range(1, len(art_names) + 1))
+    ax.set_xticklabels(art_names, rotation=45)
+    ax.set_ylabel("Percent")
+    ax.set_title(title)
+
+    plt.tight_layout()
+    plt.savefig(output_path)
+    plt.close()
 
 

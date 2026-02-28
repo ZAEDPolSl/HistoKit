@@ -8,7 +8,7 @@ from src.histo_kit.grand_qc.artifacts import Artifact
 from src.histo_kit.patches_extraction.patches_extractor import PatchesExtractor
 from src.histo_kit.patches_extraction.preprocessing import convert_mask_grandqc
 from src.histo_kit.utils.file_utils import get_basename
-from src.histo_kit.utils.wsi import load_wsi_mag, read_region
+from src.histo_kit.utils.wsi import load_wsi_mag, read_masked_region
 
 """
 Script for dividing image into patches

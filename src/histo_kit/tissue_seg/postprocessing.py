@@ -88,9 +88,9 @@ def remove_gray_stains(img, mask=None):
     non-gray. If a mask is provided, the output is the intersection of the mask
     and the chroma threshold.
     """
-    img_tmp = rgb2lab(img).astype(np.float128)
+    img_tmp = rgb2lab(img)
     tmp = np.sqrt(img_tmp[:,:,1]**2 + img_tmp[:,:,2]**2)
-    return mask & (tmp>2) if mask is not None else tmp>2
+    return tmp>2
 
 
 def remove_pen(img, pen_color, thr_low, thr_high, thr_back, SE_radius, mode):
@@ -223,7 +223,34 @@ def remove_pen2(img, pen_color, thr_low, thr_high, thr_back, radius =9, mode = "
 
     return mask
 
-def remove_small_objects(mask, mode="kmeans", area_thr = "wsi"):
+
+def remove_small_objects(mask):
+    thr_area = round(10 ** (0.45 * np.log10(mask.shape[0] * mask.shape[1])))
+    props = measure.regionprops(label(mask.astype(bool)))
+    areas = np.array([p.area for p in props])
+    area_tmp = areas[areas > thr_area]
+    if (len(area_tmp)>1):
+        idx, centers = cluster_regions(np.log10(area_tmp))
+
+        if centers[0] > centers[1]:
+            thr_area = min(area_tmp[idx == 0]) - 1
+        else:
+            thr_area = min(area_tmp[idx == 1]) - 1
+
+    if np.sum(areas>thr_area)<1:
+        idx, centers = cluster_regions(np.log10(areas))
+        if centers[0] > centers[1]:
+            thr_area = min(areas[idx == 0]) - 1
+        else:
+            thr_area = min(areas[idx == 1]) - 1
+
+    mask_res = morphology.remove_small_objects(mask.astype(bool), min_size=thr_area, connectivity=2)
+    return mask_res
+
+
+
+
+def remove_small_objects_2(mask, mode="kmeans", area_thr = "wsi"):
     """
         Remove small objects from a binary mask based on area.
 
