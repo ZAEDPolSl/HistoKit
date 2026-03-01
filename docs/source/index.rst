@@ -6,19 +6,20 @@ It provides a comprehensive toolkit for common WSI operations:
 
 Features
 --------
-
-- **Staining normalization** – standardize H&E images for consistent analysis.
 - **Tissue detection** – identify tissue regions within slides.
 - **Artifact detection** – detect artifacts using the **GrandQC** model.
-- **Feature extraction** – extract image features using foundation models.
 - **Patch extraction** – divide slides into patches at a specified zoom level and step size.
+- **Staining normalization and augmentation** – standardize H&E images for consistent analysis.
+
+Features in Progeress
+---------------------
 - **Visualization** – explore extracted features with **UMAP** embeddings.
+- **Feature extraction** – extract image features using foundation models.
 
 GitHub Repository
 -----------------
 
-You can find the source code on  🔗  `GitHub <https://github.com/ZAEDPolSl/HistoKit>`_
-
+You can find the source code on   `GitHub <https://github.com/ZAEDPolSl/HistoKit>`_
 
 Installation
 ------------
@@ -53,6 +54,20 @@ You just have to install histo_kit from your .zip file with the following comman
 
    pip install {path-to-histokit-archive}.zip
 
+License
+--------
+
+HistoKit is licensed under the CC BY-NC-SA 4.0 International license. This means that you are free to share and adapt the material for non-commercial purposes, as long as you give appropriate credit, provide a link to the license, and indicate if changes were made. You may not use the material for commercial purposes, and if you remix, transform, or build upon the material, you must distribute your contributions under the same license as the original.
+
+About Us
+--------
+
+.. toctree::
+   :maxdepth: 1
+   :caption: About Us
+
+   About
+
 Examples
 --------
 
@@ -61,7 +76,9 @@ Examples
    :caption: Examples
 
    TissueDetection
-   CreatingPatches
+   WsiLoading
+   PatchExtraction
+   AugmentationNormalization
 
 Documentation
 -------------

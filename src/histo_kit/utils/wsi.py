@@ -1,3 +1,4 @@
+import openslide
 from PIL import Image
 import numpy as np
 from skimage import measure
@@ -131,6 +132,81 @@ def get_regions_location(bg_mask):
     return bbox_list, image_list
 
 
+from PIL import Image
+import openslide
+
+def read_object_wsi(wsi, bbox, mag, bbox_mag = None):
+    """
+    Read a region from a WSI so that different magnifications
+    (e.g. 5x, 20x) correspond to the EXACT same slide area.
+
+    Assumptions
+    -----------
+    - bbox is defined in level 0 coordinates (highest magnification, e.g. 40x)
+    - bbox = (x, y, w, h)
+
+    Parameters
+    ----------
+    wsi : OpenSlide object or str
+    bbox : tuple
+        (x, y, w, h) in level 0 (40x)
+    mag : float
+        Desired magnification (e.g. 5, 20)
+
+    Returns
+    -------
+    PIL.Image.Image
+    """
+
+    if isinstance(wsi, str):
+        wsi = openslide.OpenSlide(wsi)
+
+    base_mag = float(wsi.properties.get("openslide.objective-power"))
+
+    if bbox_mag is None:
+        bbox_mag = base_mag
+
+    mag_layers = [
+        base_mag / ds
+        for ds in wsi.level_downsamples
+    ]
+
+    level = wsi.get_best_level_for_downsample(base_mag / mag)
+    level_mag = mag_layers[level]
+
+    x, y, w, h = bbox
+
+    if  bbox_mag <= base_mag:
+        scale = base_mag / bbox_mag
+    elif bbox_mag > base_mag:
+        scale = bbox_mag / base_mag
+
+    x_l0 = int(round(x * scale))
+    y_l0 = int(round(y * scale))
+
+    w_l0 = int(round(w * scale))
+    h_l0 = int(round(h * scale))
+
+    w_l = int(round(w_l0 / wsi.level_downsamples[level]))
+    h_l = int(round(h_l0 / wsi.level_downsamples[level]))
+
+    region = wsi.read_region(
+        (x_l0, y_l0),
+        level,
+        (w_l, h_l)
+    ).convert("RGB")
+
+    print(x_l0, y_l0, w_l, h_l)
+
+    if abs(level_mag - mag) > 1e-3:
+        out_w = int(round(w_l * mag / mag_layers[level]))
+        out_h = int(round(h_l * mag / mag_layers[level]))
+        region = region.resize((out_w, out_h), Image.LANCZOS)
+
+    return region
+
+
+
 def load_wsi_mag(wsi, desired_mag, rescale_method=Image.LANCZOS, verbose=False, allow_upscaling=True):
     """
     Load and rescale a whole-slide image (WSI) to a desired magnification.
@@ -227,8 +303,8 @@ def load_wsi_mag(wsi, desired_mag, rescale_method=Image.LANCZOS, verbose=False, 
     return region, scale_val, info, mpp_slide, ratio
 
 
-def read_region(wsi, mask_file, region_idx, desired_mag, notation="python",
-                allow_list=(1, 7), resampling_method=Image.Resampling.LANCZOS):
+def read_masked_region(wsi, mask_file, region_idx, desired_mag, notation="python",
+                       allow_list=(1, 7), resampling_method=Image.Resampling.LANCZOS):
     """
     Read a masked region from a whole-slide image (WSI) and rescale it to a desired magnification.
 
@@ -271,7 +347,7 @@ def read_region(wsi, mask_file, region_idx, desired_mag, notation="python",
 
     Examples
     --------
-    >>> region = read_region(wsi, mask_file, region_idx=0, desired_mag=10)
+    >>> region = read_masked_region(wsi, mask_file, region_idx=0, desired_mag=10)
     >>> plt.imshow(region)
     >>> plt.show()
     """
@@ -295,14 +371,14 @@ def read_region(wsi, mask_file, region_idx, desired_mag, notation="python",
         level = wsi.level_dimensions.index((des_w, des_h))
         # when desired magnification is not available - read the layer with the ratio that
         # is the nearest larger ratio to the desired ratio and resize
-        region = wsi.read_region((0, 0), level, wsi.level_dimensions[level]).convert("RGB")
+        region = wsi.read_masked_region((0, 0), level, wsi.level_dimensions[level]).convert("RGB")
         region = region.resize((des_w, des_h), resampling_method)
         region = np.array(region)[bbox[0]:bbox[2], bbox[1]:bbox[3]]
     else:
         # when desired ratio is available read the correct wsi layer
         level = wsi.get_best_level_for_downsample(desired_ratio)
         region = np.array(
-            wsi.read_region((bbox[0], bbox[1]), level, (bbox[2] - bbox[0], bbox[3] - bbox[1])).convert("RGB"))
+            wsi.read_masked_region((bbox[0], bbox[1]), level, (bbox[2] - bbox[0], bbox[3] - bbox[1])).convert("RGB"))
 
     # load mask with artifacts
     mask_art = mask_file["mask_art"][region_idx]

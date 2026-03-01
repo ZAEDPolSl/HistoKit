@@ -13,15 +13,15 @@ Script for loading wsi with desired resolution. If desired resolution is not ava
 """
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/Compass/HE/LMUM/20x/')
-parser.add_argument("--out_folder", type=str, help="Input directory with masks created by grandQC for detected regions with file extension. ", default="/mnt/data/Tmp/jmerta/compass_regions_small/")
+parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default='/mnt/data/Datasets/HE_data/TCGA_UCEC/')
+parser.add_argument("--out_folder", type=str, help="Input directory with masks created by grandQC for detected regions with file extension. ", default="/mnt/data/Tmp/jmerta/tcga_thumbnails/")
 parser.add_argument('--desired_mag', help="Desired slide magnification.", default=1, type = float)
 
 
 if __name__ == "__main__":
     args = parser.parse_args()
     os.makedirs(args.out_folder, exist_ok=True)
-    slides = sorted(glob.glob(os.path.join(args.wsi_dir, '*.svs')))
+    slides = sorted(glob.glob(os.path.join(args.wsi_dir, '*.svs')), key=os.path.getsize)
     for s_path in tqdm(slides):
         print(s_path)
         try:

@@ -1,6 +1,9 @@
 import os
+
+import h5py
 import numpy as np
 from PIL import Image
+from PIL.ExifTags import TAGS
 from tifffile import tifffile
 
 
@@ -98,4 +101,31 @@ def get_basename(path):
     'image.v1.test'
     """
     return os.path.splitext(os.path.basename(path))[0]
+
+
+def save_mat_v73(file_path, save_dict):
+    """
+    Save dictionary as MATLAB -v7.3 HDF5 .mat file.
+    Handles strings, lists, booleans, and numpy arrays.
+    """
+    with h5py.File(file_path, 'w') as f:
+        for key, val in save_dict.items():
+            # Convert booleans to uint8
+            if isinstance(val, np.ndarray) and val.dtype == np.bool_:
+                val = val.astype(np.uint8)
+            # Convert lists to arrays
+            elif isinstance(val, list):
+                val = np.array(val)
+            # Convert Python strings
+            elif isinstance(val, str):
+                val = np.array(val, dtype=h5py.string_dtype())
+            # Scalars: wrap in array
+            elif np.isscalar(val):
+                val = np.array(val)
+            # Ensure numpy array
+            elif not isinstance(val, np.ndarray):
+                raise TypeError(f"Cannot save key '{key}' of type {type(val)}")
+
+            f.create_dataset(key, data=val)
+
 

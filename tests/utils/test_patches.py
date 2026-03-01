@@ -7,7 +7,7 @@ from pathlib import Path
 from src.histo_kit.grand_qc.artifacts import Artifact
 from src.histo_kit.grand_qc.dataset import get_patch_grid
 from src.histo_kit.utils.patches import merge_patches, patch_wsi
-from src.histo_kit.utils.wsi import read_region, get_regions_location
+from src.histo_kit.utils.wsi import read_masked_region, get_regions_location, load_wsi_mag
 from openslide import OpenSlide
 
 ROOT = Path(__file__).parent.parent.parent
@@ -21,7 +21,7 @@ def test_patch_image(desired_mag,patch_size, save_folder, bg_percent, overlap, e
     mask_path = np.load("/mnt/data/Tmp/jmerta/HE/test_data/test_utils/SS45212_R0A10F2A_190425_mask_all.npz", allow_pickle=True)
     region_idx = 0
     wsi = OpenSlide(path)
-    region = read_region(wsi, mask_path, region_idx, desired_mag, notation="python", allow_list=(Artifact.NORM, Artifact.BG_MODEL), tol=1e-3)
+    region = read_masked_region(wsi, mask_path, region_idx, desired_mag, notation="python", allow_list=(Artifact.NORM, Artifact.BG_MODEL), tol=1e-3)
     Image.fromarray(region).save("region_masked.png")
     patch_wsi(region, patch_size, save_folder, bg_percent, overlap, extract_type)
 
@@ -32,7 +32,7 @@ def test_read_region():
     region_idx = 0
     desired_mag = 1
     wsi = OpenSlide(path)
-    Image.fromarray(read_region(wsi, mask_path, region_idx, desired_mag, notation="python", allow_list=(Artifact.NORM, Artifact.BG_MODEL), tol=1e-3)).save("region_masked.png")
+    Image.fromarray(read_masked_region(wsi, mask_path, region_idx, desired_mag, notation="python", allow_list=(Artifact.NORM, Artifact.BG_MODEL), tol=1e-3)).save("region_masked.png")
 
 
 @pytest.mark.skip_ci
@@ -82,11 +82,25 @@ def test_get_grid():
 
 @pytest.mark.skip_ci
 def test_vis_grid():
-    patch_size = 512
-    overlap_gt = 0.1
+    patch_size = 256
+    overlap_gt =0
+    # load slide
+    slide = OpenSlide("/mnt/data/Tmp/jmerta/article_vis/svs/TCGA-AP-A0LG-01Z-00-DX1.85966119-6AB0-43FD-88E8-D260059F9F4C.svs")
 
-    region = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/region_test.png"))
-    bg = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/bg_test.png").convert("1"))
+    # rescale region
+    region, scale_val, info, mpp_slide, ratio = load_wsi_mag(slide, 2.5, allow_upscaling=True)
+    path = "/mnt/data/Tmp/jmerta/article_vis/masks/TCGA-AP-A0LG-01Z-00-DX1.85966119-6AB0-43FD-88E8-D260059F9F4C.mat"
+    from PIL import Image
+    import scipy.io as sio
+    region = np.array(region)
+    bg = sio.loadmat(path)["mask_bg"].astype(np.uint8)*255
+    bg_art = Image.open("/mnt/data/Tmp/jmerta/article_vis/grandqc_overlay_vis/color_map_TCGA-AP-A0LG-01Z-00-DX1.85966119-6AB0-43FD-88E8-D260059F9F4C.png")
+    bg_art = bg_art.resize((bg.shape[1], bg.shape[0]), Image.NEAREST)
+    bg_art = np.array(bg_art)[:,:,0]
+    bg_art[bg_art != 128] = 0
+    bg_art[bg_art==128] = 1
+
+    Image.fromarray(bg_art.astype(np.uint8)*255).save("bg_art.png")
     region_list, images_list = get_regions_location(bg)
     bg_rgb = np.array(Image.open(f"{ROOT}/test_data/test_utils/test_patches/bg_test.png").convert("RGB"))
 
@@ -102,16 +116,18 @@ def test_vis_grid():
     cv2.imwrite("bbox_vis.png", bg_rgb)
 
     coords = get_patch_grid(region_list, patch_size=patch_size, overlap=overlap_gt)
-
+    region = region*bg_art[...,None]
     for x_s, y_s, x_e, y_e in zip(coords["x_start"], coords["y_start"], coords["x_end"], coords["y_end"]):
+        if bg_art[y_s:y_e, x_s:x_e].sum() <50:
+            continue
         cv2.rectangle(
-            bg_rgb,
+            region,
             (max(0, x_s), max(0, y_s)),
             (min(region.shape[1], x_e), min(region.shape[0], y_e)),
             color=(0, 255, 0),
-            thickness=2
+            thickness=8
         )
-    cv2.imwrite(f"reg_vis.png", bg_rgb)
+    Image.fromarray(region).save("region.png")
 
 
 

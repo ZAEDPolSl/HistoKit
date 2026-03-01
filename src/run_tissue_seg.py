@@ -19,26 +19,26 @@ parser = argparse.ArgumentParser()
 # Common settings
 parser.add_argument('--wsi_dir', type=str, help='Input directory with WSIs', default=None)
 parser.add_argument('--files_to_process', type=str, help='Path to the text file with absolute .svs filepaths to process. '
-                                                         'This argument will be ignored if wsi_dir is provided', default="/mnt/data/Tmp/jmerta/HE/svs_to_process.svs")
-parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/test/')
+                                                         'This argument will be ignored if wsi_dir is provided', default="/mnt/data/Tmp/jmerta/HE/src/to_process.txt")
+parser.add_argument('--out_dir', type=str, help='Output directory', default='/mnt/data/Tmp/jmerta/Compass_restults_12_01_2026_rest/')
 parser.add_argument('--vis_mag', help='Magnification of saved visualisations.',default=0.625, type=int)
-parser.add_argument('--overwrite', help='Overwrite files with results if they exist in the output folder or not.',default=False, type=bool)
+parser.add_argument('--overwrite', help='Overwrite files with results if they exist in the output folder or not.',default=True, type=bool)
 parser.add_argument('--save_mag', help='The magnification for background and artifacts masks.',default=2.5, type=float)
 
 # Settings for background detection with thresholding methods
 parser.add_argument('--run_tis_det', type=bool, help='Run tissue detection step or not.', default=True)
 parser.add_argument('--fill_holes', type=bool, help='Fill holes in the tissue or not.', default=True)
 parser.add_argument('--close_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image closing', default=2)
-parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=2)
-parser.add_argument('--tissdet_mag', help='Magnification used for tissue detection',default=2.5, type=float)
+parser.add_argument('--open_disk_r', type=int, help='Radius for disk strel used during mask cleaning with image opening', default=3)
+parser.add_argument('--tissdet_mag', help='Magnification used for tissue detection',default=10, type=float)
 parser.add_argument('--remove_small_objects', help='Remove small tissue areas during post-processing or not.',default=True, type=bool)
-parser.add_argument('--workers', help='Number of workers used for background tissue detection.',default=8, type=int,choices=range(1, os.cpu_count() + 1))
+parser.add_argument('--workers', help='Number of workers used for background tissue detection.',default=4, type=int,choices=range(1, os.cpu_count() + 1))
 
 # Settings for artifact detection with GrandQC
 parser.add_argument('--run_artifacts_det', type=bool, help='Run artifacts detection step or not.', default=True)
 parser.add_argument('--save_confidence_maps', help='Save confidence maps or not.',default=True, type=bool)
 parser.add_argument('--device', help='Device used for artifacts detection: cuda or cpu', choices=["cuda", "cpu"],default="cuda")
-parser.add_argument('--workers_per_slide', help='Number of workers used in Pytorch dataset during artifact segmentation.',default=6, type=int,choices=range(1, os.cpu_count() + 1))
+parser.add_argument('--workers_per_slide', help='Number of workers used in Pytorch dataset during artifact segmentation.',default=4, type=int,choices=range(1, os.cpu_count() + 1))
 parser.add_argument('--batch_size', help='Batch size used during artifact segmentation.', default=64, type=int)
 parser.add_argument('--grandqc_model', help='Path to GrandQC model weights (model for 10x magnification is used by default).',default="/mnt/data/Tmp/jmerta/HE/models/GrandQC_MPP1.pth", type=str)
 parser.add_argument('--grandqc_mpp', help='MPP for grand qc model (mpp=1 corresponds to magnification 10x, mpp=2.0 - 5x, mpp=1.5 - 7.5x)',default=1.0, type=float)
@@ -68,6 +68,7 @@ def detect_bg_slides(slide_arr):
             deltas.append(0)
     return error_slides, error_msgs, deltas, processed
 
+# 354_16
 
 # Create folders for results
 if __name__ == "__main__":
@@ -81,7 +82,7 @@ if __name__ == "__main__":
                   "bg_removal_contour_vis": create_folder(args.out_dir, 'bg_removal_contour_vis'),
                   "grandqc_overlay_vis": create_folder(args.out_dir, 'grandqc_overlay_vis'),
                   "grandqc_confidence_maps": create_folder(args.out_dir, 'grandqc_confidence_maps')
-                                                    if args.save_confidence_maps else None}
+                  if args.save_confidence_maps else None}
 
     # get slides names
     if args.wsi_dir is not None:
@@ -97,17 +98,18 @@ if __name__ == "__main__":
     if not args.overwrite:
         slides = []
         for s in all_slides:
-             b = os.path.join(paths_dict["masks"], get_basename(s) + ".mat")
-             if not os.path.exists(b):
-                 slides.append(s)
+            b = os.path.join(paths_dict["masks"], get_basename(s) + ".h5")
+            if not os.path.exists(b):
+                slides.append(s)
     else:
         slides = all_slides
     # calculate grandQC model magnification
-    MAG_MODEL = 10/args.grandqc_mpp
+    MAG_MODEL = 10 / args.grandqc_mpp
 
     if args.run_tis_det:
         # Process WSIs
-        print(f"Found {len(slides)} WSIs in {args.wsi_dir} directory. Using {args.workers} workers for tissue detection.\n")
+        print(
+            f"Found {len(slides)} WSIs in {args.wsi_dir} directory. Using {args.workers} workers for tissue detection.\n")
         print("====== STEP 1 =======: Tissue detection.\n")
         time_start = time.time()
 
@@ -133,11 +135,11 @@ if __name__ == "__main__":
             futures = {executor.submit(detect_bg_slides, s): s for s in slides_arr}
 
             with  tqdm(total=len(slides),
-               desc="Detecting tissue...",
-               position=0,
-               dynamic_ncols=True,
-               mininterval=0.5,
-               smoothing=0.2) as pbar:
+                       desc="Detecting tissue...",
+                       position=0,
+                       dynamic_ncols=True,
+                       mininterval=0.5,
+                       smoothing=0.2) as pbar:
                 for fut in as_completed(futures):
                     src = futures[fut]
                     e_s, e_m, d, proc = fut.result()
@@ -162,22 +164,28 @@ if __name__ == "__main__":
     if args.run_artifacts_det:
         print(f"STEP 2: Artifacts Segmentation with GrandQC. Using {args.device} for GrandQC.")
 
-        tis_det_files = glob.glob(paths_dict["masks"]+'/*.mat')
+        tis_det_files = glob.glob(
+            os.path.join(paths_dict["masks"], "*.h5")
+        )
         folder_tis_det = paths_dict["masks"]
 
         if not args.overwrite:
             slides = []
             for s in all_slides:
                 b = os.path.join(paths_dict["masks_grandqc"], get_basename(s) + ".mat")
-                if not os.path.exists(b):
+                c = os.path.join(paths_dict["masks"], get_basename(s) + ".h5")
+                if not os.path.exists(b) and os.path.exists(c):
                     slides.append(s)
         else:
-            slides = all_slides
-
+            slides = []
+            for s in all_slides:
+                c = os.path.join(paths_dict["masks"], get_basename(s) + ".h5")
+                if os.path.exists(c):
+                    slides.append(s)
 
         print("====== STEP 2.1 =======: Artifacts detection with GrandQC.\n")
         print(
-            f"Found {len(all_slides)} WSIs in {args.wsi_dir} directory and {len(tis_det_files)} corresponding .mat files with tissue masks in {folder_tis_det} directory.\n")
+            f"Found {len(all_slides)} WSIs in {args.wsi_dir} directory and {len(tis_det_files)} corresponding .h5 files with tissue masks in {folder_tis_det} directory.\n")
         print(f"Loading GrandQC model weights from {args.grandqc_model}...")
 
         model = torch.load(args.grandqc_model, map_location=args.device)
@@ -192,10 +200,12 @@ if __name__ == "__main__":
             if os.path.exists(f):
                 os.remove(f)
 
+        slides = sorted(slides, key=os.path.getsize)
+
         for s_f in tqdm(slides, total=len(slides), desc="Processing slides"):
             try:
                 basename = get_basename(s_f)
-                tis_det = os.path.join(folder_tis_det, basename+".mat")
+                tis_det = os.path.join(folder_tis_det, basename + ".h5")
                 detect_artifacts_slide(
                     s_f, tis_det, args.batch_size,
                     args.workers_per_slide, args.device,
@@ -246,6 +256,8 @@ if __name__ == "__main__":
                     f.write(f"{basename} - {str(e)}\n")
 
     print("Finished STEP 2B (Artifacts detection) - in time: {:.2f} min".format((time.time() - time_start) / 60))
+
+
 
 
 

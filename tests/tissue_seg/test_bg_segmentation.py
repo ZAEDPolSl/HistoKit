@@ -1,12 +1,16 @@
 import os
-
+from openslide import OpenSlide
 import numpy as np
+import openslide
 import pytest
 from scipy.io import loadmat
 from PIL import Image
 from src.histo_kit.tissue_seg.bg_segmentation import wsi_tissue_seg
 
 from pathlib import Path
+
+from src.histo_kit.utils.file_utils import get_basename
+from src.histo_kit.utils.wsi import load_wsi_mag, get_regions_location
 
 ROOT = Path(__file__).parent.parent.parent
 
@@ -38,3 +42,27 @@ def test_tissue_seg(img_path, mat_file):
     rgb = Image.fromarray(rgb)
     print(f"\n Fraction of mismatched elements: {diff_fraction:.8f} - Number of pixels mismatched: {diff_num}\n")
     assert diff_fraction < 10e-2
+
+@pytest.mark.skip_ci
+@pytest.mark.parametrize("folder_mat, folder_svs", [
+    (f"/mnt/data/Tmp/jmerta/Compass_HistoKit_test/Background_matlab/",
+     f"/mnt/data/Datasets/Compass/HE/")
+])
+def test_tissue_seg_folder(folder_mat, folder_svs):
+
+    mat_files = [f for f in os.listdir(folder_mat) if f.endswith('.mat')]
+    des_mag = 2.5
+
+    for mat_f in mat_files:
+        mask = loadmat(os.path.join(folder_mat, mat_f))
+        basename = get_basename(mat_f).removesuffix("_mask_all")
+        svs_path = os.path.join(folder_svs, f"{basename}.svs")
+        wsi = OpenSlide(svs_path)
+        region, scale_val, info, mpp_slide, ratio = load_wsi_mag(wsi, des_mag, allow_upscaling=True)
+        region_np = np.array(region)
+        res = wsi_tissue_seg(region_np)
+        res["mask"] = res["mask"].astype(np.uint8)
+
+
+
+

@@ -469,57 +469,7 @@ def find_thr(data, alpha, mi, sigma, idx, draw):
 
     return thr
 
-def get_pixel_distribution(img):
-    """
-    Compute the pixel value distribution for each RGB channel of an image.
-
-    This function calculates histograms of pixel intensities (0–255) separately
-    for the Red, Green, and Blue channels of an input RGB image. Counts for
-    near-white pixels (values 254 and 255) are set to zero to remove artificial
-    or background artifacts.
-
-    Parameters
-    ----------
-    img : ndarray of shape (M, N, 3)
-        Input RGB image as a NumPy array with values in the range [0, 255].
-
-    Returns
-    -------
-    R : ndarray of shape (256,)
-        Histogram of Red channel pixel intensities (with counts for 254 and 255 set to zero).
-    G : ndarray of shape (256,)
-        Histogram of Green channel pixel intensities (with counts for 254 and 255 set to zero).
-    B : ndarray of shape (256,)
-        Histogram of Blue channel pixel intensities (with counts for 254 and 255 set to zero).
-
-    Examples
-    --------
-    >>> R, G, B = get_pixel_distribution(image)
-    >>> print("Red channel counts:", R)
-    >>> print("Green channel counts:", G)
-    >>> print("Blue channel counts:", B)
-    """
-
-    # get distribution of pixel values per color channel
-    R = img[:, :, 0].ravel()
-    G = img[:, :, 1].ravel()
-    B = img[:, :, 2].ravel()
-
-    bins = np.arange(-0.5, 256.5, 1)
-
-    R, _ = np.histogram(R, bins=bins)
-    B, _ = np.histogram(B, bins=bins)
-    G, _ = np.histogram(G, bins=bins)
-
-    # remove counts from artificial white pixels
-    R[254:] = 0
-    G[254:] = 0
-    B[254:] = 0
-
-    return R, G, B
-
-
-def get_thr_image(img, thr_min = 0.7*255, verbose=False):
+def get_thr_image(img: np.ndarray, thr_min = 0.7*255, verbose=False):
     """
     Compute per-channel thresholds for an RGB image using the GaMRed algorithm.
 
@@ -590,6 +540,58 @@ def get_thr_image(img, thr_min = 0.7*255, verbose=False):
                 print(f"Too low threshold for {k} channel, use Otsu instead.")
 
     return thr, R, G, B
+
+def get_pixel_distribution(img):
+    """
+    Compute the pixel value distribution for each RGB channel of an image.
+
+    This function calculates histograms of pixel intensities (0–255) separately
+    for the Red, Green, and Blue channels of an input RGB image. Counts for
+    near-white pixels (values 254 and 255) are set to zero to remove artificial
+    or background artifacts.
+
+    Parameters
+    ----------
+    img : ndarray of shape (M, N, 3)
+        Input RGB image as a NumPy array with values in the range [0, 255].
+
+    Returns
+    -------
+    R : ndarray of shape (256,)
+        Histogram of Red channel pixel intensities (with counts for 254 and 255 set to zero).
+    G : ndarray of shape (256,)
+        Histogram of Green channel pixel intensities (with counts for 254 and 255 set to zero).
+    B : ndarray of shape (256,)
+        Histogram of Blue channel pixel intensities (with counts for 254 and 255 set to zero).
+
+    Examples
+    --------
+    >>> R, G, B = get_pixel_distribution(image)
+    >>> print("Red channel counts:", R)
+    >>> print("Green channel counts:", G)
+    >>> print("Blue channel counts:", B)
+    """
+
+    # get distribution of pixel values per color channel
+    R = img[:, :, 0].ravel()
+    G = img[:, :, 1].ravel()
+    B = img[:, :, 2].ravel()
+
+    bins = np.arange(-0.5, 256.5, 1)
+
+    R, _ = np.histogram(R, bins=bins)
+    B, _ = np.histogram(B, bins=bins)
+    G, _ = np.histogram(G, bins=bins)
+
+    # remove counts from artificial white pixels
+    R[254:] = 0
+    G[254:] = 0
+    B[254:] = 0
+
+    return R, G, B
+
+
+
 
 def two_step_otsu(hist):
     """
