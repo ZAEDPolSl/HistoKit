@@ -1,0 +1,39 @@
+# cohort.yaml
+
+slides:
+  input_dir: ./data/slides
+  pattern: "*.svs"
+
+output_dir: ./outputs
+
+logging:
+  enabled: true
+  log_dir: ./outputs/logs
+  processed_file: processed.csv
+  errors_file: errors.csv
+
+stages:
+  tissue_detection:
+    enabled: true
+    algorithm: gamred
+    config_path: ./configs/gamred.yaml
+    parallel_workers: 8
+    overwrite: false
+
+  artifact_detection:
+    enabled: true
+    algorithm: grandqc
+    config_path: ./configs/grandqc.yaml
+    parallel_workers: 1
+    overwrite: false
+    tissue_source:
+      algorithm: gamred
+
+  statistics:
+    enabled: true
+    config_path: ./configs/statistics.yaml
+    workers: 4
+    tissue_source:
+      algorithm: gamred
+    artifact_source:
+      algorithm: grandqc

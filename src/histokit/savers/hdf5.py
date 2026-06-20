@@ -6,6 +6,8 @@ from .base import BaseSaver
 
 class HDF5Saver(BaseSaver):
 
+    extension = ".h5"
+
     def save(self, out_dir: str, basename:str, result: dict) -> None:
         os.makedirs(out_dir, exist_ok=True)
 
