@@ -1,0 +1,32 @@
+# gamred.yaml
+
+vis_mag: float = 0.625
+save_mag: float = 5
+
+# Tissue detection
+tissdet_mag: 2.5
+thr_min: 178.5
+split_regions: true
+
+# Green pen removal
+remove_green_pen: true
+thr_green_pen: [15, 120]
+disk_radius_green_pen: 9
+
+# Black pen removal
+remove_black_pen: true
+thr_black_pen: [15, 0]
+disk_radius_black_pen: 9
+
+# Gray stain removal
+remove_gray_stains: true
+
+# Postprocessing parameters
+fill_holes: true
+open_disk_radius: 2
+close_disk_radius: 2
+remove_small_regions: true
+small_regions_thr: null
+
+# Output format
+saver: hdf5
