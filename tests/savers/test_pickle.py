@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from histokit.savers.pickle import PickleSaver
+from histokit.savers import PickleSaver
 
 
 def test_pickle_saver_save_creates_file(tmp_path):

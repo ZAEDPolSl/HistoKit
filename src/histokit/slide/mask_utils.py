@@ -82,10 +82,39 @@ def merge_regions(masks, bboxes, shape):
 
     return merged
 
-def rescale_mask(mask: np.ndarray, bbox: BBox) -> np.ndarray:
+def scale_mask_to_bbox(mask: np.ndarray, bbox: BBox) -> np.ndarray:
 
     new_size = (int(bbox.w), int(bbox.h))
 
+    if new_size[0] < 1 or new_size[1] < 1:
+        raise ValueError(f"Invalid bbox size: {new_size}")
+
+    if mask.ndim == 2:
+        return np.array(
+            Image.fromarray(mask).resize(new_size, Image.Resampling.NEAREST)
+        )
+
+    if mask.ndim == 3:
+        channels = [
+            np.array(
+                Image.fromarray(mask[:, :, c]).resize(
+                    new_size,
+                    Image.Resampling.NEAREST,
+                )
+            )
+            for c in range(mask.shape[2])
+        ]
+        return np.stack(channels, axis=2).astype(mask.dtype)
+
+    raise ValueError(f"Expected 2D or 3D mask, got shape {mask.shape}")
+
+def rescale_mask(mask: np.ndarray, scale: float) -> np.ndarray:
+    
+    new_size = (int(mask.shape[1] * scale), int(mask.shape[0] * scale))
+    
+    if new_size[0] < 1 or new_size[1] < 1:
+        raise ValueError(f"Invalid bbox size: {new_size}")
+    
     if mask.ndim == 2:
         return np.array(
             Image.fromarray(mask).resize(new_size, Image.Resampling.NEAREST)

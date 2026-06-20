@@ -1,15 +1,6 @@
-
 from importlib import import_module
 
-__all__ = [
-    "augmentation",
-    "cohort_runner",
-    "patch_extractors",
-    "savers",
-    "segmentation",
-    "slide",
-    "stain_normalisation",
-]
+__all__ = ["gamred"]
 
 
 def __getattr__(name):

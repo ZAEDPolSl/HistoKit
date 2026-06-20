@@ -1,6 +1,6 @@
 import pytest
 import numpy as np
-from histokit.slide.bbox import BBox, BBoxMode
+from histokit.slide import BBox, BBoxMode
 
 
 def test_bbox_init_xy_and_wh():

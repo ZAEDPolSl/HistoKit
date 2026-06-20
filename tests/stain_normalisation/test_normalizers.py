@@ -4,9 +4,9 @@ import cv2
 import pytest
 import numpy as np
 from matplotlib import pyplot as plt
-from histokit.stain_normalisation.normalizers import StainingNormalizer
+from histokit.stain_normalisation import StainingNormalizer
 
-TEST_PATH = Path(__file__).parent.parent / "data/stain_normalisation/"
+TEST_PATH = Path(__file__).parent.parent / "data/stain_normalization/"
 
 def read_rgb(path):
     img = cv2.imread(str(path))

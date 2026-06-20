@@ -7,6 +7,8 @@ from .base import BaseSaver
 class HDF5Saver(BaseSaver):
 
     def save(self, out_dir: str, basename:str, result: dict) -> None:
+        os.makedirs(out_dir, exist_ok=True)
+
         with h5py.File(os.path.join(out_dir, f"{basename}.h5"), "w") as f:
             for key, value in result.items():
                 self._write_value(f, key, value)

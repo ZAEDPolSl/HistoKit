@@ -1,18 +1,18 @@
 import pytest
 
-from histokit.segmentation.collectors.base import CompositeOutputCollector
-from histokit.segmentation.collectors.image import (
+from histokit.segmentation.collectors import CompositeOutputCollector
+from histokit.segmentation.collectors import (
     ThumbnailCollector,
     SegmentationOverlayCollector,
     HistogramCollector,
     ImageOutputCollector,
 )
-from histokit.segmentation.postprocessing.step import (
+from histokit.segmentation.postprocessing import (
     Opening,
     FillHoles,
     RemoveSmallRegions,
 )
-from histokit.segmentation.tissue.gamred.config import GaMRedConfig
+from histokit.segmentation.tissue.gamred import GaMRedConfig
 
 
 def test_default_config_builds_postprocess_steps():

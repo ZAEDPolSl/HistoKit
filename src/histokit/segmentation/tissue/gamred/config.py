@@ -1,11 +1,23 @@
 from dataclasses import dataclass, field, fields
 from pathlib import Path
-from typing import Callable, Any
+from typing import Any
+
 import yaml
 
 from ...collectors.base import CompositeOutputCollector
-from ...collectors.image import ThumbnailCollector, SegmentationOverlayCollector, HistogramCollector, ImageOutputCollector
-from ...postprocessing.step import Opening, FillHoles, RemoveSmallRegions, PostProcessStep
+from ...collectors.image import (
+    ThumbnailCollector,
+    SegmentationOverlayCollector,
+    HistogramCollector,
+    ImageOutputCollector,
+)
+from ...postprocessing.step import (
+    Opening,
+    FillHoles,
+    RemoveSmallRegions,
+    PostProcessStep,
+)
+
 
 COLLECTOR_REGISTRY = {
     "ThumbnailCollector": ThumbnailCollector,
@@ -15,12 +27,12 @@ COLLECTOR_REGISTRY = {
 }
 
 
-
 @dataclass
 class GaMRedConfig:
-
     vis_mag: float = 1.0
     tissdet_mag: float = 2.5
+    save_mag: float | None = 1.0
+
     thr_min: float = 0.7 * 255
     split_regions: bool = True
 
@@ -34,28 +46,21 @@ class GaMRedConfig:
 
     remove_gray_stains: bool = True
 
-    fill_holes: bool = True
-    open_disk_radius: int = 2
-    close_disk_radius: int = 2
-    remove_small_regions: bool = True
-    small_regions_thr: int | None = None
+    saver: str | None = "hdf5"
+    out_dir: str | Path | None = "./outputs"
 
-    saver: str = "hdf5"
-    out_dir: str | Path | None = None
+    postprocess_steps: list[PostProcessStep] = field(
+        default_factory=lambda: [
+            Opening(disk_radius=2),
+            FillHoles(enabled=True),
+            Opening(disk_radius=2),
+            RemoveSmallRegions(thr_area=None),
+        ]
+    )
 
-    postprocess_steps: list[PostProcessStep] = field(default_factory=list)
-
-    collectors: list[dict[str, Any]] = field(default_factory=list)
+    collectors: list[dict[str, Any] | str] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        if not self.postprocess_steps:
-            self.postprocess_steps = [
-                Opening(disk_radius=self.open_disk_radius),
-                FillHoles(enabled=self.fill_holes),
-                Opening(disk_radius=self.open_disk_radius),
-                RemoveSmallRegions(thr_area=self.small_regions_thr),
-            ]
-
         if not self.collectors:
             self.collectors = [
                 {"name": "ThumbnailCollector"},
@@ -73,9 +78,11 @@ class GaMRedConfig:
             if isinstance(item, str):
                 name = item
                 params = {}
+
             elif isinstance(item, dict):
                 name = item.get("name")
                 params = item.get("params", {})
+
             else:
                 raise TypeError(f"Invalid collector config: {item}")
 
@@ -95,8 +102,11 @@ class GaMRedConfig:
 
     def to_hdf5_dict(self) -> dict[str, Any]:
         return {
+            "vis_mag": self.vis_mag,
             "tissdet_mag": self.tissdet_mag,
+            "save_mag": self.save_mag,
             "thr_min": self.thr_min,
+            "split_regions": self.split_regions,
             "remove_green_pen": self.remove_green_pen,
             "thr_green_pen": self.thr_green_pen,
             "disk_radius_green_pen": self.disk_radius_green_pen,
@@ -104,10 +114,8 @@ class GaMRedConfig:
             "thr_black_pen": self.thr_black_pen,
             "disk_radius_black_pen": self.disk_radius_black_pen,
             "remove_gray_stains": self.remove_gray_stains,
-            "fill_holes": self.fill_holes,
-            "open_disk_radius": self.open_disk_radius,
-            "remove_small_regions": self.remove_small_regions,
-            "small_regions_thr": self.small_regions_thr,
+            "saver": self.saver,
+            "out_dir": str(self.out_dir) if self.out_dir is not None else None,
             "postprocess_steps": [
                 step.get_config()
                 for step in self.postprocess_steps
@@ -131,6 +139,7 @@ class GaMRedConfig:
             )
 
         field_names = {f.name for f in fields(cls)}
+
         filtered = {
             k: v
             for k, v in data.items()
@@ -147,18 +156,23 @@ class GaMRedConfig:
             if isinstance(item, str):
                 name = item
                 params = {}
+
             elif isinstance(item, dict):
                 name = item.get("name")
                 params = item.get("params", {})
+
             else:
                 continue
 
             if name == "Opening":
                 steps.append(Opening(**params))
+
             elif name == "FillHoles":
                 steps.append(FillHoles(**params))
+
             elif name == "RemoveSmallRegions":
                 steps.append(RemoveSmallRegions(**params))
+
             else:
                 raise ValueError(f"Unknown postprocess step: {name}")
 

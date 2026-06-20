@@ -1,11 +1,18 @@
 import numpy as np
 
-def any_excluded(exclude_fns):
-    def _fn(patch: np.ndarray) -> bool:
-        return any(fn(patch) for fn in exclude_fns)
-    return _fn
 
-def exclude_background(bg_value=255, threshold=1.0):
-    def _fn(patch: np.ndarray) -> bool:
-        return np.mean(patch == bg_value) >= threshold
-    return _fn
+class AnyExcluded:
+    def __init__(self, exclude_fns):
+        self.exclude_fns = exclude_fns
+
+    def __call__(self, patch: np.ndarray) -> bool:
+        return any(fn(patch) for fn in self.exclude_fns)
+
+
+class ExcludeBackground:
+    def __init__(self, bg_value=255, threshold=1.0):
+        self.bg_value = bg_value
+        self.threshold = threshold
+
+    def __call__(self, patch: np.ndarray) -> bool:
+        return np.mean(patch == self.bg_value) >= self.threshold

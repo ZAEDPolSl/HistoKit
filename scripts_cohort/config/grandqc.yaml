@@ -1,0 +1,42 @@
+# grandqc.yaml
+
+# output
+saver: hdf5
+out_dir: ./outputs
+
+# model
+model_path: ./models/GrandQC_MPP1.pth
+
+# inference
+device: cuda:0
+batch_size: 16
+num_workers: 2
+
+# magnification
+grandqc_mpp: 1.0
+det_mag: 10.0
+vis_mag: 1.0
+
+# patches
+patch_size_model: 512
+patch_size: 512
+overlap: 0.75
+grid_offset: 0.5
+pad_value: 255
+
+# network
+encoder: timm-efficientnet-b0
+encoder_weights: imagenet
+classes: 8
+
+# blending
+blending_mode: gaussian
+blending_sigma: null
+
+# outputs
+save_confidence_maps: true
+save_raw_mask: true
+
+# visualizations
+collectors:
+  - name: ArtifactOverlayCollector

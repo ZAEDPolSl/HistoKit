@@ -56,6 +56,11 @@ class SegmentationOverlayCollector(OutputCollector):
         image = np.asarray(output.metadata["image"])
         mask = np.asarray(output.data)
 
+        if mask.dtype == bool:
+            mask = mask.astype(np.uint8) * 255
+        else:
+            mask = mask.astype(np.uint8)
+
         save_dir = self.out_dir / "tissue_detection_overlay"
         save_dir.mkdir(parents=True, exist_ok=True)
 

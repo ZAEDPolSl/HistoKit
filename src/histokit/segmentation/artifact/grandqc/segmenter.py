@@ -1,61 +1,68 @@
 import os
 import time
+import warnings
+from .config import GrandQCConfig
+from ...collectors.base import OutputKind
 import numpy as np
+from typing import Dict
 import torch
 from torch.utils.data import DataLoader
 from ....patch_extractors.datasets.grid import GridExtractorDataset
 from ....slide.bbox import BBox
-from ....slide.mask_utils import rescale_mask, merge_regions
+from ....slide.mask_utils import scale_mask_to_bbox, merge_regions
 from ....slide.slide import Slide
-from ...tissue.gamred.config import GrandQCConfig
-from ...tissue.base import PatchSegmenter
+from ...base import Segmenter
 from ...utils import get_weights
 import segmentation_models_pytorch as smp
 from ....savers.base import Saver
 
 
-class GrandQCSegmenter(PatchSegmenter):
+class GrandQCSegmenter(Segmenter):
 
     def __init__(self, config: GrandQCConfig):
         self.config = config
+        self.output_collector = config.build_output_collector()
+        self.saver = Saver(self.config.saver)
 
         self.model = torch.load(self.config.model_path,
-                                map_location=self.config.device)
+                                map_location=self.config.device,
+                                weights_only=False)
         self.model.to(self.config.device)
         self.model.eval()
 
-        self.preprocess = smp.encoders.get_preprocessing_fn(
-            self.config.encoder,
-            self.config.encoder_weights,
-        )
         self.saver = Saver(self.config.saver)
 
         self.weight_patch = get_weights(self.config.blending_mode,
                                    self.config.patch_size,
                                    self.config.patch_size,
                                    sigma=self.config.blending_sigma)
+    
 
+    def segment(self, 
+                slide: Slide, 
+                basename: str = "slide", 
+                tissue_mask: dict | None = None, 
+                verbose: bool = False) -> Dict:
 
-    def prep_fn(self, img):
-        return self.preprocess(img)
+        if verbose:
+            print(f"Segmenting artifacts for slide: {basename} using GrandQC...")
 
-    def run_pipeline_single(self, path:str, path_mask:str = None) -> dict:
         t0 = time.perf_counter()
-        slide = Slide(path)
-        basename = os.path.basename(path)
 
-        if path_mask is not None:
-            mask_data = self.saver.load(path_mask)
-        else:
+        if tissue_mask is None:
+            # When there is no tissue mask provided, patches will be 
+            # extracted from the entire slide. 
+
             w, h = slide.get_size_at_mag(self.config.det_mag)
-            mask_data = {
-                "mask": [np.ones(slide.level_dimensions[-1], dtype=bool)],
+
+            tissue_mask = {
+                "mask": [np.ones((h, w), dtype=bool)],
                 "bbox": [np.array([0, 0, w, h])],
-                "mag_save": self.config.det_mag
+                "mag_save": self.config.det_mag,
             }
 
-        result ={
-            "basename": os.path.basename(path),
+        result = {
+            "basename": basename,
             "method": "GrandQC",
             "type": "artifact_mask",
 
@@ -71,20 +78,22 @@ class GrandQCSegmenter(PatchSegmenter):
             "level_dimensions_0": np.array(slide.level_dimensions[0]),
 
             "config": self.config.to_hdf5_dict(),
-            "time": 0
+            "time": 0,
         }
 
-        for idx, (mask, bbox) in enumerate(zip(mask_data["mask"], mask_data["bbox"])):
+        for idx, (mask, bbox) in enumerate(zip(tissue_mask["mask"], tissue_mask["bbox"])):
 
-            region = slide.read_masked_object(bbox=bbox,
-                                              mask=mask,
-                                              mag_bbox=mask_data["mag_save"],
-                                              mag=self.config.det_mag,
-                                              pad_value=self.config.pad_value)
+            if verbose:
+                print(f"Processing tissue region {idx + 1}/{len(tissue_mask['mask'])}")
 
-
-
-            region_np = np.array(region)
+            # 1. Read the tissue region at detection magnification
+            region_np = np.array(slide.read_masked_object(
+                bbox=bbox,
+                mask=mask,
+                mag_bbox=tissue_mask["mag_save"],
+                mag=self.config.det_mag,
+                pad_value=self.config.pad_value,
+            ))
 
             ds = GridExtractorDataset(
                 region_np,
@@ -92,26 +101,35 @@ class GrandQCSegmenter(PatchSegmenter):
                 overlap=self.config.overlap,
                 pad_value=self.config.pad_value,
                 grid_offset=self.config.grid_offset,
-                prep_fn=self.prep_fn,
+                prep_fn= smp.encoders.get_preprocessing_fn(
+                    self.config.encoder,
+                    self.config.encoder_weights,
+                )
             )
 
-            H, W = region_np.shape[0], region_np.shape[1]
-            raw_mask = np.zeros((H, W, self.config.classes))
+            H, W = region_np.shape[:2]
 
-            loader = DataLoader(ds, batch_size=self.config.batch_size,
-                                num_workers=self.config.num_workers,
-                                pin_memory=True)
+            # 2. Initialize raw mask and weights
 
-            weights = np.zeros((H, W))
+            raw_mask = np.zeros((H, W, self.config.classes),dtype=np.float32)
+            weights = np.zeros((H, W), dtype=np.float32)
+
+            loader = DataLoader(
+                ds,
+                batch_size=self.config.batch_size,
+                num_workers=self.config.num_workers,
+                pin_memory=True,
+            )
+
+            # 3. Run GrandQC in batches
 
             for batch in loader:
                 with torch.no_grad():
                     images = batch["patch"].to(self.config.device)
                     pred = self.model(images).to("cpu").numpy()
 
-                for i, pred in enumerate(pred):
-
-                    pred_hwc = pred.transpose(1, 2, 0)
+                for i, pred_single in enumerate(pred):
+                    pred_hwc = pred_single.transpose(1, 2, 0)
 
                     orig_x0 = int(batch["x_start"][i])
                     orig_y0 = int(batch["y_start"][i])
@@ -132,67 +150,120 @@ class GrandQCSegmenter(PatchSegmenter):
                     src_x0 = dst_x0 - orig_x0
                     src_y0 = dst_y0 - orig_y0
 
-                    pred_patch = pred_hwc[src_y0:src_y0 + h, src_x0:src_x0 + w, :]  # (h, w, C)
-                    gauss_patch_crop = self.weight_patch[src_y0:src_y0 + h, src_x0:src_x0 + w]  # (h, w)
+                    pred_patch = pred_hwc[
+                        src_y0:src_y0 + h,
+                        src_x0:src_x0 + w,
+                        :,
+                    ]
 
-                    raw_mask[dst_y0:dst_y1, dst_x0:dst_x1, :] += pred_patch * gauss_patch_crop[..., None]
-                    weights[dst_y0:dst_y1, dst_x0:dst_x1] += gauss_patch_crop
+                    weight_patch = self.weight_patch[
+                        src_y0:src_y0 + h,
+                        src_x0:src_x0 + w,
+                    ]
 
+                    raw_mask[
+                        dst_y0:dst_y1,
+                        dst_x0:dst_x1,
+                        :,
+                    ] += pred_patch * weight_patch[..., None]
+
+                    weights[
+                        dst_y0:dst_y1,
+                        dst_x0:dst_x1,
+                    ] += weight_patch
+
+            # 4. Normalize the raw mask by the weights to get the final 
+            # confidence maps for each class.
             raw_mask = np.divide(
                 raw_mask,
                 weights[:, :, None],
                 out=np.zeros_like(raw_mask),
-                where=weights[:, :, None] != 0
+                where=weights[:, :, None] != 0,
             )
 
-            pred_mask = np.argmax(raw_mask, axis=2).astype('int8')
-            pred_mask = pred_mask[:H, :W]
+            # 5. Get the predicted mask by taking the argmax across classes
+            pred_mask = np.argmax(raw_mask, axis=2).astype(np.int8)
 
-            bg = np.all(region_np == 0, axis=2)
-            raw_mask[:, :, 0] = bg
+            # 6. Set background pixels (pad_value) to class 0 in the predicted mask
+            bg = np.all(region_np == self.config.pad_value, axis=2)
 
-            # remove the rest of bg pixels
-            pred_mask[(bg.astype(bool))] = 0
+            raw_mask[:, :, 0] = bg.astype(raw_mask.dtype)
+            pred_mask[bg] = 0
 
-            bbox = BBox.normalize(bbox, mag=self.config.det_mag)
-            bbox = bbox.scale(mag=self.config.save_mag)
-            result["mask"].append(rescale_mask(pred_mask, bbox))
-            result["bbox"].append(bbox.numpy())
+            # 7. Scale the predicted mask and raw mask to the save magnification.
+            bbox_obj = BBox.normalize(bbox, mag=self.config.det_mag)
+            bbox_save = bbox_obj.scale(mag=self.config.save_mag)
+
+            if bbox_save.w < 1 or bbox_save.h < 1:
+                warnings.warn(
+                    f"Skipping region {idx + 1} due to small size after scaling. BBox: {bbox_save}",
+                    UserWarning,
+                )
+                continue
+
+            result["mask"].append(scale_mask_to_bbox(pred_mask, bbox_save))
+            result["bbox"].append(bbox_save.numpy())
 
             if self.config.save_raw_mask:
-                result["raw_mask"].append(rescale_mask(raw_mask, bbox))
+                result["raw_mask"].append(
+                    scale_mask_to_bbox(raw_mask, bbox_save)
+                )
 
+            # * Free memory
             del region_np
-            del region
+            del raw_mask
+            del pred_mask
 
+        result["time"] = time.perf_counter() - t0
 
-        result["elapsed_time"] = time.perf_counter() - t0
-
-        if len(self.config.visualisation_steps):
+        # 8. Collect outputs for visualization (optional)
+        if self.config.collectors:
 
             masks = []
             bboxes = []
+            
+            # Visialisation are done for a whole slide, so masks are 
+            # scaled and merged to a single mask.
 
-            for m, b in zip(result["mask"], result["bbox"]):
-                b = BBox.normalize(b, mag=self.config.save_mag).scale(mag=self.config.vis_mag)
-                masks.append(rescale_mask(m, b))
-                bboxes.append(b.numpy().astype(int))
+            for mask, bbox in zip(result["mask"], result["bbox"]):
+                bbox_vis = BBox.normalize(bbox, mag=self.config.save_mag,
+                ).scale(mag=self.config.vis_mag)
+
+                if bbox_save.w < 1 or bbox_save.h < 1:
+                    warnings.warn(
+                        f"Skipping region {idx + 1} due to small size after scaling. BBox: {bbox_save}",
+                        UserWarning,
+                    )
+                    continue
+
+                masks.append(scale_mask_to_bbox(mask, bbox_vis))
+                bboxes.append(bbox_vis.numpy().astype(int))
 
             w, h = slide.get_size_at_mag(self.config.vis_mag)
-            mask_merged = merge_regions(masks, bboxes, shape=(h, w))
 
-            vis_dict = {
-                "mask": mask_merged,
-                "colors": self.config.colors,
-                "basename": basename
-            }
+            mask_merged = merge_regions(
+                masks,
+                bboxes,
+                shape=(h, w),
+            )
 
-            for step in self.config.visualisation_steps:
-                step(data=vis_dict,
-                     slide=slide,
-                     save_dir=self.config.out_dir)
+            thumb = np.array(slide.read_region(mag=self.config.vis_mag))
 
+            self._collect(
+                name="artifact_overlay",
+                step="visualisation",
+                kind=OutputKind.MASK,
+                data=mask_merged,
+                basename=basename,
+                image=thumb,
+                colors=self.config.colors,
+            )
 
-        self.saver.save(self.config.out_dir, basename, result)
+        # 9. Save results (optional)
+        self.saver.save(
+            os.path.join(self.config.out_dir, "mask_grandqc"),
+            basename,
+            result,
+        )
 
         return result

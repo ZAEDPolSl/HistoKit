@@ -1,8 +1,7 @@
 import numpy as np
 import pytest
-from histokit.segmentation.collectors.base import PipelineOutput
-from histokit.segmentation.tissue.gamred.config import GaMRedConfig
-from histokit.segmentation.tissue.gamred.segmenter import GaMRedSegmenter
+from histokit.segmentation.collectors import PipelineOutput
+from histokit.segmentation.tissue.gamred import GaMRedConfig, GaMRedSegmenter
 
 
 class DummyCollector:

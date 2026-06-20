@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from PIL import Image
-from histokit.slide.backends.pil import PILBackend
+from histokit.slide.backends import PILBackend
 
 TEST_PATH = Path(__file__).parent.parent.parent / "data"
 

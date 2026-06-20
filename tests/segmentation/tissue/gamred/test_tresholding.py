@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from histokit.segmentation.tissue.gamred.thresholding import (
+from histokit.segmentation.tissue.gamred import (
     otsuthresh,
     two_step_otsu,
     get_thr_image,

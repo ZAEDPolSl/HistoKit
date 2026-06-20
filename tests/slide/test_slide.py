@@ -1,13 +1,10 @@
 import numpy as np
 import pytest
 from pathlib import Path
-from histokit.slide.backends.numpy import NumpyBackend
-from histokit.slide.backends.openslide import OpenSlideBackend
-from histokit.slide.backends.pil import PILBackend
-from histokit.slide.slide import Slide
-from histokit.savers.base import Saver
+from histokit.savers import Saver
+from histokit.slide import NumpyBackend, OpenSlideBackend, PILBackend, Slide
 
-TEST_PATH = Path(__file__).parent.parent / "data"
+TEST_PATH = Path(__file__).parent.parent / "data/wsi/"
 
 @pytest.fixture(params=[
     lambda: np.random.choice([False, True], (64, 64)).astype(bool),          # Binary bool
@@ -26,7 +23,7 @@ def slide_pil(tmp_path: Path, request):
     path = TEST_PATH / f"{request.param}"
     return Slide(str(path))
 
-@pytest.fixture(params=["sample_aperio_cptac_ucec.svs", "sample_aperio_tcga_ucec.svs", "sample_hammamatsu_rosella.ndpi", "sample_layered_endo.tif"])
+@pytest.fixture(params=["Aperio/CMU-1-Small-Region.svs", "ARGOS/Argos-1-Stacked.avs", "Philips/Philips-1.tiff", "Hamamatsu/Hamamatsu-1.ndpi"])
 def slide_openslide(tmp_path: Path, request):
     path = TEST_PATH / f"{request.param}"
     return Slide(str(path))
@@ -34,11 +31,10 @@ def slide_openslide(tmp_path: Path, request):
 @pytest.fixture(params=[
     "sample_tnbc.png",
     "sample_ocelot.jpg",
-    "sample_single_rosella.tiff",
-    "sample_aperio_cptac_ucec.svs",
-    "sample_aperio_tcga_ucec.svs",
-    "sample_hammamatsu_rosella.ndpi",
-    "sample_layered_endo.tif",
+    "Aperio/CMU-1-Small-Region.svs",
+    "ARGOS/Argos-1-Stacked.avs",
+    "Philips/Philips-1.tiff",
+    "Hamamatsu/Hamamatsu-1.ndpi",
     lambda: np.random.choice([False, True], (64, 64)).astype(bool)
 ])
 def slide(tmp_path: Path, request):
@@ -51,7 +47,7 @@ def slide(tmp_path: Path, request):
 
     return Slide(data)
 
-@pytest.fixture(params=["sample_single_rosella.tiff","sample_hammamatsu_rosella.ndpi", lambda: np.random.choice([False, True], (64, 64)).astype(bool)])
+@pytest.fixture(params=["Aperio/CMU-1-Small-Region.svs","ARGOS/Argos-1-Stacked.avs", "Philips/Philips-1.tiff", "Hamamatsu/Hamamatsu-1.ndpi", lambda: np.random.choice([False, True], (64, 64)).astype(bool)])
 def slide_test_extraction(tmp_path: Path, request):
     param = request.param
     if callable(param):
@@ -95,21 +91,21 @@ def test_get_properties(slide):
     props = slide.properties
     assert isinstance(props, dict)
 
-@pytest.mark.parametrize("ratio, expected, slide", [(2.5, 0, "sample_single_rosella.tiff"), (2.5, 1, "sample_hammamatsu_rosella.ndpi")])
+@pytest.mark.parametrize("ratio, expected, slide", [(2.5, 0, "Aperio/CMU-1-Small-Region.svs"), (2.5, 1, "ARGOS/Argos-1-Stacked.avs")])
 def test_get_best_level_for_downsample_ratio(ratio, expected, slide):
     slide = Slide(str(TEST_PATH / slide))
     level = slide.get_best_level_for_downsample(ratio=ratio)
     assert isinstance(level, int)
     assert expected == level
 
-@pytest.mark.parametrize("mpp, expected, slide", [(0.4597, 0, "sample_single_rosella.tiff"), (1.9, 3, "sample_hammamatsu_rosella.ndpi")])
+@pytest.mark.parametrize("mpp, expected, slide", [(0.4597, 0, "Aperio/CMU-1-Small-Region.svs"), (1.9, 2, "ARGOS/Argos-1-Stacked.avs")])
 def test_get_best_level_for_downsample_mpp(mpp, expected, slide):
     slide = Slide(str(TEST_PATH / slide))
     level = slide.get_best_level_for_downsample(mpp=mpp)
     assert isinstance(level, int)
     assert expected == level
 
-@pytest.mark.parametrize("mag, expected, slide", [(2.5, 0, "sample_single_rosella.tiff"), (4, 3, "sample_hammamatsu_rosella.ndpi")])
+@pytest.mark.parametrize("mag, expected, slide", [(2.5, 0, "Aperio/CMU-1-Small-Region.svs"), (4, 2, "ARGOS/Argos-1-Stacked.avs")])
 def test_get_best_level_for_downsample_mag(mag, expected, slide):
     slide = Slide(str(TEST_PATH / slide))
     level = slide.get_best_level_for_downsample(mag=mag)

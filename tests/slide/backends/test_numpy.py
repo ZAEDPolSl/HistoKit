@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from PIL import Image
-from histokit.slide.backends.numpy import NumpyBackend
+from histokit.slide.backends import NumpyBackend
 
 @pytest.fixture(params=[
     lambda: np.random.choice([False, True], (64, 64)).astype(bool),          # Binary bool

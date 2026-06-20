@@ -1,6 +1,6 @@
 from typing import Tuple, List, Optional
 from PIL import Image, ImageDraw
-from histokit.slide.backends.base import BaseSlideBackend
+from histokit.slide.backends import BaseSlideBackend
 
 class MockWSIBackend(BaseSlideBackend):
     def __init__(self):

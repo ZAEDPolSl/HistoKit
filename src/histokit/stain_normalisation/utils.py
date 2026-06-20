@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from skimage.morphology import remove_small_objects
 from sklearn.decomposition import sparse_encode
-from src.histokit.stain_normalisation.exceptions import StainNormalizationError
+from .exceptions import StainNormalizationError
 
 
 def rgb2od(img, eps = 1e-6):
@@ -21,9 +21,10 @@ def rgb2od(img, eps = 1e-6):
     numpy.ndarray
         Optical density image with dtype ``np.float32`` and shape ``(H, W, 3)``.
     """
-    img[(img == 0)] = 1
-    img = img.astype(np.float32)
-    od = np.maximum(-np.log(img / 255), eps)
+    img_copy = img.copy()
+    img_copy[(img_copy == 0)] = 1
+    img_copy = img_copy.astype(np.float32)
+    od = np.maximum(-np.log(img_copy / 255), eps)
     return od
 
 def od2rgb(od):

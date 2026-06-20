@@ -1,6 +1,12 @@
 import pytest
 
-from histokit.segmentation.collectors.base import OutputKind, PipelineOutput, OutputCollector, NoOpOutputCollector, CompositeOutputCollector
+from histokit.segmentation.collectors import (
+    CompositeOutputCollector,
+    NoOpOutputCollector,
+    OutputCollector,
+    OutputKind,
+    PipelineOutput,
+)
 
 
 def test_output_kind_values():

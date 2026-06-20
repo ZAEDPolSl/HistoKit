@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from torch.utils.data import Dataset
 import torch
-from .conditions import exclude_background
+from .conditions import ExcludeBackground
 from ..patch_writer import PatchImageWriter
 
 class PatchDataset(Dataset):
@@ -15,7 +15,7 @@ class PatchDataset(Dataset):
         pad_value: int=255,
         prep_fn=None,
         aug_fn=None,
-        exclude_fn=exclude_background(bg_value = 255, threshold = 1),
+        exclude_fn=ExcludeBackground(bg_value=255, threshold=1.0),
         bbox_list=None,
         patch_writer: PatchImageWriter = None,
     ):
@@ -110,10 +110,7 @@ class PatchDataset(Dataset):
             y_end=y_end,
         )
 
-        exclude = False
-        if self.exclude_fn is not None and self.exclude_fn(patch):
-            exclude = True
-            print(exclude)
+        exclude = (self.exclude_fn is not None and self.exclude_fn(patch))
 
         if self.aug_fn is not None:
             patch = self.aug_fn(patch)

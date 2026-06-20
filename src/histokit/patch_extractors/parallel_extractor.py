@@ -1,7 +1,7 @@
 from pathlib import Path
 import numpy as np
 from torch.utils.data import DataLoader, default_collate
-from src.histokit.slide.slide import Slide
+from ..slide import Slide
 from .patch_writer import PatchImageWriter
 from .strategies.grid import GridExtractionStrategy
 from ..savers.hdf5 import HDF5Saver

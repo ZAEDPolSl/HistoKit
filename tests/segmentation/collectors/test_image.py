@@ -1,11 +1,11 @@
 import numpy as np
 from PIL import Image
 
-from histokit.segmentation.collectors.base import (
+from histokit.segmentation.collectors import (
     OutputKind,
     PipelineOutput,
 )
-from histokit.segmentation.collectors.image import (
+from histokit.segmentation.collectors import (
     ImageOutputCollector,
     ThumbnailCollector,
     SegmentationOverlayCollector,

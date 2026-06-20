@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from histokit.segmentation.tissue.gamred.gmm import (
+from histokit.segmentation.tissue.gamred import (
     get_pixel_distribution,
     norm_pdf,
     EM_iter_hist,

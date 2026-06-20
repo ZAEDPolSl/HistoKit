@@ -1,7 +1,7 @@
 from math import ceil
+from histokit.patch_extractors.datasets.conditions import ExcludeBackground
 import numpy as np
 from .base import PatchDataset
-from .conditions import exclude_background
 from ..patch_writer import PatchImageWriter
 
 class GridExtractorDataset(PatchDataset):
@@ -12,7 +12,7 @@ class GridExtractorDataset(PatchDataset):
                  pad_value: int = 255,
                  prep_fn=None,
                  aug_fn=None,
-                 exclude_fn=exclude_background(bg_value=255, threshold=1),
+                 exclude_fn=ExcludeBackground(bg_value=255, threshold=1.0),
                  bbox_list=None,
                  patch_writer: PatchImageWriter = None,
                  overlap=0.75,

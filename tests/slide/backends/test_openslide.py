@@ -1,7 +1,7 @@
 import pytest
 from pathlib import Path
 from PIL import Image
-from histokit.slide.backends.openslide import OpenSlideBackend
+from histokit.slide.backends import OpenSlideBackend
 TEST_PATH = Path(__file__).parent.parent.parent / "data"
 
 @pytest.fixture(params=["sample_aperio_cptac_ucec.svs", "sample_aperio_tcga_ucec.svs", "sample_hammamatsu_rosella.ndpi", "sample_layered_endo.tif"])

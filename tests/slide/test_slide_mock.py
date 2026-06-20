@@ -2,8 +2,7 @@ import numpy as np
 import pytest
 from PIL import ImageChops
 from PIL import Image
-from histokit.slide.bbox import BBox, BBoxMode
-from histokit.slide.slide import Slide
+from histokit.slide import BBox, BBoxMode, Slide
 from tests.mocks.mock_wsi_backend import MockWSIBackend
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from histokit.slide.mask_utils import split_regions, merge_regions
+from histokit.slide import merge_regions, split_regions
 
 
 def test_split_and_merge_regions_binary_mask():

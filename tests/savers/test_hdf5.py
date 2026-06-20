@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from histokit.savers.hdf5 import HDF5Saver
+from histokit.savers import HDF5Saver
 
 
 

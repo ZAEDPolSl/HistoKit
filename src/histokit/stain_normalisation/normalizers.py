@@ -1,8 +1,8 @@
 import cv2
 import numpy as np
 from abc import abstractmethod, ABC
-from src.histokit.stain_normalisation.extractors import BaseExtractor, MacenkoExtractor, VahadaneExtractor
-from src.histokit.stain_normalisation.utils import get_concentrations, od2rgb, is_rgb_uint8, get_tissue_mask
+from .extractors import BaseExtractor, MacenkoExtractor, VahadaneExtractor
+from .utils import get_concentrations, od2rgb, is_rgb_uint8, get_tissue_mask
 
 
 class BaseNormalizer(ABC):

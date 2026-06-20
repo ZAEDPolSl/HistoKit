@@ -2,36 +2,27 @@ import os
 import time
 from typing import Dict
 import numpy as np
-
-from ...collectors.base import OutputKind, PipelineOutput
+from ...base import Segmenter
+from ...collectors.base import OutputKind
 from ...utils import apply_mask
 from .thresholding import get_thr_image
 from ...postprocessing.algorithms.remove_gray_stains import remove_gray_stains
 from ...postprocessing.algorithms.remove_pen import remove_pen
 from ....savers.base import Saver
-from ....slide.mask_utils import rescale_mask, split_regions
+from ....slide.mask_utils import rescale_mask, scale_mask_to_bbox, split_regions
 from ....slide.slide import Slide
 from .config import GaMRedConfig
 
-class GaMRedSegmenter:
+class GaMRedSegmenter(Segmenter):
 
     def __init__(self, config: GaMRedConfig):
         self.config = config
         self.output_collector = config.build_output_collector()
         self.saver = Saver(self.config.saver)
 
-    def _collect(self, name, step, kind, data, **metadata):
-        self.output_collector.emit(
-            PipelineOutput(
-                name=name,
-                step=step,
-                kind=kind,
-                data=data,
-                metadata=metadata,
-            )
-    )
+    def segment(self, slide: Slide, basename: str = "slide", verbose: bool = False) -> Dict:
 
-    def segment(self, slide: Slide, basename: str = "slide") -> Dict:
+        print(f"Segmenting tissue for the slide: {basename} using GaMRed algorithm...") if verbose else None
 
         t0 = time.perf_counter()
 
@@ -85,7 +76,6 @@ class GaMRedSegmenter:
         for step in self.config.postprocess_steps:
             mask = step(mask)
         
-        
         # 7. Collect outputs
         thumb = np.array(slide.read_region(mag=self.config.vis_mag))
 
@@ -120,7 +110,7 @@ class GaMRedSegmenter:
         )
 
         mask = mask.astype(np.uint8) * 255
-        mask_rescaled = rescale_mask(mask, self.config.tissdet_mag / self.config.save_mag)
+        mask_rescaled = rescale_mask(mask, self.config.save_mag / self.config.tissdet_mag)
         mask_array, bbox_list = split_regions(mask_rescaled)
 
 
@@ -147,6 +137,6 @@ class GaMRedSegmenter:
         }
 
         # 8. Save results (optional)
-        self.saver.save(self.config.out_dir, basename, res_dict)
+        self.saver.save(os.path.join(self.config.out_dir, "mask_gamred"), basename, res_dict)
         
         return res_dict

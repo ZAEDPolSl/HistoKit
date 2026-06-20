@@ -1,7 +1,5 @@
 import pytest
-from histokit.savers.pickle import PickleSaver
-from histokit.savers.base import Saver, NoOpSaver
-from histokit.savers.hdf5 import HDF5Saver
+from histokit.savers import HDF5Saver, NoOpSaver, PickleSaver, Saver
 
 def test_saver_none_uses_noop_saver():
     saver = Saver(method=None)
