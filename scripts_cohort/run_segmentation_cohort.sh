@@ -1,0 +1,1 @@
+python run_cohort.py --config ./configs/cohort.yaml

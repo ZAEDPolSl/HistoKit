@@ -20,7 +20,7 @@ CollectorConfig = dict[str, Any] | str
 class BaseSegmentationConfig:
     saver: str | None = "hdf5"
     out_dir: str | Path | None = "./outputs"
-    save_mag: float | None = None
+    save_mag: float | None = 1.0
 
     collectors: list[CollectorConfig] | None = None
 

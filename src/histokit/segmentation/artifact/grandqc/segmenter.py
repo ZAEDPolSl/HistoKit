@@ -1,6 +1,8 @@
 import os
 import time
 import warnings
+
+from PIL import Image
 from .config import GrandQCConfig
 from ...collectors.base import OutputKind
 import numpy as np
@@ -112,6 +114,8 @@ class GrandQCSegmenter(Segmenter):
                 pad_value=self.config.pad_value,
             ))
 
+            Image.fromarray(region_np).save(os.path.join(self.config.out_dir, f"{basename}_region_{idx + 1}.png"))
+
             ds = GridExtractorDataset(
                 region_np,
                 patch_size=self.config.patch_size,
@@ -208,8 +212,7 @@ class GrandQCSegmenter(Segmenter):
             pred_mask[bg] = 0
 
             # 7. Scale the predicted mask and raw mask to the save magnification.
-            bbox_obj = BBox.normalize(bbox, mag=self.config.det_mag)
-            bbox_save = bbox_obj.scale(mag=self.config.save_mag)
+            bbox_save = BBox.normalize(bbox, mag=tissue_mask["mag_save"]).scale(mag=self.config.save_mag)
 
             if bbox_save.w < 1 or bbox_save.h < 1:
                 warnings.warn(
