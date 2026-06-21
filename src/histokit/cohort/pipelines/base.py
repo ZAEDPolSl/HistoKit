@@ -13,20 +13,70 @@ class BaseCohortPipeline(ABC):
     def __init__(self, config):
         self.config = config
 
-    def output_path(
+    def result_saver(self):
+        return Saver(getattr(self.config, "saver", "hdf5"))
+
+    def stage_dir(
         self,
-        slide_path: Path,
         algorithm: str | None = None,
     ) -> Path:
-
         algorithm = algorithm or self.config.algorithm
 
         return (
             Path(self.config.output_dir)
             / self.result_subdir
             / algorithm
-            / f"{slide_path.stem}{self.saver.extension}"
         )
+
+    def visualization_dir(
+        self,
+        algorithm: str | None = None,
+    ) -> Path:
+        return self.stage_dir(algorithm=algorithm) / "visualizations"
+
+    def output_path(
+        self,
+        slide_path: Path,
+        algorithm: str | None = None,
+    ) -> Path:
+        return (
+            self.stage_dir(algorithm=algorithm)
+            / f"{slide_path.stem}{self.result_saver().extension}"
+        )
+
+    def result_path(
+        self,
+        slide_path: Path,
+        stage: str,
+        algorithm: str,
+    ) -> Path:
+        return (
+            Path(self.config.output_dir)
+            / stage
+            / algorithm
+            / f"{slide_path.stem}{self.result_saver().extension}"
+        )
+
+    def attach_output_collector(self, segmenter):
+        """
+        In cohort mode we override the algorithm-specific collector output directory.
+
+        The algorithm config still decides WHAT to collect:
+            collectors:
+              - name: ThumbnailCollector
+              - name: SegmentationOverlayCollector
+              - name: HistogramCollector
+
+        But cohort pipeline decides WHERE those files are saved:
+            outputs/<stage>/<algorithm>/visualizations/
+        """
+
+        if hasattr(segmenter.config, "build_output_collector"):
+            segmenter.output_collector = segmenter.config.build_output_collector(
+                out_dir=self.visualization_dir()
+            )
+
+        return segmenter
 
     def collect_slides(self) -> list[Path]:
         input_dir = Path(self.config.input_dir)
@@ -38,9 +88,6 @@ class BaseCohortPipeline(ABC):
             key=lambda p: p.stat().st_size,
             reverse=True,
         )
-    
-    def result_saver(self):
-        return Saver(getattr(self.config, "saver", "hdf5"))
 
     @abstractmethod
     def run_one(self, slide_path: Path):
@@ -49,20 +96,6 @@ class BaseCohortPipeline(ABC):
     @abstractmethod
     def output_exists(self, slide_path: Path) -> bool:
         ...
-
-    def result_path(
-        self,
-        slide_path: Path,
-        stage: str,
-        algorithm: str,
-        ) -> Path:
-
-        return (
-            Path(self.config.output_dir)
-            / stage
-            / algorithm
-            / f"{slide_path.stem}{self.saver.extension}"
-        )
 
     def filter_slides(self, slide_paths: list[Path]) -> list[Path]:
         overwrite = getattr(self.config, "overwrite", False)
@@ -92,19 +125,21 @@ class BaseCohortPipeline(ABC):
         else:
             self._run_parallel(slide_paths, logger, parallel_workers)
 
-    def _run_sequential(self, slide_paths, logger):
+    def _run_sequential(self, slide_paths: list[Path], logger: CohortLogger):
         for path in slide_paths:
             basename = path.stem
             t0 = time.perf_counter()
 
             try:
                 self.run_one(path)
+
                 logger.log_processed(
                     self.stage_name,
                     path,
                     basename,
                     time.perf_counter() - t0,
                 )
+
             except Exception as e:
                 logger.log_error(
                     self.stage_name,
@@ -113,7 +148,12 @@ class BaseCohortPipeline(ABC):
                     e,
                 )
 
-    def _run_parallel(self, slide_paths, logger, workers):
+    def _run_parallel(
+        self,
+        slide_paths: list[Path],
+        logger: CohortLogger,
+        workers: int,
+    ):
         with ProcessPoolExecutor(max_workers=workers) as executor:
             futures = {
                 executor.submit(self.run_one, path): path
@@ -127,12 +167,14 @@ class BaseCohortPipeline(ABC):
 
                 try:
                     future.result()
+
                     logger.log_processed(
                         self.stage_name,
                         path,
                         basename,
                         time.perf_counter() - t0,
                     )
+
                 except Exception as e:
                     logger.log_error(
                         self.stage_name,

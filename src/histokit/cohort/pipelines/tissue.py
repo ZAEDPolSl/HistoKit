@@ -1,16 +1,12 @@
-from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
-import time
 from .base import BaseCohortPipeline
-from ..logger import CohortLogger
 from ..builder import build_segmenter
 from ...slide.slide import Slide
 
 
 class TissueDetectionPipeline(BaseCohortPipeline):
-
     stage_name = "tissue_detection"
-    result_subdir = "tissue"
+    result_subdir = "tissue_detection"
 
     def output_exists(self, slide_path: Path) -> bool:
         return self.output_path(slide_path).exists()
@@ -24,8 +20,21 @@ class TissueDetectionPipeline(BaseCohortPipeline):
             config_path=self.config.config_path,
         )
 
-        return segmenter.segment(
+        segmenter = self.attach_output_collector(segmenter)
+
+        result = segmenter.segment(
             slide,
             basename=basename,
             verbose=False,
+            save=False,
         )
+
+        out_path = self.output_path(slide_path)
+
+        self.result_saver().save(
+            out_dir=out_path.parent,
+            basename=out_path.stem,
+            result=result,
+        )
+
+        return result

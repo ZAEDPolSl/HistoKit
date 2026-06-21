@@ -2,7 +2,8 @@
 
 # output
 saver: hdf5
-out_dir: ./outputs
+out_dir: ./outputs/grandqc_single
+save_mag: 1.0
 
 # model
 model_path: ./models/GrandQC_MPP1.pth

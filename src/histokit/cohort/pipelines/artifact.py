@@ -1,13 +1,13 @@
 from pathlib import Path
+
 from .base import BaseCohortPipeline
 from ..builder import build_segmenter
 from ...slide.slide import Slide
-from ...savers.base import Saver
 
 
 class ArtifactDetectionPipeline(BaseCohortPipeline):
     stage_name = "artifact_detection"
-    result_subdir = "artifact"
+    result_subdir = "artifact_detection"
 
     def output_exists(self, slide_path: Path) -> bool:
         return self.output_path(slide_path).exists()
@@ -23,15 +23,15 @@ class ArtifactDetectionPipeline(BaseCohortPipeline):
 
         return getattr(tissue_source, "algorithm", None)
 
-    def tissue_mask_path(self, slide_path: Path):
-
+    def tissue_mask_path(self, slide_path: Path) -> Path | None:
         tissue_algorithm = self.get_tissue_source_algorithm()
 
         if tissue_algorithm is None:
             return None
 
-        return self.output_path(
-            slide_path,
+        return self.result_path(
+            slide_path=slide_path,
+            stage="tissue_detection",
             algorithm=tissue_algorithm,
         )
 
@@ -54,9 +54,22 @@ class ArtifactDetectionPipeline(BaseCohortPipeline):
             config_path=self.config.config_path,
         )
 
-        return segmenter.segment(
+        segmenter = self.attach_output_collector(segmenter)
+
+        result = segmenter.segment(
             slide,
             basename=basename,
             tissue_mask=tissue_mask,
             verbose=False,
+            save=False,
         )
+
+        out_path = self.output_path(slide_path)
+
+        self.result_saver().save(
+            out_dir=out_path.parent,
+            basename=out_path.stem,
+            result=result,
+        )
+
+        return result

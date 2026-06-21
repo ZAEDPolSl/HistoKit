@@ -19,19 +19,35 @@ from ....savers.base import Saver
 
 class GrandQCSegmenter(Segmenter):
 
-    def __init__(self, config: GrandQCConfig):
+    def __init__(self, 
+                 config: GrandQCConfig, 
+                 output_collector=None, 
+                 saver=None):
+        
         self.config = config
-        self.output_collector = config.build_output_collector()
-        self.saver = Saver(self.config.saver)
 
+        # Visualisations and other partial results
+        self.output_collector = (
+            output_collector
+            if output_collector is not None
+            else config.build_output_collector()
+        )
+
+        # Final mask saving
+        self.saver = (
+            saver
+            if saver is not None
+            else Saver(self.config.saver)
+        )
+
+        # Load the GrandQC model
         self.model = torch.load(self.config.model_path,
                                 map_location=self.config.device,
                                 weights_only=False)
         self.model.to(self.config.device)
         self.model.eval()
 
-        self.saver = Saver(self.config.saver)
-
+        # Precompute the blending weights for patch merging
         self.weight_patch = get_weights(self.config.blending_mode,
                                    self.config.patch_size,
                                    self.config.patch_size,
@@ -42,7 +58,8 @@ class GrandQCSegmenter(Segmenter):
                 slide: Slide, 
                 basename: str = "slide", 
                 tissue_mask: dict | None = None, 
-                verbose: bool = False) -> Dict:
+                verbose: bool = False, 
+                save: bool = True) -> Dict:
 
         if verbose:
             print(f"Segmenting artifacts for slide: {basename} using GrandQC...")
@@ -260,10 +277,11 @@ class GrandQCSegmenter(Segmenter):
             )
 
         # 9. Save results (optional)
-        self.saver.save(
-            os.path.join(self.config.out_dir, "mask_grandqc"),
-            basename,
-            result,
-        )
+        if save:
+            self.saver.save(
+                os.path.join(self.config.out_dir, "mask_grandqc"),
+                basename,
+                result,
+            )
 
         return result

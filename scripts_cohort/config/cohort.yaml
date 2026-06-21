@@ -1,10 +1,12 @@
 # cohort.yaml
 
 slides:
-  input_dir: ./data/slides
+  input_dir: ./tests/data/wsi/Aperio/
+  file_list: null
   pattern: "*.svs"
 
 output_dir: ./outputs
+saver: hdf5
 
 logging:
   enabled: true
@@ -28,12 +30,3 @@ stages:
     overwrite: false
     tissue_source:
       algorithm: gamred
-
-  statistics:
-    enabled: true
-    config_path: ./configs/statistics.yaml
-    workers: 4
-    tissue_source:
-      algorithm: gamred
-    artifact_source:
-      algorithm: grandqc

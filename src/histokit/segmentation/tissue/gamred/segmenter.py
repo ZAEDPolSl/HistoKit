@@ -15,12 +15,31 @@ from .config import GaMRedConfig
 
 class GaMRedSegmenter(Segmenter):
 
-    def __init__(self, config: GaMRedConfig):
+    def __init__(
+        self,
+        config: GaMRedConfig,
+        output_collector=None,
+        saver=None,
+    ):
         self.config = config
-        self.output_collector = config.build_output_collector()
-        self.saver = Saver(self.config.saver)
 
-    def segment(self, slide: Slide, basename: str = "slide", verbose: bool = False) -> Dict:
+        self.output_collector = (
+            output_collector
+            if output_collector is not None
+            else config.build_output_collector()
+        )
+
+        self.saver = (
+            saver
+            if saver is not None
+            else Saver(self.config.saver)
+        )
+
+    def segment(self, 
+                slide: Slide, 
+                basename: str = "slide", 
+                verbose: bool = False, 
+                save: bool = True) -> Dict:
 
         print(f"Segmenting tissue for the slide: {basename} using GaMRed algorithm...") if verbose else None
 
@@ -137,6 +156,11 @@ class GaMRedSegmenter(Segmenter):
         }
 
         # 8. Save results (optional)
-        self.saver.save(os.path.join(self.config.out_dir, "mask_gamred"), basename, res_dict)
-        
+        if save:
+            self.saver.save(
+                os.path.join(self.config.out_dir, "mask_gamred"),
+                basename,
+                res_dict,
+            )
+
         return res_dict

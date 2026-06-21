@@ -2,13 +2,12 @@
 
 # output
 saver: hdf5
-out_dir: ./outputs
 save_mag: 1.0
+out_dir: ./outputs
 
 # magnification settings
 vis_mag: 1.0
 tissdet_mag: 10.0
-save_mag: 1.0
 
 # tissue detection
 thr_min: 178.5
@@ -26,7 +25,6 @@ disk_radius_black_pen: 9
 
 # gray stain removal
 remove_gray_stains: true
-
 
 # postprocessing pipeline
 postprocess_steps:

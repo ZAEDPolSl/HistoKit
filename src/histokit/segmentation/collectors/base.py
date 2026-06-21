@@ -23,7 +23,7 @@ class OutputCollector:
     def emit(self, output: PipelineOutput) -> None:
         raise NotImplementedError
 
-class NoOpOutputCollector:
+class NoOpOutputCollector(OutputCollector):
     def emit(self, output: PipelineOutput) -> None:
         pass
 
