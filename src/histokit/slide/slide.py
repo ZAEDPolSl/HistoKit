@@ -1,4 +1,6 @@
 from typing import Optional, List
+import warnings
+from histokit.slide.mask_utils import merge_regions
 import numpy as np
 from PIL import Image
 from openslide import OpenSlideUnsupportedFormatError
@@ -679,7 +681,7 @@ class Slide:
                            mpp: float | None = None,
                            bbox_mode: BBoxMode = BBoxMode.WH,
                            color_mode: str = "RGB",
-                           pad_value: int = 255
+                           pad_value: tuple[int, int, int] = (255, 255, 255)
                            ) -> Image.Image:
 
         if isinstance(bbox, Sequence) and mag_bbox is None and mpp_bbox is None:
@@ -705,7 +707,7 @@ class Slide:
             mask_resized = Image.fromarray(mask).resize(region.size, resample=Image.Resampling.NEAREST)
             region_masked = np.array(region) * np.array(mask_resized)[..., None]
             black = np.all(region_masked == [0, 0, 0], axis=-1)
-            region_masked[black] = [pad_value, pad_value, pad_value]
+            region_masked[black] = pad_value
         else:
             return region
         return Image.fromarray(region_masked).convert("RGB")
@@ -721,7 +723,8 @@ class Slide:
             mpp: float | None = None,
             bbox_mode: BBoxMode = BBoxMode.WH,
             color_mode: str = "RGB",
-            max_pixels: int | None = 500_000_000,
+            max_pixels: int | None = None,
+            pad_value: tuple[int, int, int] = (255, 255, 255)
     ) -> Image.Image:
 
         if len(bboxes) != len(masks):
@@ -736,19 +739,8 @@ class Slide:
         if mag is not None and mpp is not None:
             raise ValueError("Provide exactly one of mag or mpp")
 
-        bboxes_norm = BBox.normalize_list(
-            bboxes,
-            mode=bbox_mode,
-            mag=mag_bbox,
-            mpp=mpp_bbox,
-            ref_mag=self._ref_mag,
-            ref_mpp=self._ref_mpp,
-        )
-
-        bboxes_final = [
-            bbox.scale(mag=mag, mpp=mpp)
-            for bbox in bboxes_norm
-        ]
+        masks = [self.normalize_mask(mask) for mask in masks]
+        full_mask = merge_regions(masks, bboxes, self.get_full_slide_size(mag=mag_bbox))
 
         slide_size = self.get_full_slide_size(mag=mag, mpp=mpp)
 
@@ -756,39 +748,20 @@ class Slide:
             n_pixels = slide_size[0] * slide_size[1]
             if n_pixels > max_pixels:
                 raise MemoryError(...)
+            
+        full_mask = Image.fromarray(full_mask).resize(slide_size, resample=Image.Resampling.NEAREST)
+        mask_arr = np.asarray(full_mask)
+        slide = np.array(self.read_region(mag=mag, mpp=mpp, color_mode=color_mode))
 
-        slide = self.read_region(mag=mag, mpp=mpp, color_mode=color_mode)
 
-        full_mask = Image.new("L", slide.size, 0)
-
-        for bbox, mask in zip(bboxes_final, masks):
-            mask = self.normalize_mask(mask)
-
-            mask_img = Image.fromarray(
-                mask.astype(np.uint8) * 255,
-                mode="L",
-            )
-
-            mask_resized = mask_img.resize(
-                (round(bbox.w), round(bbox.h)),
-                resample=Image.Resampling.NEAREST,
-            )
-
-            full_mask.paste(
-                mask_resized,
-                box=(round(bbox.x0), round(bbox.y0)),
-            )
-
-        slide_arr = np.asarray(slide)
-        mask_arr = np.asarray(full_mask) > 0
-
-        if slide_arr.ndim == 3:
+        if slide.ndim == 3:
             mask_arr = mask_arr[..., None]
 
-        masked = slide_arr * mask_arr
+        region_masked = slide * mask_arr
+        black = np.all(region_masked == [0, 0, 0], axis=-1)
+        region_masked[black] = list(pad_value)
 
-
-        return Image.fromarray(masked.astype(slide_arr.dtype)).convert(color_mode)
+        return Image.fromarray(region_masked.astype(slide.dtype)).convert(color_mode)
 
     def read_masked_objects(
             self,
@@ -801,7 +774,7 @@ class Slide:
             mpp: float | None = None,
             bbox_mode: BBoxMode = BBoxMode.WH,
             color_mode: str = "RGB",
-            pad_value: int = 255,
+            pad_value: tuple[int, int, int] = (255, 255, 255),
     ) -> list[Image.Image]:
 
         if len(bboxes) != len(masks):
@@ -867,17 +840,25 @@ class Slide:
         if mask.dtype == bool:
             return mask
 
-        valid = np.logical_or(mask == 0, mask == 1)
-        valid |= (mask == 255)
+        values = np.unique(mask)
 
-        if not valid.all():
-            values = np.unique(mask)
-            raise ValueError(
-                f"mask must be bool, binary (0/1), or binary uint8 (0/255). "
-                f"Found values: {values.tolist()}"
+        valid_bool = mask.dtype == bool
+        valid_binary = np.all(np.isin(values, [0, 1]))
+        valid_binary_uint8 = mask.dtype == np.uint8 and np.all(np.isin(values, [0, 255]))
+
+        if not (valid_bool or valid_binary or valid_binary_uint8):
+            warnings.warn(
+                "mask is not bool, binary (0/1), or binary uint8 (0/255). "
+                f"Found values: {values.tolist()}. "
+                "The mask will be converted to binary: values equal to 1 will remain 1, "
+                "all other values will be set to 0.",
+                UserWarning,
+                stacklevel=2,
             )
 
-        return mask > 0
+            mask = (mask == 1)
+
+        return mask>0
 
 
 

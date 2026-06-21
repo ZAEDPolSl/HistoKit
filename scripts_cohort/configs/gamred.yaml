@@ -34,7 +34,7 @@ postprocess_steps:
 
   - name: FillHoles
     params:
-      enabled: true
+      enabled: false
 
   - name: Opening
     params:
@@ -51,3 +51,5 @@ collectors:
   - name: SegmentationOverlayCollector
 
   - name: HistogramCollector
+
+  - name: MaskCollector

@@ -5,6 +5,7 @@ from histokit.savers import Saver
 from histokit.slide import NumpyBackend, OpenSlideBackend, PILBackend, Slide
 
 TEST_PATH = Path(__file__).parent.parent / "data/wsi/"
+MASKS_PATH = Path(__file__).parent.parent / "data/tissue_masks/"
 
 @pytest.fixture(params=[
     lambda: np.random.choice([False, True], (64, 64)).astype(bool),          # Binary bool
@@ -115,14 +116,14 @@ def test_get_best_level_for_downsample_mag(mag, expected, slide):
 
 def test_read_masked_objects():
 
-    slide = Slide(str(TEST_PATH / "TCGA-A7-A0CE-11A-02-BS2.2c324d8a-4f5a-4fa1-a779-5ff38fe8a52f.svs"))
+    slide = Slide(str(TEST_PATH / "Aperio/JP2K-33003-1.svs"))
 
-    data = Saver("hdf5").load("/mnt/data/Tmp/jmerta/HE/tests/tissue_segmentation/segmenters/gamred/res/TCGA-A7-A0CE-11A-02-BS2.2c324d8a-4f5a-4fa1-a779-5ff38fe8a52f.svs.h5")
+    data = Saver("hdf5").load(str(MASKS_PATH / "JP2K-33003-1.h5"))
 
     imgs = slide.read_masked_objects(data["bbox"],
                               data["mask"],
                               mag_bbox=data["mag_save"],
-                                     mag = 10)
+                                     mag = 1)
 
     for idx, img in enumerate(imgs):
         img.save(f"test_{idx}.png")

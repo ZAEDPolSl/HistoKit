@@ -4,6 +4,7 @@ from typing import Any, ClassVar
 
 from ...config import BaseSegmentationConfig, CollectorConfig
 from ...collectors.image import (
+    MaskCollector,
     ThumbnailCollector,
     SegmentationOverlayCollector,
     HistogramCollector,
@@ -26,6 +27,7 @@ class GaMRedConfig(BaseSegmentationConfig):
         "SegmentationOverlayCollector": SegmentationOverlayCollector,
         "HistogramCollector": HistogramCollector,
         "ImageOutputCollector": ImageOutputCollector,
+        "MaskCollector": MaskCollector,
     }
 
     default_collectors: ClassVar[list[CollectorConfig]] = [

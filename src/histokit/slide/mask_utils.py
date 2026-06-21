@@ -3,9 +3,9 @@ from PIL import Image
 from skimage.measure import label, regionprops
 from ..slide.bbox import BBox
 
-
 def split_regions(
     mask: np.ndarray,
+    min_area: int | None = None,
 ) -> tuple[list[np.ndarray], np.ndarray]:
 
     if mask.ndim != 2:
@@ -19,29 +19,33 @@ def split_regions(
     bboxes = []
 
     for region in regionprops(labeled):
+        if min_area is not None and region.area < min_area:
+            continue
+
         min_row, min_col, max_row, max_col = region.bbox
 
+        region_labeled = labeled[min_row:max_row, min_col:max_col]
         region_mask = mask[min_row:max_row, min_col:max_col].copy()
 
-        region_mask[labeled[min_row:max_row, min_col:max_col] != region.label] = 0
+        region_mask[region_labeled != region.label] = 0
 
-        bbox = np.array([
-            min_col,
-            min_row,
-            max_col - min_col,
-            max_row - min_row,
-        ])
+        bbox = np.array(
+            [
+                min_col,
+                min_row,
+                max_col - min_col,
+                max_row - min_row,
+            ],
+            dtype=int,
+        )
 
         masks.append(region_mask)
         bboxes.append(bbox)
 
-    bboxes = np.stack(bboxes)
-
     if len(bboxes) == 0:
         return [], np.empty((0, 4), dtype=int)
 
-    return masks, bboxes
-
+    return masks, np.stack(bboxes).astype(int)
 
 def merge_regions(masks, bboxes, shape):
     if len(masks) == 0:

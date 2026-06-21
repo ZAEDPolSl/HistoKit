@@ -236,38 +236,31 @@ class GrandQCSegmenter(Segmenter):
 
         result["time"] = time.perf_counter() - t0
 
-        # 8. Collect outputs for visualization (optional)
-        if self.config.collectors:
+        # 8. Save results (optional)
+        if save:
+            self.saver.save(
+                os.path.join(self.config.out_dir, "mask_grandqc"),
+                basename,
+                result,
+            )
 
-            masks = []
-            bboxes = []
+        # 9. Collect outputs for visualization (optional)
+        if self.config.collectors:
             
             # Visialisation are done for a whole slide, so masks are 
             # scaled and merged to a single mask.
+            w, h = slide.get_size_at_mag(self.config.save_mag)
 
-            for mask, bbox in zip(result["mask"], result["bbox"]):
-                bbox_vis = BBox.normalize(bbox, mag=self.config.save_mag,
-                ).scale(mag=self.config.vis_mag)
-
-                if bbox_save.w < 1 or bbox_save.h < 1:
-                    warnings.warn(
-                        f"Skipping region {idx + 1} due to small size after scaling. BBox: {bbox_save}",
-                        UserWarning,
-                    )
-                    continue
-
-                masks.append(scale_mask_to_bbox(mask, bbox_vis))
-                bboxes.append(bbox_vis.numpy().astype(int))
-
-            w, h = slide.get_size_at_mag(self.config.vis_mag)
+            thumb = np.array(slide.read_region(mag=self.config.vis_mag))
 
             mask_merged = merge_regions(
-                masks,
-                bboxes,
+                result["mask"],
+                result["bbox"],
                 shape=(h, w),
             )
 
-            thumb = np.array(slide.read_region(mag=self.config.vis_mag))
+            mask_merged = np.array(Image.fromarray(mask_merged.astype(np.uint8)).resize(
+                (thumb.shape[1], thumb.shape[0]), Image.Resampling.NEAREST))
 
             self._collect(
                 name="artifact_overlay",
@@ -277,14 +270,6 @@ class GrandQCSegmenter(Segmenter):
                 basename=basename,
                 image=thumb,
                 colors=self.config.colors,
-            )
-
-        # 9. Save results (optional)
-        if save:
-            self.saver.save(
-                os.path.join(self.config.out_dir, "mask_grandqc"),
-                basename,
-                result,
             )
 
         return result

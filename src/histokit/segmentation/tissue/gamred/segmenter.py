@@ -1,6 +1,7 @@
 import os
 import time
 from typing import Dict
+from histokit.slide.bbox import BBox, BBoxMode
 import numpy as np
 from ...base import Segmenter
 from ...collectors.base import OutputKind
@@ -110,7 +111,7 @@ class GaMRedSegmenter(Segmenter):
             name="tissue_overlay",
             step="visualisation",
             kind=OutputKind.MASK,
-            data=mask,
+            data=mask.copy(),
             basename=basename,
             image=thumb,
         )
@@ -129,8 +130,14 @@ class GaMRedSegmenter(Segmenter):
         )
 
         mask = mask.astype(np.uint8) * 255
-        mask_rescaled = rescale_mask(mask, self.config.save_mag / self.config.tissdet_mag)
-        mask_array, bbox_list = split_regions(mask_rescaled)
+        mask_array, bbox_list = split_regions(mask)
+
+        for idx, (m, bb) in enumerate(zip(mask_array, bbox_list)):
+            bb = BBox.normalize(bb, mag=self.config.tissdet_mag).scale(mag=self.config.save_mag)
+            m = scale_mask_to_bbox(m, bb)
+
+            mask_array[idx] = m
+            bbox_list[idx] = bb.numpy(mode=BBoxMode.WH).astype(int)
 
 
         elapsed = time.perf_counter() - t0

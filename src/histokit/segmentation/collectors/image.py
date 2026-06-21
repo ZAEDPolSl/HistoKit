@@ -43,6 +43,27 @@ class ThumbnailCollector(OutputCollector):
             save_dir / f"{basename}.png"
         )
 
+class MaskCollector(OutputCollector):
+    def __init__(self, out_dir):
+        self.out_dir = Path(out_dir)
+
+    def emit(self, output: PipelineOutput) -> None:
+        if output.kind != OutputKind.MASK:
+            return
+
+        basename = output.metadata.get("basename", "mask")
+        step = output.metadata.get("step", "masks")
+
+        save_dir = self.out_dir / step
+        save_dir.mkdir(parents=True, exist_ok=True)
+
+        arr = np.asarray(output.data)
+
+        if arr.dtype == bool:
+            arr = arr.astype(np.uint8) * 255
+
+        Image.fromarray(arr).save(save_dir / f"{basename}.png")
+
 
 class SegmentationOverlayCollector(OutputCollector):
     def __init__(self, out_dir):
