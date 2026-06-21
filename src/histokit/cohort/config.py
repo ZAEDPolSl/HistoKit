@@ -75,10 +75,16 @@ class CohortConfig:
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "CohortConfig":
+        path = Path(path).resolve()
+
         with open(path, "r", encoding="utf-8") as fh:
             data = yaml.safe_load(fh) or {}
 
-        return cls.from_dict(data)
+        config = cls.from_dict(data)
+
+        config._resolve_paths(base_dir=path.parent)
+
+        return config
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "CohortConfig":
@@ -223,6 +229,41 @@ class CohortConfig:
         return SourceConfig(
             algorithm=algorithm,
         )
+    
+    def _resolve_paths(self, base_dir: Path) -> None:
+        self.slides.input_dir = str(self._resolve_path(self.slides.input_dir, base_dir))
+        self.output_dir = str(self._resolve_path(self.output_dir, base_dir))
+
+        if self.logging is not None and self.logging.log_dir is not None:
+            self.logging.log_dir = str(self._resolve_path(self.logging.log_dir, base_dir))
+
+        for stage in [
+            self.tissue_detection,
+            self.artifact_detection,
+            self.statistics,
+        ]:
+            if stage is None:
+                continue
+
+            stage.input_dir = self.slides.input_dir
+            stage.output_dir = self.output_dir
+
+            if stage.config_path is not None:
+                stage.config_path = str(self._resolve_path(stage.config_path, base_dir))
+
+            if stage.logging is not None and stage.logging.log_dir is not None:
+                stage.logging.log_dir = str(
+                    self._resolve_path(stage.logging.log_dir, base_dir)
+                )
+
+    @staticmethod
+    def _resolve_path(path: str | Path, base_dir: Path) -> Path:
+        path = Path(path)
+
+        if path.is_absolute():
+            return path
+
+        return base_dir / path
 
 
 

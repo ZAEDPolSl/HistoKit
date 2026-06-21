@@ -4,7 +4,7 @@ from pathlib import Path
 import time
 from ...savers.base import Saver
 from ..logger import CohortLogger
-
+from tqdm import tqdm
 
 class BaseCohortPipeline(ABC):
     stage_name: str
@@ -58,18 +58,6 @@ class BaseCohortPipeline(ABC):
         )
 
     def attach_output_collector(self, segmenter):
-        """
-        In cohort mode we override the algorithm-specific collector output directory.
-
-        The algorithm config still decides WHAT to collect:
-            collectors:
-              - name: ThumbnailCollector
-              - name: SegmentationOverlayCollector
-              - name: HistogramCollector
-
-        But cohort pipeline decides WHERE those files are saved:
-            outputs/<stage>/<algorithm>/visualizations/
-        """
 
         if hasattr(segmenter.config, "build_output_collector"):
             segmenter.output_collector = segmenter.config.build_output_collector(
@@ -126,7 +114,12 @@ class BaseCohortPipeline(ABC):
             self._run_parallel(slide_paths, logger, parallel_workers)
 
     def _run_sequential(self, slide_paths: list[Path], logger: CohortLogger):
-        for path in slide_paths:
+        for path in tqdm(
+            slide_paths,
+            total=len(slide_paths),
+            desc=self.stage_name,
+            unit="slide",
+        ):
             basename = path.stem
             t0 = time.perf_counter()
 
@@ -160,7 +153,12 @@ class BaseCohortPipeline(ABC):
                 for path in slide_paths
             }
 
-            for future in as_completed(futures):
+            for future in tqdm(
+                as_completed(futures),
+                total=len(futures),
+                desc=self.stage_name,
+                unit="slide",
+            ):
                 path = futures[future]
                 basename = path.stem
                 t0 = time.perf_counter()

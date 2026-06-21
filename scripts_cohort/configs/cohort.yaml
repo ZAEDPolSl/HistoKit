@@ -1,11 +1,11 @@
 # cohort.yaml
 
 slides:
-  input_dir: ./tests/data/wsi/Aperio/
+  input_dir: C:/Repos/HistoKit/tests/data/wsi/Aperio
   file_list: null
   pattern: "*.svs"
 
-output_dir: ./outputs
+output_dir: ../outputs
 saver: hdf5
 
 logging:
@@ -18,14 +18,14 @@ stages:
   tissue_detection:
     enabled: true
     algorithm: gamred
-    config_path: ./configs/gamred.yaml
+    config_path: ./gamred.yaml
     parallel_workers: 8
     overwrite: false
 
   artifact_detection:
     enabled: true
     algorithm: grandqc
-    config_path: ./configs/grandqc.yaml
+    config_path: ./grandqc.yaml
     parallel_workers: 1
     overwrite: false
     tissue_source:

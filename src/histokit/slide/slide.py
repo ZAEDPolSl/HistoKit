@@ -8,6 +8,7 @@ from .backends.pil import PILBackend
 from .backends.base import BaseSlideBackend
 from .bbox import BBoxMode, BBox
 from typing import Union, Sequence
+from os import PathLike
 
 class Slide:
     """
@@ -56,8 +57,18 @@ class Slide:
     MAG_PRECISION = 2
     MPP_PRECISION = 4
 
-    def __init__(self, data: Union[str, np.ndarray, Image.Image], mag: Optional[float] = None, mpp: Optional[float] = None,
-                 ref_mag: Optional[float] = None, ref_mpp: Optional[float] = None, rescale_method: Optional[Image.Resampling] = None):
+    def __init__(
+        self,
+        data: Union[str, PathLike, np.ndarray, Image.Image],
+        mag: Optional[float] = None,
+        mpp: Optional[float] = None,
+        ref_mag: Optional[float] = None,
+        ref_mpp: Optional[float] = None,
+        rescale_method: Optional[Image.Resampling] = None,
+    ):
+        if isinstance(data, PathLike):
+            data = str(data)
+
         self._backend: BaseSlideBackend = self._select_backend(data)
         self._ref_mag = self.REF_MAG if ref_mag is None else ref_mag
         self._ref_mpp = self.REF_MPP if ref_mpp is None else ref_mpp
@@ -73,22 +84,25 @@ class Slide:
             return Image.Resampling.NEAREST
 
     @staticmethod
-    def _select_backend(data: str | np.ndarray | Image.Image) -> BaseSlideBackend:
+    def _select_backend(
+        data: str | PathLike | np.ndarray | Image.Image,
+    ) -> BaseSlideBackend:
         """
         Select and initialize the appropriate slide backend for the given input.
 
         The function chooses a backend depending on the type and format of the input:
 
         - If `data` is a NumPy array, it returns a `NumpyBackend`.
-        - If `data` is a string (path to a slide file), it first tries to open it with `OpenSlideBackend`.
-          If the file format is unsupported or cannot be opened, it falls back to `PILBackend`.
+        - If `data` is a path-like object, it is converted to string.
+        - If `data` is a string path, it first tries to open it with `OpenSlideBackend`.
+        If the file format is unsupported or cannot be opened, it falls back to `PILBackend`.
         - If `data` is already a `PIL.Image.Image`, it will use `PILBackend`.
 
         Parameters
         ----------
-        data : str | np.ndarray | PIL.Image.Image
+        data : str | os.PathLike | np.ndarray | PIL.Image.Image
             Input slide, which can be:
-            - a file path (str) to a slide image
+            - a file path to a slide image
             - a NumPy array representing the slide
             - a PIL Image object
 
@@ -102,16 +116,24 @@ class Slide:
         TypeError
             If `data` is not one of the supported types.
         """
+        if isinstance(data, PathLike):
+            data = str(data)
+
         if isinstance(data, np.ndarray):
             return NumpyBackend(data)
+
         if isinstance(data, Image.Image):
             return PILBackend(data)
+
         if isinstance(data, str):
             try:
                 return OpenSlideBackend(data)
             except (OpenSlideUnsupportedFormatError, OSError):
-                return PILBackend(data) # try PIL as a fallback for unsupported formats or if OpenSlide fails to open the file
-        raise TypeError(f"Unsupported type for backend selection: {type(data)}")
+                return PILBackend(data)
+
+        raise TypeError(
+            f"Unsupported type for backend selection: {type(data)}"
+        )
 
     def _resolve_scale(self, user_mag, user_mpp):
         """
