@@ -1,7 +1,6 @@
 import os
 import time
 import warnings
-
 from PIL import Image
 from .config import GrandQCConfig
 from ...collectors.base import OutputKind
@@ -113,8 +112,6 @@ class GrandQCSegmenter(Segmenter):
                 mag=self.config.det_mag,
                 pad_value=self.config.pad_value,
             ))
-
-            Image.fromarray(region_np).save(os.path.join(self.config.out_dir, f"{basename}_region_{idx + 1}.png"))
 
             ds = GridExtractorDataset(
                 region_np,

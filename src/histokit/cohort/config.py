@@ -3,7 +3,6 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
-
 import yaml
 
 
@@ -30,6 +29,8 @@ class SourceConfig:
 @dataclass
 class StageConfig:
     enabled: bool = True
+
+    stage_name: str = "stage"
 
     algorithm: str | None = None
     config_path: str | None = None
@@ -180,6 +181,7 @@ class CohortConfig:
 
         data = data or {}
 
+        stage_name = data.get("stage_name", stage_name)
         enabled = data.get("enabled", True)
 
         if not enabled:
@@ -194,6 +196,7 @@ class CohortConfig:
         )
 
         return StageConfig(
+            stage_name=stage_name,
             enabled=enabled,
             algorithm=data.get("algorithm"),
             config_path=data.get("config_path"),

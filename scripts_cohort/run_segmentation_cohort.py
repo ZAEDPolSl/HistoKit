@@ -1,9 +1,7 @@
 from pathlib import Path
 import argparse
-
-from histokit.cohort.config import CohortConfig
-from histokit.cohort.runner import CohortRunner
-
+from histokit import CohortConfig
+from histokit import CohortRunner
 
 DESCRIPTION = r"""
 ╔══════════════════════════════════════════════════════════════╗

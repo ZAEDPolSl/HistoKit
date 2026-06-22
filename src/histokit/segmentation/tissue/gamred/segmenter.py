@@ -16,6 +16,34 @@ from .config import GaMRedConfig
 
 class GaMRedSegmenter(Segmenter):
 
+    """Segment tissue regions in whole-slide images using the GaMRed algorithm. 
+
+    The segmenter reads a slide at a configured detection magnification, estimates RGB background thresholds, using the GaMRed algorithm, 
+    optionally removes pen marks (green and black) and gray stains, applies post-processing steps, and returns tissue masks together 
+    with bounding boxes and metadata. Optionally, the results are saved. 
+    
+    Parameters 
+    ---------- 
+    config : GaMRedConfig 
+        Configuration object controlling thresholding, magnifications, pen-mark removal, post-processing, visualization, output paths, and saver settings. 
+    output_collector : optional 
+        Object used to collect intermediate and visualization outputs. If ``None``, it is created from ``config.build_output_collector()``. 
+    saver : optional 
+        Object used to save segmentation results. If ``None``, a ``Saver`` is initialized using ``config.saver``. 
+        
+    Attributes 
+    ---------- 
+    config : GaMRedConfig 
+        Segmenter configuration. 
+    output_collector : optional 
+        Collector used for storing generated outputs such as thumbnails, overlays, and histograms. 
+    saver : Saver 
+        Saver used to persist segmentation results. 
+        
+    Notes 
+    ----- 
+    The GaMRed workflow includes RGB threshold estimation, optional green and black pen removal, optional gray stain removal, configured post-processing, mask splitting, bounding-box normalization, and optional result saving. """
+
     def __init__(
         self,
         config: GaMRedConfig,
@@ -137,7 +165,7 @@ class GaMRedSegmenter(Segmenter):
             m = scale_mask_to_bbox(m, bb)
 
             mask_array[idx] = m
-            bbox_list[idx] = bb.numpy(mode=BBoxMode.WH).astype(int)
+            bbox_list[idx] = bb.numpy(mode=BBoxMode.WH)
 
 
         elapsed = time.perf_counter() - t0

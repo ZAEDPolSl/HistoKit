@@ -1,11 +1,11 @@
 # cohort.yaml
 
 slides:
-  input_dir: C:/Repos/HistoKit/tests/data/wsi/Aperio
-  file_list: null
+  input_dir: C:/Repos/Data/Compass/svs/
+  file_csv: null
   pattern: "*.svs"
 
-output_dir: ../outputs
+output_dir: C:/Repos/Data/Compass/Results/
 saver: hdf5
 
 logging:
@@ -19,7 +19,7 @@ stages:
     enabled: true
     algorithm: gamred
     config_path: ./gamred.yaml
-    parallel_workers: 8
+    parallel_workers: 1
     overwrite: false
 
   artifact_detection:

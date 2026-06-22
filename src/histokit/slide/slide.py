@@ -296,7 +296,7 @@ class Slide:
         if self.mag is not None:
             level_mag = [round(self.mag / x, self.MAG_PRECISION) for x in down_levels]
         else:
-            level_mag = [None for x in down_levels]
+            level_mag = [None for _ in down_levels]
         return level_mag
 
     @property
@@ -316,7 +316,7 @@ class Slide:
         if self.mpp is not None:
             level_mpp = [round(self.mpp * x, self.MPP_PRECISION) for x in down_levels]
         else:
-            level_mpp = [None for x in down_levels]
+            level_mpp = [None for _ in down_levels]
         return level_mpp
 
 
@@ -338,8 +338,8 @@ class Slide:
             (width, height) at the specified magnification, or ``None`` if reference values are not set.
         """
         scale_factor = mag / self.mag if self.mag is not None else 1
-        width = int(self.level_dimensions[0][0] * scale_factor)
-        height = int(self.level_dimensions[0][1] * scale_factor)
+        width = round(self.level_dimensions[0][0] * scale_factor)
+        height = round(self.level_dimensions[0][1] * scale_factor)
         return (width, height)
 
     def get_mpp_at_mag(self, mag: float) -> Optional[float]:
@@ -721,7 +721,6 @@ class Slide:
             mpp_bbox: float | None = None,
             mag: float | None = None,
             mpp: float | None = None,
-            bbox_mode: BBoxMode = BBoxMode.WH,
             color_mode: str = "RGB",
             max_pixels: int | None = None,
             pad_value: tuple[int, int, int] = (255, 255, 255)
@@ -740,14 +739,15 @@ class Slide:
             raise ValueError("Provide exactly one of mag or mpp")
 
         masks = [self.normalize_mask(mask) for mask in masks]
-        full_mask = merge_regions(masks, bboxes, self.get_full_slide_size(mag=mag_bbox))
+        full_mask = merge_regions(masks, bboxes, self.get_full_slide_size(mag=mag_bbox, mpp=mpp_bbox))
 
         slide_size = self.get_full_slide_size(mag=mag, mpp=mpp)
 
         if max_pixels is not None:
             n_pixels = slide_size[0] * slide_size[1]
             if n_pixels > max_pixels:
-                raise MemoryError(...)
+                raise MemoryError("The requested slide size exceeds the maximum allowed pixels size and can be memory intensive. " \
+                "Please consider using a lower magnification or increasing the max_pixels limit.")
             
         full_mask = Image.fromarray(full_mask).resize(slide_size, resample=Image.Resampling.NEAREST)
         mask_arr = np.asarray(full_mask)

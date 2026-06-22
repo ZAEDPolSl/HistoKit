@@ -88,7 +88,7 @@ def merge_regions(masks, bboxes, shape):
 
 def scale_mask_to_bbox(mask: np.ndarray, bbox: BBox) -> np.ndarray:
 
-    new_size = (int(bbox.w), int(bbox.h))
+    new_size = (round(bbox.w), round(bbox.h))
 
     if new_size[0] < 1 or new_size[1] < 1:
         raise ValueError(f"Invalid bbox size: {new_size}")
@@ -114,8 +114,8 @@ def scale_mask_to_bbox(mask: np.ndarray, bbox: BBox) -> np.ndarray:
 
 def rescale_mask(mask: np.ndarray, scale: float) -> np.ndarray:
     
-    new_size = (int(mask.shape[1] * scale), int(mask.shape[0] * scale))
-    
+    new_size = (round(mask.shape[1] * scale), round(mask.shape[0] * scale))
+
     if new_size[0] < 1 or new_size[1] < 1:
         raise ValueError(f"Invalid bbox size: {new_size}")
     

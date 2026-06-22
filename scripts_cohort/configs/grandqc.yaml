@@ -2,11 +2,11 @@
 
 # output
 saver: hdf5
-out_dir: ./outputs/grandqc_single
-save_mag: 1.0
+out_dir: ./outputs/
+save_mag: 5.0
 
 # model
-model_path: ./models/GrandQC_MPP1.pth
+model_path: C:/Repos/HistoKit/models/GrandQC_MPP1.pth
 
 # inference
 device: cuda:0
@@ -16,12 +16,12 @@ num_workers: 2
 # magnification
 grandqc_mpp: 1.0
 det_mag: 10.0
-vis_mag: 1.0
+vis_mag: 2.5
 
 # patches
 patch_size_model: 512
 patch_size: 512
-overlap: 0.75
+overlap: 0.9
 grid_offset: 0.5
 pad_value: 255
 
@@ -31,8 +31,8 @@ encoder_weights: imagenet
 classes: 8
 
 # blending
-blending_mode: gaussian
-blending_sigma: null
+blending_mode: constant
+blending_sigma: 1.25
 
 # outputs
 save_confidence_maps: true
