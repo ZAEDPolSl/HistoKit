@@ -43,10 +43,10 @@ class PatchDataset(Dataset):
     def vis(self):
         plt.imshow(self.region)
         for i in range(len(self.coords["x_start"])):
-            x_start = int(self.coords["x_start"][i])
-            y_start = int(self.coords["y_start"][i])
-            x_end = int(self.coords["x_end"][i])
-            y_end = int(self.coords["y_end"][i])
+            x_start = int(round(self.coords["x_start"][i]))
+            y_start = int(round(self.coords["y_start"][i]))
+            x_end = int(round(self.coords["x_end"][i]))
+            y_end = int(round(self.coords["y_end"][i]))
             plt.plot([x_start, x_end, x_end, x_start, x_start],
                      [y_start, y_start, y_end, y_end, y_start], 'r-')
         plt.show()
@@ -98,10 +98,10 @@ class PatchDataset(Dataset):
         raise TypeError(f"Unsupported patch type: {type(patch)}")
 
     def __getitem__(self, idx):
-        x_start = int(self.coords["x_start"][idx])
-        y_start = int(self.coords["y_start"][idx])
-        x_end = int(self.coords["x_end"][idx])
-        y_end = int(self.coords["y_end"][idx])
+        x_start = int(round(self.coords["x_start"][idx]))
+        y_start = int(round(self.coords["y_start"][idx]))
+        x_end = int(round(self.coords["x_end"][idx]))
+        y_end = int(round(self.coords["y_end"][idx]))
 
         patch = self._crop_with_padding(
             x_start=x_start,

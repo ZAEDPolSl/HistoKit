@@ -63,7 +63,7 @@ def merge_regions(masks, bboxes, shape):
     merged = np.zeros(out_shape, dtype=dtype)
 
     for region_mask, bbox in zip(masks, bboxes):
-        x, y, w, h = bbox.astype(int)
+        x, y, w, h = np.round(bbox).astype(int)
 
         x0, y0 = x, y
         x1, y1 = x + w, y + h
