@@ -8,6 +8,7 @@ from ...slide.slide import Slide
 class ArtifactDetectionPipeline(BaseCohortPipeline):
     stage_name = "artifact_detection"
     result_subdir = "artifact_detection"
+    result_dir_name = "masks"
 
     def output_exists(self, slide_path: Path) -> bool:
         return self.output_path(slide_path).exists()

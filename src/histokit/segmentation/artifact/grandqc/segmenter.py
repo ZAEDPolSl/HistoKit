@@ -2,6 +2,7 @@ import os
 import time
 import warnings
 from PIL import Image
+from histokit.slide.mask import SpatialMask
 from .config import GrandQCConfig
 from ...collectors.base import OutputKind
 import numpy as np
@@ -10,7 +11,6 @@ import torch
 from torch.utils.data import DataLoader
 from ....patch_extractors.datasets.grid import GridExtractorDataset
 from ....slide.bbox import BBox
-from ....slide.mask_utils import scale_mask_to_bbox, merge_regions
 from ....slide.slide import Slide
 from ...base import Segmenter
 from ...utils import get_weights
@@ -99,16 +99,21 @@ class GrandQCSegmenter(Segmenter):
             "time": 0,
         }
 
+        masks_vis = []
+
         for idx, (mask, bbox) in enumerate(zip(tissue_mask["mask"], tissue_mask["bbox"])):
 
             if verbose:
                 print(f"Processing tissue region {idx + 1}/{len(tissue_mask['mask'])}")
 
             # 1. Read the tissue region at detection magnification
+
+            # mask loading
+            bbox = BBox(bbox, mag=tissue_mask["mag_save"])
+            mask = SpatialMask(data = mask, bbox = bbox)
+
             region_np = np.array(slide.read_masked_object(
-                bbox=bbox,
                 mask=mask,
-                mag_bbox=tissue_mask["mag_save"],
                 mag=self.config.det_mag,
                 pad_value=self.config.pad_value,
             ))
@@ -149,10 +154,10 @@ class GrandQCSegmenter(Segmenter):
                 for i, pred_single in enumerate(pred):
                     pred_hwc = pred_single.transpose(1, 2, 0)
 
-                    orig_x0 = int(batch["x_start"][i])
-                    orig_y0 = int(batch["y_start"][i])
-                    orig_x1 = int(batch["x_end"][i])
-                    orig_y1 = int(batch["y_end"][i])
+                    orig_x0 = int(round(batch["x_start"][i].item()))
+                    orig_y0 = int(round(batch["y_start"][i].item()))
+                    orig_x1 = int(round(batch["x_end"][i].item()))
+                    orig_y1 = int(round(batch["y_end"][i].item()))
 
                     dst_x0 = max(0, orig_x0)
                     dst_y0 = max(0, orig_y0)
@@ -208,23 +213,31 @@ class GrandQCSegmenter(Segmenter):
             raw_mask[:, :, 0] = bg.astype(raw_mask.dtype)
             pred_mask[bg] = 0
 
-            # 7. Scale the predicted mask and raw mask to the save magnification.
-            bbox_save = BBox.normalize(bbox, mag=tissue_mask["mag_save"]).scale(mag=self.config.save_mag)
-
-            if bbox_save.w < 1 or bbox_save.h < 1:
+            # 7. Scale the predicted mask and raw mask to the save magnification.            
+            pred_mask = SpatialMask(pred_mask, 
+                                    bbox=bbox).scale(target_mag=self.config.save_mag)
+            
+            # Skip regions that become too small after scaling to the save magnification.
+            if pred_mask.bbox.w < 1 or pred_mask.bbox.h < 1:
                 warnings.warn(
-                    f"Skipping region {idx + 1} due to small size after scaling. BBox: {bbox_save}",
+                    f"Skipping region {idx + 1} due to small size after scaling. BBox: {pred_mask.bbox}",
                     UserWarning,
                 )
                 continue
+            
+            masks_vis.append(pred_mask)
+            
+            result["mask"].append(pred_mask.data)
+            result["bbox"].append(pred_mask.bbox.numpy())
 
-            result["mask"].append(scale_mask_to_bbox(pred_mask, bbox_save))
-            result["bbox"].append(bbox_save.numpy())
+            raw_mask = SpatialMask(raw_mask, 
+                                   bbox=bbox,
+                                   kind="prob").scale(target_mag=self.config.save_mag)
 
             if self.config.save_raw_mask:
-                result["raw_mask"].append(
-                    scale_mask_to_bbox(raw_mask, bbox_save)
-                )
+                result["raw_mask"].append(raw_mask.data)
+
+            
 
             # * Free memory
             del region_np
@@ -246,24 +259,19 @@ class GrandQCSegmenter(Segmenter):
             
             # Visialisation are done for a whole slide, so masks are 
             # scaled and merged to a single mask.
-            w, h = slide.get_size_at_mag(self.config.save_mag)
-
             thumb = np.array(slide.read_region(mag=self.config.vis_mag))
-
-            mask_merged = merge_regions(
-                result["mask"],
-                result["bbox"],
-                shape=(h, w),
+            masks_vis = [m.scale(target_mag=self.config.vis_mag) for m in masks_vis]
+    
+            mask_merged = SpatialMask.merge_regions(
+                masks_vis,
+                shape=(thumb.shape[0], thumb.shape[1]),
             )
-
-            mask_merged = np.array(Image.fromarray(mask_merged.astype(np.uint8)).resize(
-                (thumb.shape[1], thumb.shape[0]), Image.Resampling.NEAREST))
 
             self._collect(
                 name="artifact_overlay",
                 step="visualisation",
                 kind=OutputKind.MASK,
-                data=mask_merged,
+                data=mask_merged.data,
                 basename=basename,
                 image=thumb,
                 colors=self.config.colors,

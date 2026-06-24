@@ -1,4 +1,5 @@
 from abc import abstractmethod
+from ...slide.bbox import BBox
 import numpy as np
 from matplotlib import pyplot as plt
 from torch.utils.data import Dataset
@@ -9,20 +10,33 @@ from ..patch_writer import PatchImageWriter
 class PatchDataset(Dataset):
 
     def __init__(
-        self,
-        region: np.ndarray,
-        patch_size: int=512,
-        pad_value: int=255,
-        prep_fn=None,
-        aug_fn=None,
-        exclude_fn=ExcludeBackground(bg_value=255, threshold=1.0),
-        bbox_list=None,
-        patch_writer: PatchImageWriter = None,
+    self,
+    region: np.ndarray,
+    patch_size: int = 512,
+    pad_value: int = 255,
+    prep_fn=None,
+    aug_fn=None,
+    exclude_fn=ExcludeBackground(bg_value=255, threshold=1.0),
+    bbox_list: list[BBox] | None = None,
+    patch_writer: PatchImageWriter = None,
     ):
+        self.region = region
+        self.patch_size = patch_size
+        self.pad_value = pad_value
+        self.prep_fn = prep_fn
+        self.aug_fn = aug_fn
+        self.exclude_fn = exclude_fn
+        self.patch_writer = patch_writer
+
         if bbox_list is None:
-           self.bbox_list = [(0, 0, region.shape[1], region.shape[0])]
+            self.bbox_list = [
+                BBox([0, 0, region.shape[1], region.shape[0]])
+            ]
         else:
-            self.bbox_list = bbox_list
+            self.bbox_list = [
+                bbox if isinstance(bbox, BBox) else BBox(bbox)
+                for bbox in bbox_list
+            ]
 
         self.region = region
         self.patch_size = patch_size

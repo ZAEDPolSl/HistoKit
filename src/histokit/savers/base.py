@@ -14,7 +14,13 @@ class BaseSaver(ABC):
 
 
 class Saver:
+    """A wrapper class that selects the appropriate saver based on the specified method.
+    This class provides a unified interface for saving and loading data using different formats.
+    """
     def __init__(self, method=None):
+        """Initialize the Saver with the specified method.
+        param method: The saving method to use. Supported methods are 'hdf5', 'pickle', and 'noop' (no operation). If None, NoOpSaver is used.
+        """
         if method is None:
             self.saver = NoOpSaver()
             return

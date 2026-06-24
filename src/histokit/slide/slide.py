@@ -1,6 +1,5 @@
 from typing import Optional, List
-import warnings
-from histokit.slide.mask_utils import merge_regions
+from .mask import SpatialMask
 import numpy as np
 from PIL import Image
 from openslide import OpenSlideUnsupportedFormatError
@@ -8,7 +7,7 @@ from .backends.numpy import NumpyBackend
 from .backends.openslide import OpenSlideBackend
 from .backends.pil import PILBackend
 from .backends.base import BaseSlideBackend
-from .bbox import BBoxMode, BBox
+from .bbox import BBox
 from typing import Union, Sequence
 from os import PathLike
 
@@ -425,12 +424,11 @@ class Slide:
 
     def read_region(
         self,
-        bbox: Union[BBox, Sequence[int], np.ndarray, None] = None,
+        bbox: BBox | np.ndarray | Sequence[float] | Sequence[int] | None = None,
         *,
         mag: float | None = None,
         mpp: float | None = None,
         level: int | None = None,
-        bbox_mode: BBoxMode = BBoxMode.WH,
         color_mode: str = "RGB"
     ) -> Image.Image:
 
@@ -446,7 +444,7 @@ class Slide:
 
         Parameters
         ----------
-        bbox : BBox or sequence of int/float or numpy.ndarray, optional
+        bbox : BBox or sequence of int/float or numpy.ndarray as [x0, y0, w, h], optional
             Bounding box of the region to read. When BBox is not provided, the entire level will be read.
             Coordinates are assumed to be in the coordinate space defined by the provided ``mag``, ``mpp``, or pyramid level.
         mag : float, optional
@@ -455,8 +453,6 @@ class Slide:
             Target microns per pixel for the output image.
         level : int, optional
             Pyramid level index to read from.
-        bbox_mode : BBoxMode, optional
-            Coordinate format of ``bbox``. Defaults to ``BBoxMode.WH``.
         color_mode : str, optional
             PIL color mode for the returned image (e.g. ``"RGB"``, ``"L"``).
             Defaults to ``"RGB"``.
@@ -471,26 +467,30 @@ class Slide:
         ValueError
             If not exactly one of ``level``, ``mag``, ``mpp`` is provided.
         """
+        if bbox is None:
+            # If no bbox is provided, read the entire level. We create a bbox that covers the whole level dimensions.
+            bbox = BBox([0, 0, self.level_dimensions[0][0], self.level_dimensions[0][1]], mag=self.mag, mpp=self.mpp)
+            if mag is None and mpp is None:
+               bbox = bbox.scale(target_mag = self.level_mag[level])
+            else:
+                bbox = bbox.scale(target_mag = mag, target_mpp = self.mpp)
+        
+        if not isinstance(bbox, BBox):
+            bbox = BBox(bbox, mag=mag, mpp=mpp)
+
         if sum(x is not None for x in (level, mag, mpp)) != 1:
             raise ValueError("Provide exactly one of: level, mag, mpp")
 
-        if bbox is None:
-            # If no bbox is provided, read the entire level. We create a bbox that covers the whole level dimensions.
-            bbox = BBox(0, 0, w=self.level_dimensions[0][0], h=self.level_dimensions[0][1], mag=self.mag, mpp=self.mpp)
-            if mag is None and mpp is None:
-               bbox = bbox.scale(mag = self.level_mag[level])
-            else:
-                bbox = bbox.scale(mag = mag, mpp = self.mpp)
 
         if mag is not None:
-            bbox_norm = BBox.normalize(bbox, mode=bbox_mode, mag=mag, ref_mag=self._ref_mag, ref_mpp=self._ref_mpp)
-            region = self._read_region_mag(mag, bbox_norm)
+            bbox_scaled = bbox.scale(target_mag=mag)
+            region = self._read_region_mag(mag, bbox_scaled)
         elif mpp is not None:
-            bbox_norm = BBox.normalize(bbox, mode=bbox_mode, mpp=mpp, ref_mag=self._ref_mag, ref_mpp=self._ref_mpp)
-            region = self._read_region_mpp(mpp, bbox_norm)
+            bbox_scaled = bbox.scale(target_mpp=mpp)
+            region = self._read_region_mpp(mpp, bbox_scaled)
         elif level is not None:
-            bbox_norm = BBox.normalize(bbox, mode=bbox_mode, mag=self.level_mag[level], ref_mag=self._ref_mag, ref_mpp=self._ref_mpp)
-            region = self._read_region_level(level, bbox_norm)
+            bbox_scaled = bbox.scale(target_mag=self.level_mag[level])
+            region = self._read_region_level(level, bbox_scaled)
         else:
             raise ValueError("Must provide one of level, mag, or mpp to determine read_region resolution.")
         return region.convert(color_mode)
@@ -518,13 +518,48 @@ class Slide:
 
         # Convert location to the level 0 coordinate space x0, y0
         # h and w are defined for the given level in OpenSlide
-        x0, y0, w, h = bbox.as_tuple(BBoxMode.WH)
-        downsample = self._backend.level_downsamples[level]
-        x0_int_l0, y0_int_l0 = round(x0 * downsample), round(y0 * downsample)
-        w_int = min(round(w), self.level_dimensions[level][0] - round(x0))
-        h_int = min(round(h), self.level_dimensions[level][1] - round(y0))
+        if level < 0 or level >= self.level_count:
+            raise ValueError(
+                f"Invalid level: {level}. Slide has {self.level_count} levels."
+            )
 
-        return self._backend.read_region(location=(x0_int_l0, y0_int_l0), level=level, size=(w_int, h_int))
+        # get bbox as integer coordinates
+        bbox_int = bbox.get_bbox_integer()
+        x0, y0, w, h = bbox_int.xywh_int
+
+        level_width, level_height = self.level_dimensions[level]
+
+        # bbox to level bounds.
+        x1 = x0 + w
+        y1 = y0 + h
+
+        x0_clip = max(0, x0)
+        y0_clip = max(0, y0)
+        x1_clip = min(level_width, x1)
+        y1_clip = min(level_height, y1)
+
+        w_int = x1_clip - x0_clip
+        h_int = y1_clip - y0_clip
+
+        if w_int <= 0 or h_int <= 0:
+            raise ValueError(
+                f"Requested bbox is outside level bounds. "
+                f"bbox={bbox_int}, level={level}, "
+                f"level_dimensions={self.level_dimensions[level]}"
+            )
+
+        # backends expect location in level-0 coordinates.
+        downsample = self._backend.level_downsamples[level]
+
+        x0_l0 = int(round(x0_clip * downsample))
+        y0_l0 = int(round(y0_clip * downsample))
+
+        return self._backend.read_region(
+            location=(x0_l0, y0_l0),
+            level=level,
+            size=(w_int, h_int),
+        )
+    
 
     def _read_region_mag(self, mag: float, bbox: BBox):
         """
@@ -545,18 +580,25 @@ class Slide:
         PIL.Image.Image
             The region image rescaled to the requested magnification.
         """
-        # We want to scale region from the nearest larger level to the requested magnification
+        if mag <= 0:
+            raise ValueError(f"Magnification must be positive. Got: {mag}")
+
+        # Choose pyramid level used as the source.
         level = self.get_best_level_for_downsample(mag=mag)
 
-        # Scale the bbox to the level's coordinate space
-        bbox_level = bbox.scale(mag=self.level_mag[level])
+        # Convert requested bbox from target magnification to the source level
+        bbox_level = bbox.scale(target_mag=self.level_mag[level])
 
-        # Read the region at the level's resolution
+        # source level (nearest higher resolution) 
         region = self._read_region_level(level, bbox_level)
 
-        # Finally, scale the region to the requested mpp
-        bbox = bbox.scale(mag=mag)
-        return region.resize((round(bbox.w), round(bbox.h)), resample=self.rescale_method)
+        # bbox as int
+        bbox_out = bbox.get_bbox_integer()
+
+        return region.resize(
+            bbox_out.size,
+            resample=self.rescale_method,
+        )
 
     def _read_region_mpp(self, mpp:float, bbox: BBox):
         """
@@ -578,28 +620,39 @@ class Slide:
             The region image rescaled to the requested MPP.
         """
 
-        # We want to scale region from the nearest larger level to the requested mpp
+        if mpp <= 0:
+            raise ValueError(f"MPP must be positive. Got: {mpp}")
+
+        if bbox.mpp is not None and abs(bbox.mpp - mpp) > 1e-6:
+            raise ValueError(
+                f"bbox.mpp ({bbox.mpp}) must match requested mpp ({mpp}). "
+                "Scale or normalize the bbox before calling _read_region_mpp."
+            )
+
         level = self.get_best_level_for_downsample(mpp=mpp)
 
-        # Scale the bbox to the level's coordinate space
-        bbox_level = bbox.scale(mpp=self.level_mpp[level])
+        bbox_level = bbox.scale(
+            target_mpp=self.level_mpp[level],
+        )
 
-        # Read the region at the level's resolution
-        region = self._read_region_level(level, bbox_level)
+        region = self._read_region_level(
+            level,
+            bbox_level,
+        )
 
-        # Finally, scale the region to the requested mpp
-        bbox = bbox.scale(mpp=mpp)
-        return region.resize((round(bbox.w), round(bbox.h)), resample=self.rescale_method)
+        bbox_out = bbox.get_bbox_integer()
+
+        return region.resize(
+            bbox_out.size,
+            resample=self.rescale_method,
+        )
 
     def read_object(
             self,
-            bbox: Union[BBox, Sequence[int], np.ndarray],
+            bbox: BBox,
             *,
-            mag_bbox: float | None = None,
-            mpp_bbox: float | None = None,
             mag: float | None = None,
             mpp: float | None = None,
-            bbox_mode: BBoxMode = BBoxMode.WH,
             color_mode: str = "RGB"
     ) -> Image.Image:
 
@@ -612,11 +665,8 @@ class Slide:
 
         Parameters
         ----------
-        bbox : BBox or sequence of int/float or numpy.ndarray
-            Bounding box of the object. Can be a BBox instance, a list/tuple of 4 numbers
-            (x0, y0, x1, y1) or (x0, y0, w, h), or a NumPy array.
-            Coordinates are assumed to be in the coordinate space defined BBox.mpp, BBox.mag or
-            by `mag_bbox` or `mpp_bbox`.
+        bbox : BBox
+            Bounding box of the object with specified MPP or magnification.
 
         mag_bbox : float, optional
             Magnification at which the `bbox` coordinates are defined.
@@ -640,10 +690,6 @@ class Slide:
             Target microns per pixel for the returned image. If provided, the bounding box
             will be rescaled to match this resolution.
 
-        bbox_mode : BBoxMode, optional
-            Format of the `bbox` coordinates. Can be `BBoxMode.WH` for (x0, y0, w, h) or
-            `BBoxMode.XY` for (x0, y0, x1, y1). Defaults to `BBoxMode.WH`.
-
         color_mode : str, optional
             PIL color mode for the output image, e.g., `"RGB"` or `"RGBA"`. Defaults to `"RGB"`.
 
@@ -653,63 +699,72 @@ class Slide:
             The extracted object image at the requested output resolution.
         """
 
-        if isinstance(bbox, Sequence) and mag_bbox is None and mpp_bbox is None:
-            raise ValueError("For non-BBox input, at least one of mag_bbox or mpp_bbox must be provided to define the coordinate space of the bbox.")
+        if bbox is None:
+            raise ValueError("bbox must be provided.")
 
-        # Normalize bbox to BBox object
-        bbox_norm = BBox.normalize(
-            bbox,
-            mode=bbox_mode,
-            mag=mag_bbox,
-            mpp=mpp_bbox,
-            ref_mag=self._ref_mag,
-            ref_mpp=self._ref_mpp
+        if (mag is None) == (mpp is None):
+            raise ValueError("Provide exactly one of mag or mpp.")
+        
+        if bbox.mag is None and bbox.mpp is None:
+            raise ValueError(
+                "Could not determine bbox coordinate space. Provide mag_bbox or "
+                "mpp_bbox, or pass a BBox with mag or mpp metadata."
+            )
+
+        if mag is not None:
+            return self.read_region(
+                bbox.scale(target_mag=mag),
+                mag=mag,
+                color_mode=color_mode,
+            )
+
+        return self.read_region(
+            bbox.scale(target_mpp=mpp),
+            mpp=mpp,
+            color_mode=color_mode,
         )
 
-        bbox_final = bbox_norm if mag is None and mpp is None else bbox_norm.scale(mag=mag, mpp=mpp)
-        return self.read_region(bbox_final, mag=mag, mpp=mpp, bbox_mode=bbox_mode, color_mode=color_mode)
+
+    def read_masked_object(
+        self,
+        mask: SpatialMask,
+        *,
+        mag: float | None = None,
+        mpp: float | None = None,
+        color_mode: str = "RGB",
+        pad_value: tuple[int, int, int] = (255, 255, 255),
+    ) -> Image.Image:
 
 
+        if not isinstance(mask, SpatialMask):
+                raise TypeError("mask must be a SpatialMask.")
 
-    def read_masked_object(self,
-                           bbox: Union[BBox, Sequence[int], np.ndarray],
-                           mask: np.ndarray | None = None,
-                           *,
-                           mag_bbox: float | None = None,
-                           mpp_bbox: float | None = None,
-                           mag: float | None = None,
-                           mpp: float | None = None,
-                           bbox_mode: BBoxMode = BBoxMode.WH,
-                           color_mode: str = "RGB",
-                           pad_value: tuple[int, int, int] = (255, 255, 255)
-                           ) -> Image.Image:
+        if (mag is None) == (mpp is None):
+            raise ValueError("Provide exactly one of mag or mpp.")
 
-        if isinstance(bbox, Sequence) and mag_bbox is None and mpp_bbox is None:
-            raise ValueError("For non-BBox input, at least one of mag_bbox or mpp_bbox must be provided to define the coordinate space of the bbox.")
-
-
-
-        # Normalize bbox to BBox object
-        bbox_norm = BBox.normalize(
-            bbox,
-            mode=bbox_mode,
-            mag=mag_bbox,
-            mpp=mpp_bbox,
-            ref_mag=self._ref_mag,
-            ref_mpp=self._ref_mpp
-        )
-
-        bbox_final = bbox_norm if mag is None and mpp is None else bbox_norm.scale(mag=mag, mpp=mpp)
-        region = self.read_region(bbox_final, mag=mag, mpp=mpp, bbox_mode=bbox_mode, color_mode=color_mode)
-
-        if mask is not None:
-            mask = self.normalize_mask(mask)
-            mask_resized = Image.fromarray(mask).resize(region.size, resample=Image.Resampling.NEAREST)
-            region_masked = np.array(region) * np.array(mask_resized)[..., None]
-            black = np.all(region_masked == [0, 0, 0], axis=-1)
-            region_masked[black] = pad_value
+        if mag is not None:
+            mask_out = mask.scale(target_mag=mag)
         else:
-            return region
+            mask_out = mask.scale(target_mpp=mpp)
+
+        region = self.read_region(
+            mask_out.bbox,
+            mag=mag,
+            mpp=mpp,
+            color_mode=color_mode,
+        )
+
+        mask_out.binarize()
+
+        if mask_out.data.shape[:2] != region.size[::-1]:
+            raise ValueError(
+                f"Mask shape {mask_out.data.shape[:2]} does not match region "
+                f"shape {region.size[::-1]}."
+            )
+
+        region_np = np.asarray(region)
+        region_masked = region_np.copy()
+        region_masked[~mask_out.data] = pad_value
         return Image.fromarray(region_masked).convert("RGB")
 
     def read_masked_slide(
@@ -764,101 +819,66 @@ class Slide:
         return Image.fromarray(region_masked.astype(slide.dtype)).convert(color_mode)
 
     def read_masked_objects(
-            self,
-            bboxes: Sequence[Union[BBox, Sequence[int], np.ndarray]],
-            masks: Sequence[np.ndarray],
-            *,
-            mag_bbox: float | None = None,
-            mpp_bbox: float | None = None,
-            mag: float | None = None,
-            mpp: float | None = None,
-            bbox_mode: BBoxMode = BBoxMode.WH,
-            color_mode: str = "RGB",
-            pad_value: tuple[int, int, int] = (255, 255, 255),
+        self,
+        masks: Sequence[SpatialMask],
+        *,
+        mag: float | None = None,
+        mpp: float | None = None,
+        color_mode: str = "RGB",
+        pad_value: tuple[int, int, int] = (255, 255, 255),
     ) -> list[Image.Image]:
+        
+        if not isinstance(masks, Sequence):
+            raise TypeError("masks must be a sequence of SpatialMask objects.")
 
-        if len(bboxes) != len(masks):
-            raise ValueError(
-                f"bboxes and masks must have the same length, "
-                f"got {len(bboxes)} and {len(masks)}"
-            )
+        if (mag is None) == (mpp is None):
+            raise ValueError("Provide exactly one of mag or mpp.")
 
-        return [
-            self.read_masked_object(
-                bbox=bbox,
+        return [self.read_masked_object(
                 mask=mask,
-                mag_bbox=mag_bbox,
-                mpp_bbox=mpp_bbox,
                 mag=mag,
                 mpp=mpp,
-                bbox_mode=bbox_mode,
                 color_mode=color_mode,
-                pad_value=pad_value
-            )
-            for bbox, mask in zip(bboxes, masks)
-        ]
+                pad_value=pad_value) for mask in masks]
 
     def get_full_slide_size(
-            self,
-            *,
-            mag: float | None = None,
-            mpp: float | None = None,
+        self,
+        *,
+        mag: float | None = None,
+        mpp: float | None = None,
     ) -> tuple[int, int]:
+        
+        """Return full slide size at the requested resolution.
 
-        if mag is None and mpp is None:
-            raise ValueError("Provide exactly one of mag or mpp")
+        Parameters
+        ----------
+        mag : float, optional
+            Target magnification.
+        mpp : float, optional
+            Target microns per pixel.
 
-        if mag is not None and mpp is not None:
-            raise ValueError("Provide exactly one of mag or mpp")
+        Returns
+        -------
+        tuple[int, int]
+            Slide size as ``(width, height)``.
+        """
+        if (mag is None) == (mpp is None):
+            raise ValueError("Provide exactly one of mag or mpp.")
 
         bbox = BBox(
-            0,
-            0,
-            w=self.level_dimensions[0][0],
-            h=self.level_dimensions[0][1],
+            [0, 0, self.level_dimensions[0][0], self.level_dimensions[0][1]],
             mag=self.mag,
             mpp=self.mpp,
             ref_mag=self._ref_mag,
             ref_mpp=self._ref_mpp,
         )
 
-        bbox = bbox.scale(mag=mag, mpp=mpp)
+        if mag is not None:
+            bbox = bbox.scale(target_mag=mag)
+        else:
+            bbox = bbox.scale(target_mpp=mpp)
 
-        return round(bbox.w), round(bbox.h)
-
-
-    @staticmethod
-    def normalize_mask(mask: np.ndarray) -> np.ndarray:
-        if not isinstance(mask, np.ndarray):
-            raise TypeError("mask must be a numpy.ndarray")
-
-        if mask.ndim != 2:
-            raise ValueError(
-                f"mask must be 2-dimensional, got shape {mask.shape}"
-            )
-
-        if mask.dtype == bool:
-            return mask
-
-        values = np.unique(mask)
-
-        valid_bool = mask.dtype == bool
-        valid_binary = np.all(np.isin(values, [0, 1]))
-        valid_binary_uint8 = mask.dtype == np.uint8 and np.all(np.isin(values, [0, 255]))
-
-        if not (valid_bool or valid_binary or valid_binary_uint8):
-            warnings.warn(
-                "mask is not bool, binary (0/1), or binary uint8 (0/255). "
-                f"Found values: {values.tolist()}. "
-                "The mask will be converted to binary: values equal to 1 will remain 1, "
-                "all other values will be set to 0.",
-                UserWarning,
-                stacklevel=2,
-            )
-
-            mask = (mask == 1)
-
-        return mask>0
+        return bbox.size
 
 
 

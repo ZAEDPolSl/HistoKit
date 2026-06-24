@@ -1,158 +1,231 @@
-import pytest
 import numpy as np
-from histokit.slide import BBox, BBoxMode
+import pytest
+from histokit.slide.bbox import BBox
 
 
-def test_bbox_init_xy_and_wh():
-    # x1/y1
-    bbox1 = BBox(10, 20, x1=50, y1=60)
-    assert bbox1.w == 40
-    assert bbox1.h == 40
-    assert bbox1.as_tuple(mode=BBoxMode.XY) == (10, 20, 50, 60)
-    assert bbox1.area() == 1600
+def test_init_from_list():
+    bbox = BBox([10, 20, 100, 50], mag=2.5)
 
-    # w/h
-    bbox2 = BBox(10, 20, w=40, h=40)
-    assert bbox2.x1 == 50
-    assert bbox2.y1 == 60
-    assert bbox2.area() == 1600
-
-    with pytest.raises(ValueError):
-        BBox(0, 0, x1=10, w=5, y1=10)
+    assert bbox.x0 == 10.0
+    assert bbox.y0 == 20.0
+    assert bbox.w == 100.0
+    assert bbox.h == 50.0
+    assert bbox.x1 == 110.0
+    assert bbox.y1 == 70.0
+    assert bbox.mag == 2.5
 
 
-    with pytest.raises(ValueError):
-        BBox(0, 0, h=5)
+def test_init_from_numpy_array():
+    bbox = BBox(np.array([10, 20, 100, 50]), mag=2.5)
 
-def test_mag_mpp_calculation():
-    bbox = BBox(0, 0, w=10, h=10, mag=20)
-    assert bbox.mag == 20
-    assert bbox.mpp == round(BBox.REF_MAG * BBox.REF_MPP / 20, 4)
+    assert bbox.xywh == (10.0, 20.0, 100.0, 50.0)
+    assert bbox.xyxy == (10.0, 20.0, 110.0, 70.0)
 
-    bbox2 = BBox(0, 0, w=10, h=10, mpp=0.5)
-    assert bbox2.mpp == 0.5
-    assert bbox2.mag == round(BBox.REF_MAG * BBox.REF_MPP / 0.5, 2)
-
-def test_center():
-    bbox = BBox(0, 0, w=10, h=20)
-    cx, cy = bbox.center
-    assert cx == 5
-    assert cy == 10
-
-def test_scale_factor():
-    bbox = BBox(10, 20, w=40, h=60, mag=20, mpp=1)
-    scaled = bbox.scale(factor=0.5)
-    assert scaled.x0 == round(10 * 0.5)
-    assert scaled.y0 == round(20 * 0.5)
-    assert scaled.w == round(40 * 0.5)
-    assert scaled.h == round(60 * 0.5)
-    assert scaled.mag == 20 * 0.5
-    assert scaled.mpp == 1 / 0.5
-
-def test_scale_mag_and_mpp():
-    bbox = BBox(0, 0, w=10, h=10, mag=20, mpp=1)
-    scaled_mag = bbox.scale(mag=10)
-    assert scaled_mag.mag == 10
-    assert scaled_mag.mpp == 2
-
-    scaled_mpp = bbox.scale(mpp=2)
-    assert scaled_mpp.mpp == 2
-    assert scaled_mpp.mag == 10
-
-def test_as_tuple_and_array():
-    bbox = BBox(10, 20, w=40, h=50)
-    assert bbox.as_tuple(BBoxMode.XY) == (10, 20, 50, 70)
-    assert bbox.as_tuple(BBoxMode.WH) == (10, 20, 40, 50)
-
-    arr_xy = bbox.numpy(BBoxMode.XY)
-    assert isinstance(arr_xy, np.ndarray)
-    assert np.array_equal(arr_xy, np.array([10, 20, 50, 70]))
-
-    arr_wh = bbox.numpy(BBoxMode.WH)
-    assert np.array_equal(arr_wh, np.array([10, 20, 40, 50]))
-
-def test_area():
-    bbox = BBox(0, 0, w=3, h=5)
-    assert bbox.area() == 15
-
-def test_normalize_bbox_object_no_change():
-    bbox = BBox(10, 20, w=30, h=40, mag=10, mpp=1)
-    normalized = BBox.normalize(bbox)
-    assert normalized is bbox
-
-def test_normalize_bbox_object_with_new_params():
-    bbox = BBox(10, 20, w=30, h=40, mag=10, mpp=1)
-    normalized = BBox.normalize(bbox, mag=20, mpp=0.5, ref_mag=15, ref_mpp=1.2)
-    assert normalized is not bbox
-    assert normalized.mag == 20
-    assert normalized.mpp == 0.5
-    assert normalized.ref_mag == 15
-    assert normalized.ref_mpp == 1.2
-    assert normalized.x0 == bbox.x0 and normalized.y0 == bbox.y0
-    assert normalized.w == bbox.w and normalized.h == bbox.h
-
-@pytest.mark.parametrize("seq_type", [list, tuple, np.array])
-def test_normalize_bbox_sequence(seq_type):
-    arr = seq_type([10, 20, 30, 40])
-    normalized = BBox.normalize(arr, mode=BBoxMode.WH, mag=5, mpp=0.5)
-    assert isinstance(normalized, BBox)
-    assert normalized.x0 == 10
-    assert normalized.y0 == 20
-    assert normalized.w == 30
-    assert normalized.h == 40
-    assert normalized.mag == 5
-    assert normalized.mpp == 0.5
-
-@pytest.mark.parametrize("seq_type", [list, tuple, np.array])
-def test_normalize_bbox_sequence_mag(seq_type):
-    arr = seq_type([10, 20, 30, 40])
-    normalized = BBox.normalize(arr, mode=BBoxMode.WH, mag=10)
-    assert isinstance(normalized, BBox)
-    assert normalized.x0 == 10
-    assert normalized.y0 == 20
-    assert normalized.w == 30
-    assert normalized.h == 40
-    assert normalized.mag == 10
-    assert normalized.mpp == 1
-
-@pytest.mark.parametrize("seq_type", [list, tuple, np.array])
-def test_normalize_bbox_sequence_mag(seq_type):
-    arr = seq_type([10, 20, 30, 40])
-    normalized = BBox.normalize(arr, mode=BBoxMode.WH, mpp=1)
-    assert isinstance(normalized, BBox)
-    assert normalized.x0 == 10
-    assert normalized.y0 == 20
-    assert normalized.w == 30
-    assert normalized.h == 40
-    assert normalized.mag == 10
-    assert normalized.mpp == 1
-
-def test_normalize_invalid_sequence_length():
-    with pytest.raises(ValueError):
-        BBox.normalize([10, 20, 30])
-
-def test_normalize_invalid_type():
-    with pytest.raises(TypeError):
-        BBox.normalize("Not a bbox")
 
 @pytest.mark.parametrize(
-    "bbox_input, bbox_mode, expected_count",
-    [   (None, BBoxMode.WH, 0),
-        (BBox(0, 0, w=10, h=10), BBoxMode.WH, 1),
-        ([(0, 0, 10, 10), (20, 20, 5, 5)], BBoxMode.WH, 2),
-        ([(0, 0, 10, 10)], BBoxMode.XY, 1),
-        (np.array([0, 0, 10, 10]), BBoxMode.WH, 1),
-        (np.array([[0, 0, 10, 10], [20, 20, 5, 5]]), BBoxMode.WH, 2),
-        ([BBox(1, 1, w=5, h=5), BBox(2, 2, w=3, h=3)], BBoxMode.WH, 2),
-    ]
+    "bbox",
+    [
+        [0, 0, 0, 10],
+        [0, 0, 10, 0],
+        [0, 0, -1, 10],
+        [0, 0, 10, -1],
+    ],
 )
-def test_normalize_list(bbox_input, bbox_mode, expected_count):
+def test_invalid_non_positive_width_or_height_raises(bbox):
+    with pytest.raises(ValueError, match="positive width and height"):
+        BBox(bbox)
 
-    result = BBox.normalize_list(
-        bbox=bbox_input,
-        mode = bbox_mode,
+
+@pytest.mark.parametrize(
+    "bbox",
+    [
+        [0, 0, 10],
+        [0, 0, 10, 20, 30],
+        "abcd",
+        [0, 0, "10", 20],
+        object(),
+    ],
+)
+def test_invalid_bbox_input_raises(bbox):
+    with pytest.raises((TypeError, ValueError)):
+        BBox(bbox)
+
+
+@pytest.mark.parametrize(
+    "mag",
+    [0, -1, -2.5],
+)
+def test_invalid_mag_raises(mag):
+    with pytest.raises(ValueError, match="mag must be positive"):
+        BBox([0, 0, 10, 20], mag=mag)
+
+
+@pytest.mark.parametrize(
+    "mpp",
+    [0, -1, -0.25],
+)
+def test_invalid_mpp_raises(mpp):
+    with pytest.raises(ValueError, match="mpp must be positive"):
+        BBox([0, 0, 10, 20], mpp=mpp)
+
+
+def test_mpp_is_derived_from_mag():
+    bbox = BBox([0, 0, 10, 20], mag=20.0)
+
+    assert bbox.mag == 20.0
+    assert bbox.mpp == 0.5
+
+
+def test_mag_is_derived_from_mpp():
+    bbox = BBox([0, 0, 10, 20], mpp=0.5)
+
+    assert bbox.mpp == 0.5
+    assert bbox.mag == 20.0
+
+
+def test_mag_and_mpp_use_custom_reference_values():
+    bbox = BBox(
+        [0, 0, 10, 20],
+        mag=40.0,
+        ref_mag=20.0,
+        ref_mpp=0.5,
     )
 
-    assert isinstance(result, list)
-    assert all(isinstance(b, BBox) for b in result)
-    assert len(result) == expected_count
+    assert bbox.mpp == 0.25
+
+
+def test_area():
+    bbox = BBox([10, 20, 100, 50])
+
+    assert bbox.area() == 5000.0
+
+
+def test_numpy_returns_xywh_by_default():
+    bbox = BBox([10, 20, 100, 50])
+
+    np.testing.assert_array_equal(
+        bbox.numpy(),
+        np.array([10.0, 20.0, 100.0, 50.0]),
+    )
+
+
+def test_numpy_with_int_dtype():
+    bbox = BBox([10.2, 20.7, 100.4, 50.9])
+
+    np.testing.assert_array_equal(
+        bbox.numpy(dtype=int),
+        np.array([10, 20, 100, 50]),
+    )
+
+
+def test_scale_with_factor():
+    bbox = BBox([10, 20, 100, 50], mag=10.0)
+
+    scaled = bbox.scale(factor=2.0)
+
+    assert scaled.xywh == (20.0, 40.0, 200.0, 100.0)
+    assert scaled.mag == 20.0
+    assert scaled.mpp == 0.5
+
+
+def test_scale_with_target_mag():
+    bbox = BBox([10, 20, 100, 50], mag=10.0)
+
+    scaled = bbox.scale(target_mag=20.0)
+
+    assert scaled.xywh == (20.0, 40.0, 200.0, 100.0)
+    assert scaled.mag == 20.0
+    assert scaled.mpp == 0.5
+
+
+def test_scale_with_target_mpp():
+    bbox = BBox([10, 20, 100, 50], mpp=1.0)
+
+    scaled = bbox.scale(target_mpp=0.5)
+
+    assert scaled.xywh == (20.0, 40.0, 200.0, 100.0)
+    assert scaled.mpp == 0.5
+    assert scaled.mag == 20.0
+
+
+def test_scale_without_factor_or_known_resolution_raises():
+    bbox = BBox([10, 20, 100, 50])
+
+    with pytest.raises(ValueError, match="Must provide either"):
+        bbox.scale(target_mag=20.0)
+
+
+@pytest.mark.parametrize(
+    "factor",
+    [0, -1, -0.5],
+)
+def test_scale_with_invalid_factor_raises(factor):
+    bbox = BBox([10, 20, 100, 50])
+
+    with pytest.raises(ValueError, match="Scaling factor must be positive"):
+        bbox.scale(factor=factor)
+
+
+def test_get_bbox_integer_covers_float_bbox():
+    bbox = BBox([10.8, 15.2, 5.4, 3.9], mag=2.5)
+
+    int_bbox = bbox.get_bbox_integer()
+
+    assert int_bbox.xywh == (10.0, 15.0, 7.0, 5.0)
+    assert int_bbox.xyxy == (10.0, 15.0, 17.0, 20.0)
+    assert int_bbox.mag == 2.5
+
+
+def test_get_bbox_integer_for_integer_bbox():
+    bbox = BBox([10, 15, 5, 4])
+
+    int_bbox = bbox.get_bbox_integer()
+
+    assert int_bbox.xywh == (10.0, 15.0, 5.0, 4.0)
+    assert int_bbox.xyxy == (10.0, 15.0, 15.0, 19.0)
+
+
+def test_size_returns_width_height():
+    bbox = BBox([10.8, 15.2, 5.4, 3.9])
+
+    assert bbox.size == (7, 5)
+
+
+def test_shape_returns_height_width():
+    bbox = BBox([10.8, 15.2, 5.4, 3.9])
+
+    assert bbox.shape == (5, 7)
+
+
+def test_xywh_int():
+    bbox = BBox([10.8, 15.2, 5.4, 3.9])
+
+    assert bbox.xywh_int == (10, 15, 7, 5)
+
+
+def test_xyxy_int():
+    bbox = BBox([10.8, 15.2, 5.4, 3.9])
+
+    assert bbox.xyxy_int == (10, 15, 17, 20)
+
+
+def test_numpy_int():
+    bbox = BBox([10.8, 15.2, 5.4, 3.9])
+
+    np.testing.assert_array_equal(
+        bbox.numpy_int(),
+        np.array([10, 15, 7, 5]),
+    )
+
+
+def test_repr_contains_bbox_fields():
+    bbox = BBox([10, 20, 100, 50], mag=2.5)
+
+    text = repr(bbox)
+
+    assert "BBox" in text
+    assert "x0=10.0" in text
+    assert "y0=20.0" in text
+    assert "w=100.0" in text
+    assert "h=50.0" in text
+    assert "mag=2.5" in text

@@ -114,21 +114,6 @@ def test_get_best_level_for_downsample_mag(mag, expected, slide):
     assert expected == level
 
 
-def test_read_masked_objects():
-
-    slide = Slide(str(TEST_PATH / "Aperio/JP2K-33003-1.svs"))
-
-    data = Saver("hdf5").load(str(MASKS_PATH / "JP2K-33003-1.h5"))
-
-    imgs = slide.read_masked_objects(data["bbox"],
-                              data["mask"],
-                              mag_bbox=data["mag_save"],
-                                     mag = 1)
-
-    for idx, img in enumerate(imgs):
-        img.save(f"test_{idx}.png")
-    assert len(imgs) == 2
-
 
 
 

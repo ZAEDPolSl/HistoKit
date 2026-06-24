@@ -2,12 +2,12 @@
 
 # output
 saver: hdf5
-save_mag: 5.0
+save_mag: 1.0
 out_dir: ./outputs
 
 # magnification settings
 vis_mag: 2.5
-tissdet_mag: 1
+tissdet_mag: 2.5
 
 # tissue detection
 thr_min: 178.5

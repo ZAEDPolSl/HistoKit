@@ -57,7 +57,7 @@ class GrandQCConfig(BaseSegmentationConfig):
             "ART_PEN": (4, (255, 0, 0)),
             "ART_EDGE": (5, (255, 0, 255)),
             "ART_FOCUS": (6, (75, 0, 130)),
-            "BG_MODEL": (7, (50, 120, 230)),
+            "BG_MODEL": (0, (0, 0, 0)),
         }
     )
 

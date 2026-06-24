@@ -27,6 +27,17 @@ class BaseCohortPipeline(ABC):
             / self.result_subdir
             / algorithm
         )
+    
+    def result_dir(
+        self,
+        algorithm: str | None = None,
+    ) -> Path:
+        stage_dir = self.stage_dir(algorithm=algorithm)
+
+        if self.result_dir_name is None:
+            return stage_dir
+
+        return stage_dir / self.result_dir_name
 
     def visualization_dir(
         self,
@@ -40,7 +51,7 @@ class BaseCohortPipeline(ABC):
         algorithm: str | None = None,
     ) -> Path:
         return (
-            self.stage_dir(algorithm=algorithm)
+            self.result_dir(algorithm=algorithm)
             / f"{slide_path.stem}{self.result_saver().extension}"
         )
 
@@ -49,13 +60,18 @@ class BaseCohortPipeline(ABC):
         slide_path: Path,
         stage: str,
         algorithm: str,
+        result_dir_name: str | None = "masks",
     ) -> Path:
-        return (
+        base_dir = (
             Path(self.config.output_dir)
             / stage
             / algorithm
-            / f"{slide_path.stem}{self.result_saver().extension}"
         )
+
+        if result_dir_name is not None:
+            base_dir = base_dir / result_dir_name
+
+        return base_dir / f"{slide_path.stem}{self.result_saver().extension}"
 
     def attach_output_collector(self, segmenter):
 

@@ -1,7 +1,8 @@
 import os
 import time
 from typing import Dict
-from histokit.slide.bbox import BBox, BBoxMode
+from histokit.slide.bbox import BBox
+from histokit.slide.mask import SpatialMask
 import numpy as np
 from ...base import Segmenter
 from ...collectors.base import OutputKind
@@ -10,7 +11,6 @@ from .thresholding import get_thr_image
 from ...postprocessing.algorithms.remove_gray_stains import remove_gray_stains
 from ...postprocessing.algorithms.remove_pen import remove_pen
 from ....savers.base import Saver
-from ....slide.mask_utils import rescale_mask, scale_mask_to_bbox, split_regions
 from ....slide.slide import Slide
 from .config import GaMRedConfig
 
@@ -157,16 +157,18 @@ class GaMRedSegmenter(Segmenter):
             basename=basename,
         )
 
-        mask = mask.astype(np.uint8) * 255
-        mask_array, bbox_list = split_regions(mask)
+        # 8. Split mask into regions and scale to save magnification
 
-        for idx, (m, bb) in enumerate(zip(mask_array, bbox_list)):
-            bb = BBox.normalize(bb, mag=self.config.tissdet_mag).scale(mag=self.config.save_mag)
-            m = scale_mask_to_bbox(m, bb)
+        mask = SpatialMask(mask.astype(np.uint8) * 255, mag=self.config.tissdet_mag)
+        regions = mask.split_regions()
 
-            mask_array[idx] = m
-            bbox_list[idx] = bb.numpy(mode=BBoxMode.WH)
+        mask_array = []
+        bbox_list = []
 
+        for r in regions:
+            r = r.scale(target_mag=self.config.save_mag)
+            mask_array.append(r.data)
+            bbox_list.append(r.bbox.numpy())
 
         elapsed = time.perf_counter() - t0
 
@@ -190,7 +192,7 @@ class GaMRedSegmenter(Segmenter):
             "time": elapsed
         }
 
-        # 8. Save results (optional)
+        # 9. Save results (optional)
         if save:
             self.saver.save(
                 os.path.join(self.config.out_dir, "mask_gamred"),

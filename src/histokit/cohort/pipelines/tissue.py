@@ -7,6 +7,7 @@ from ...slide.slide import Slide
 class TissueDetectionPipeline(BaseCohortPipeline):
     stage_name = "tissue_detection"
     result_subdir = "tissue_detection"
+    result_dir_name = "masks"
 
     def output_exists(self, slide_path: Path) -> bool:
         return self.output_path(slide_path).exists()

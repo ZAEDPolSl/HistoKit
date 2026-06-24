@@ -9,6 +9,11 @@ class HDF5Saver(BaseSaver):
     extension = ".h5"
 
     def save(self, out_dir: str, basename:str, result: dict) -> None:
+        """Save a dictionary to an HDF5 file.
+        param out_dir: Directory to save the HDF5 file.
+        param basename: Base name of the HDF5 file (without extension).
+        param result: Dictionary containing the data to save.
+        """
         os.makedirs(out_dir, exist_ok=True)
 
         with h5py.File(os.path.join(out_dir, f"{basename}.h5"), "w") as f:
@@ -16,6 +21,10 @@ class HDF5Saver(BaseSaver):
                 self._write_value(f, key, value)
 
     def load(self, path) -> dict:
+        """Load a dictionary from an HDF5 file.
+        param path: Path to the HDF5 file.
+        return: Dictionary containing the data from the HDF5 file.
+        """
         with h5py.File(os.path.join(path), "r") as f:
             return self._read_value(f)
 
@@ -24,6 +33,10 @@ class HDF5Saver(BaseSaver):
         group: h5py.Group,
         masks: list[np.ndarray],
     ) -> None:
+        """Save a list of masks to an HDF5 group.
+        param group: The HDF5 group to save the masks to.
+        param masks: A list of numpy arrays representing the masks.
+        """
         group.create_dataset("count", data=len(masks))
 
         for i, mask in enumerate(masks):
@@ -38,6 +51,10 @@ class HDF5Saver(BaseSaver):
         group: h5py.Group,
         data: dict,
     ) -> None:
+        """Save a dictionary to an HDF5 group.
+        param group: The HDF5 group to save the dictionary to.
+        param data: The dictionary to save.
+        """
         for key, value in data.items():
             self._write_value(group, key, value)
 
@@ -88,6 +105,12 @@ class HDF5Saver(BaseSaver):
         key: str,
         value,
     ) -> None:
+        
+        """Write a value to an HDF5 group.
+        param group: The HDF5 group to write the value to.
+        param key: The key under which to store the value.
+        param value: The value to store. Can be a dict, list, tuple, numpy array,
+                      string, None, or a scalar (int, float, bool)."""
 
         if key == "mask":
             self._save_masks(

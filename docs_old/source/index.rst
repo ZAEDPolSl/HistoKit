@@ -7,7 +7,7 @@ It provides a comprehensive toolkit for common WSI operations:
 Features
 --------
 - **Tissue detection** – identify tissue regions within slides.
-- **Artifact detection** – detect artifacts using the **GrandQC** model.
+- **Artifact detection** – detect artifacts using the modified **GrandQC** algorithm.
 - **Patch extraction** – divide slides into patches at a specified zoom level and step size.
 - **Staining normalization and augmentation** – standardize H&E images for consistent analysis.
 
