@@ -15,7 +15,7 @@ num_workers: 2
 
 # magnification
 grandqc_mpp: 1.0
-det_mag: 1.0
+det_mag: 10.0
 vis_mag: 2.5
 
 # patches

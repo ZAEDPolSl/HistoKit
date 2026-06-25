@@ -215,7 +215,7 @@ class GrandQCSegmenter(Segmenter):
 
             # 7. Scale the predicted mask and raw mask to the save magnification.            
             pred_mask = SpatialMask(pred_mask, 
-                                    bbox=bbox).scale(target_mag=self.config.save_mag)
+                                    bbox=bbox.scale(target_mag=self.config.det_mag)).scale(target_mag=self.config.save_mag)
             
             # Skip regions that become too small after scaling to the save magnification.
             if pred_mask.bbox.w < 1 or pred_mask.bbox.h < 1:
@@ -231,7 +231,7 @@ class GrandQCSegmenter(Segmenter):
             result["bbox"].append(pred_mask.bbox.numpy())
 
             raw_mask = SpatialMask(raw_mask, 
-                                   bbox=bbox,
+                                   bbox=bbox.scale(target_mag=self.config.det_mag),
                                    kind="prob").scale(target_mag=self.config.save_mag)
 
             if self.config.save_raw_mask:
