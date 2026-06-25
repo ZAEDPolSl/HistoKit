@@ -1,3 +1,4 @@
+import math
 import os
 import time
 import warnings
@@ -79,6 +80,7 @@ class GrandQCSegmenter(Segmenter):
                 "mag_save": self.config.det_mag,
             }
 
+
         result = {
             "basename": basename,
             "method": "GrandQC",
@@ -110,13 +112,15 @@ class GrandQCSegmenter(Segmenter):
 
             # mask loading
             bbox = BBox(bbox, mag=tissue_mask["mag_save"])
-            mask = SpatialMask(data = mask, bbox = bbox)
+            mask = SpatialMask(data = mask, bbox = bbox, kind="label")
 
             region_np = np.array(slide.read_masked_object(
                 mask=mask,
                 mag=self.config.det_mag,
                 pad_value=self.config.pad_value,
             ))
+
+            Image.fromarray(region_np).save(os.path.join(self.config.out_dir, f"region_{idx + 1}.png"))
 
             ds = GridExtractorDataset(
                 region_np,
@@ -154,10 +158,10 @@ class GrandQCSegmenter(Segmenter):
                 for i, pred_single in enumerate(pred):
                     pred_hwc = pred_single.transpose(1, 2, 0)
 
-                    orig_x0 = int(round(batch["x_start"][i].item()))
-                    orig_y0 = int(round(batch["y_start"][i].item()))
-                    orig_x1 = int(round(batch["x_end"][i].item()))
-                    orig_y1 = int(round(batch["y_end"][i].item()))
+                    orig_x0 = int(math.floor(batch["x_start"][i].item()))
+                    orig_y0 = int(math.floor(batch["y_start"][i].item()))
+                    orig_x1 = int(math.ceil(batch["x_end"][i].item()))
+                    orig_y1 = int(math.ceil(batch["y_end"][i].item()))
 
                     dst_x0 = max(0, orig_x0)
                     dst_y0 = max(0, orig_y0)

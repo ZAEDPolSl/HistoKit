@@ -7,7 +7,7 @@ out_dir: ./outputs
 
 # magnification settings
 vis_mag: 2.5
-tissdet_mag: 2.5
+tissdet_mag: 1.0
 
 # tissue detection
 thr_min: 178.5

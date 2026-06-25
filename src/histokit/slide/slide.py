@@ -481,7 +481,6 @@ class Slide:
         if sum(x is not None for x in (level, mag, mpp)) != 1:
             raise ValueError("Provide exactly one of: level, mag, mpp")
 
-
         if mag is not None:
             bbox_scaled = bbox.scale(target_mag=mag)
             region = self._read_region_mag(mag, bbox_scaled)

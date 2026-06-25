@@ -3,50 +3,6 @@ import numpy as np
 import random
 from .base import Transform
 
-class SaltAndPepper(Transform):
-    def __init__(self, amount_range=(0.01, 0.05), prob=1.0):
-        super().__init__(prob)
-        self.amount_range = amount_range
-
-    def apply(self, img: np.ndarray) -> np.ndarray:
-        arr = img.copy()
-        amount = random.uniform(*self.amount_range)
-
-        h, w = arr.shape[:2]
-        num_pixels = int(amount * h * w)
-
-        num_salt = num_pixels // 2
-        num_pepper = num_pixels - num_salt
-
-        ys = np.random.randint(0, h, num_salt)
-        xs = np.random.randint(0, w, num_salt)
-        arr[ys, xs] = 255
-
-        ys = np.random.randint(0, h, num_pepper)
-        xs = np.random.randint(0, w, num_pepper)
-        arr[ys, xs] = 0
-
-        return arr
-
-
-class GaussianNoise(Transform):
-    def __init__(self, mean_range=(0.0, 6.0), std_range=(10.0, 30.0), prob=1.0):
-        super().__init__(prob)
-        self.mean_range = mean_range
-        self.std_range = std_range
-
-    def apply(self, img: np.ndarray) -> np.ndarray:
-        mean = random.uniform(*self.mean_range)
-        std = random.uniform(*self.std_range)
-
-        arr = img.astype(np.float32)
-        noise = np.random.normal(mean, std, arr.shape)
-
-        arr = arr + noise
-        arr = np.clip(arr, 0, 255).astype(np.uint8)
-
-        return arr
-
 
 class ColorJitter(Transform):
     def __init__(

@@ -158,7 +158,6 @@ class GaMRedSegmenter(Segmenter):
         )
 
         # 8. Split mask into regions and scale to save magnification
-
         mask = SpatialMask(mask.astype(np.uint8) * 255, mag=self.config.tissdet_mag)
         regions = mask.split_regions()
 

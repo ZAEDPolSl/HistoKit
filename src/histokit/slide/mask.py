@@ -126,11 +126,11 @@ class SpatialMask:
         SpatialMask
             New mask resized to the target bbox.
         """
-        bbox = bbox.get_bbox_integer()
+        bbox_int = bbox.get_bbox_integer()
 
         data = self._resize_array(
             self.data,
-            size=bbox.size,
+            size=bbox_int.size,
             resample=self._resampling_method(),
         )
 
