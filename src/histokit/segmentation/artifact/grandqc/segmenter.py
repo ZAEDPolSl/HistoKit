@@ -120,8 +120,6 @@ class GrandQCSegmenter(Segmenter):
                 pad_value=self.config.pad_value,
             ))
 
-            Image.fromarray(region_np).save(os.path.join(self.config.out_dir, f"region_{idx + 1}.png"))
-
             ds = GridExtractorDataset(
                 region_np,
                 patch_size=self.config.patch_size,
