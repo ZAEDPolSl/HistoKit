@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, ClassVar
 
-from ...config import BaseSegmentationConfig, CollectorConfig
+from ...config import BaseAlgorithmConfig, CollectorConfig
 from ...collectors.image import (
     MaskCollector,
     ThumbnailCollector,
@@ -19,7 +19,7 @@ from ...postprocessing.step import (
 
 
 @dataclass
-class GaMRedConfig(BaseSegmentationConfig):
+class GaMRedConfig(BaseAlgorithmConfig):
     algorithm_name: ClassVar[str] = "GaMRed"
 
     collector_registry: ClassVar[dict[str, type]] = {

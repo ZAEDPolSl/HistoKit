@@ -2,24 +2,73 @@ from abc import ABC, abstractmethod
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 import time
+
+from histokit.segmentation.config import BaseAlgorithmConfig
 from ...savers.base import Saver
 from ..logger import CohortLogger
 from tqdm import tqdm
 
 class BaseCohortPipeline(ABC):
+    """Base class for cohort-level processing pipelines.
+
+    This class implements common logic for running a processing stage over a
+    collection of whole-slide images. It handles slide collection, output path
+    construction, skipping already processed slides, sequential or parallel
+    execution, and logging of processed slides and errors.
+
+    Subclasses are expected to define the processing logic for a single slide
+    by implementing :meth:`run_one` and :meth:`output_exists`.
+
+    Attributes
+    ----------
+    stage_name : str
+        Name of the processing stage, used in logs and progress bars.
+    result_subdir : str
+        Name of the output subdirectory for this pipeline stage.
+    result_dir_name : str or None, default=None
+        Optional subdirectory inside the stage directory where result files are
+        saved. If ``None``, results are saved directly in the stage directory.
+    config : BaseSegmentationConfig
+        Pipeline configuration object.
+    """
+
     stage_name: str
     result_subdir: str
 
-    def __init__(self, config):
+    def __init__(self, config: BaseAlgorithmConfig):
+        """Initialize the cohort pipeline.
+
+        Parameters
+        ----------
+        config : BaseAlgorithmConfig
+            Pipeline configuration. See `BaseAlgorithmConfig` documentation.
+        """
         self.config = config
 
     def result_saver(self):
+        """Return saver used for writing pipeline results.
+
+        Returns
+        -------
+        Saver
+            Saver instance selected from ``config.saver``. If the configuration
+            does not define a saver, ``"hdf5"`` is used by default.
+        """
         return Saver(getattr(self.config, "saver", "hdf5"))
 
-    def stage_dir(
-        self,
-        algorithm: str | None = None,
-    ) -> Path:
+    def stage_dir(self, algorithm: str | None = None) -> Path:
+        """Return stage output directory.
+
+        Parameters
+        ----------
+        algorithm : str, optional
+            Algorithm name. If omitted, ``config.algorithm`` is used.
+
+        Returns
+        -------
+        pathlib.Path
+            Path to the algorithm-specific stage directory.
+        """
         algorithm = algorithm or self.config.algorithm
 
         return (
@@ -28,10 +77,19 @@ class BaseCohortPipeline(ABC):
             / algorithm
         )
     
-    def result_dir(
-        self,
-        algorithm: str | None = None,
-    ) -> Path:
+    def result_dir(self, algorithm: str | None = None) -> Path:
+        """Return directory where result files are saved.
+
+        Parameters
+        ----------
+        algorithm : str, optional
+            Algorithm name. If omitted, ``config.algorithm`` is used.
+
+        Returns
+        -------
+        pathlib.Path
+            Path to the result directory.
+        """
         stage_dir = self.stage_dir(algorithm=algorithm)
 
         if self.result_dir_name is None:
@@ -39,48 +97,78 @@ class BaseCohortPipeline(ABC):
 
         return stage_dir / self.result_dir_name
 
-    def visualization_dir(
-        self,
-        algorithm: str | None = None,
-    ) -> Path:
+    def visualization_dir(self, algorithm: str | None = None) -> Path:
+        """Return directory where visualization files are saved.
+
+        Parameters
+        ----------
+        algorithm : str, optional
+            Algorithm name. If omitted, ``config.algorithm`` is used.
+
+        Returns
+        -------
+        pathlib.Path
+            Path to the visualization directory.
+        """
         return self.stage_dir(algorithm=algorithm) / "visualizations"
 
-    def output_path(
-        self,
-        slide_path: Path,
-        algorithm: str | None = None,
-    ) -> Path:
+    def output_path(self, slide_path: Path, algorithm: str | None = None) -> Path:
+        """Return output file path for a slide.
+
+        Parameters
+        ----------
+        slide_path : pathlib.Path
+            Path to the input slide.
+        algorithm : str, optional
+            Algorithm name. If omitted, ``config.algorithm`` is used.
+
+        Returns
+        -------
+        pathlib.Path
+            Output path for the slide result.
+        """
         return (
             self.result_dir(algorithm=algorithm)
             / f"{slide_path.stem}{self.result_saver().extension}"
         )
 
-    def result_path(
-        self,
-        slide_path: Path,
-        stage: str,
-        algorithm: str,
-        result_dir_name: str | None = "masks",
-    ) -> Path:
-        base_dir = (
-            Path(self.config.output_dir)
-            / stage
-            / algorithm
-        )
+    def result_path(self, slide_path: Path, stage: str, 
+                    algorithm: str, result_dir_name: str | None = "masks") -> Path:
+        """Return path to a result from another pipeline stage.
+
+        This is useful when one stage depends on the output of a previous
+        stage, for example artifact detection depending on tissue masks.
+
+        Parameters
+        ----------
+        slide_path : pathlib.Path
+            Path to the input slide.
+        stage : str
+            Name of the stage whose result should be loaded.
+        algorithm : str
+            Algorithm name used by that stage.
+        result_dir_name : str or None, default="masks"
+            Optional subdirectory inside the stage directory.
+
+        Returns
+        -------
+        pathlib.Path
+            Path to the requested result file.
+        """
+        base_dir = (Path(self.config.output_dir) / stage / algorithm)
 
         if result_dir_name is not None:
             base_dir = base_dir / result_dir_name
 
         return base_dir / f"{slide_path.stem}{self.result_saver().extension}"
 
-    def attach_output_collector(self, segmenter):
+    def attach_output_collector(self, step_runner) -> object:
 
-        if hasattr(segmenter.config, "build_output_collector"):
-            segmenter.output_collector = segmenter.config.build_output_collector(
-                out_dir=self.visualization_dir()
-            )
+        if hasattr(step_runner.config, "build_output_collector"):
+            step_runner.output_collector = step_runner.config.build_output_collector(
+                out_dir=self.visualization_dir())
 
-        return segmenter
+        return step_runner
 
     def collect_slides(self) -> list[Path]:
         input_dir = Path(self.config.input_dir)

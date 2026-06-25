@@ -1,6 +1,6 @@
 # Contact
 
-TODO: Add contact information, issue tracker, and contribution guidelines.
+E-mail: julia.merta@polsl.pl
 
 ## Issues
 

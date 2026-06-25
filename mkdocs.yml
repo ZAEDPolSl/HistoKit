@@ -12,25 +12,12 @@ theme:
       toggle:
         icon: material/weather-night
         name: Switch to dark mode
-
     - scheme: slate
       primary: black
       accent: deep purple
       toggle:
         icon: material/weather-sunny
         name: Switch to light mode
-
-  features:
-    - navigation.indexes
-    - navigation.sections
-    - navigation.top
-    - navigation.tracking
-    - content.code.copy
-    - search.suggest
-    - search.highlight
-
-
-
   features:
     - navigation.indexes
     - navigation.sections
@@ -45,6 +32,21 @@ plugins:
   - blog:
       blog_dir: news
       post_dir: "{blog}/posts"
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          paths:
+            - src
+          options:
+            docstring_style: numpy
+            members: true
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            separate_signature: true
+            members_order: source
 
 markdown_extensions:
   - admonition
@@ -61,35 +63,26 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-
   - Getting started:
       - Installation: installation.md
-
   - Tutorials:
       - Overview: examples/index.md
-
       - Tissue detection:
           - Overview: examples/tissue_detection/index.md
           - GAMReD: examples/tissue_detection/gamred.md
-
       - Artifact detection:
           - Overview: examples/artifact_detection/index.md
           - GrandQC: examples/artifact_detection/grandqc.md
-
       - Whole-slide processing:
           - WSI loading: examples/whole_slide_processing.md
           - Patch extraction: examples/patch_extraction.md
-
       - Image preprocessing:
           - Stain normalization: examples/stain_normalization.md
           - Augmentation: examples/augmentation.md
-
       - Cohort processing: examples/cohort_processing.md
       - Loading results into MATLAB: examples/matlab_results.md
-
   - News:
       - news/index.md
-
   - Project:
       - Authors: authors.md
       - Publications: publications.md
@@ -97,3 +90,4 @@ nav:
       - License: license.md
       - Citations: citations.md
       - Contact: contact.md
+  - API reference: api.md

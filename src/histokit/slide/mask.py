@@ -6,7 +6,7 @@ from skimage.measure import label, regionprops
 import warnings
 from .bbox import BBox
 
-MaskKind = Literal["label", "prob"]
+MaskKind = Literal["label", "prob", "binary"] 
 
 class SpatialMask:
     """Mask array with spatial metadata.
@@ -23,9 +23,10 @@ class SpatialMask:
         Input mask array. Must be 2D or 3D.
     bbox : BBox, optional
         BBox describing the mask location and coordinate space.
-    kind : {"label", "probability"}, optional
+    kind : {"label", "probability", "binary"}, optional
         Mask type. ``"label"`` should be used for binary or class-label masks.
         ``"probability"`` should be used for confidence maps.
+        ``"binary"`` is deprecated, use ``"label"`` instead.
     mag : float, optional
         Magnification of the mask coordinate space. Used only when ``bbox`` is
         not provided.
@@ -60,9 +61,9 @@ class SpatialMask:
                 f"Expected 2D or 3D mask, got shape {data.shape}."
             )
 
-        if kind not in ("label", "prob"):
+        if kind not in ("label", "prob", "binary"):
             raise ValueError(
-                f"Unknown mask kind: {kind}. Expected 'label' or 'probability'."
+                f"Unknown mask kind: {kind}. Expected 'label', 'probability', or 'binary'."
             )
 
         if sum(x is not None for x in (bbox, mag, mpp)) != 1:
@@ -140,13 +141,7 @@ class SpatialMask:
             kind=self.kind,
         )
 
-    def scale(
-        self,
-        *,
-        factor: float | None = None,
-        target_mag: float | None = None,
-        target_mpp: float | None = None,
-    ) -> "SpatialMask":
+    def scale(self,*,factor: float | None = None, target_mag: float | None = None, target_mpp: float | None = None) -> "SpatialMask":
         """Scale mask and bbox to another coordinate space.
 
         Parameters
@@ -171,10 +166,7 @@ class SpatialMask:
 
         return self.resize_to_bbox(bbox_scaled)
 
-    def split_regions(
-        self,
-        min_area: int | None = None,
-    ) -> list["SpatialMask"]:
+    def split_regions(self, min_area: int | None = None) -> list["SpatialMask"]:
         """Split a 2D label mask into connected regions.
 
         Parameters
@@ -236,11 +228,7 @@ class SpatialMask:
         return regions 
 
     @classmethod
-    def merge_regions(
-        cls,
-        regions: list["SpatialMask"],
-        shape: tuple[int, int],
-    ) -> "SpatialMask":
+    def merge_regions(cls, regions: list["SpatialMask"], shape: tuple[int, int]) -> "SpatialMask":
 
         # check inputs
         if len(shape) != 2:
@@ -304,9 +292,7 @@ class SpatialMask:
         return self.data, self.bbox.numpy_int()
 
     @staticmethod
-    def parts_from_regions(
-        regions: list["SpatialMask"],
-    ) -> tuple[list[np.ndarray], np.ndarray]:
+    def parts_from_regions(regions: list["SpatialMask"]) -> tuple[list[np.ndarray], np.ndarray]:
         """Convert regions to old-style ``masks, bboxes`` representation."""
         masks = [region.data for region in regions]
 
@@ -373,8 +359,6 @@ class SpatialMask:
         self.data = self.data > thr
         return self
 
-
-
     def __repr__(self) -> str:
         return (
             "SpatialMask("
@@ -434,11 +418,7 @@ class SpatialMask:
                 channel_for_pil = channel
 
             resized = np.array(
-                Image.fromarray(channel_for_pil).resize(
-                    size,
-                    resample=resample,
-                )
-            )
+                Image.fromarray(channel_for_pil).resize(size, resample=resample))
 
             return resized.astype(dtype, copy=False)
 

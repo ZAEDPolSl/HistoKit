@@ -14,9 +14,9 @@ class Transform(ABC):
 
     Parameters
     ----------
-    prob : float, optional
+    prob : float, (default=0.5)
         Probability of applying the augmentation. The value should be in the
-        range [0.0, 1.0], (default: 0.5).
+        range [0.0, 1.0].
     """
     def __init__(self, prob=0.5):
         """
@@ -24,8 +24,8 @@ class Transform(ABC):
 
         Parameters
         ----------
-        prob : float, optional
-            Probability of applying the augmentation (default: 0.5).
+        prob : float, default=0.5
+            Probability of applying the augmentation.
         """
         self.prob = prob
 
@@ -85,8 +85,8 @@ class OneOf:
         transforms : list
             List of augmentations to choose from. Each element should be callable,
             for example an instance of a class inheriting from `Transform`.
-        prob : float, optional
-            Probability of applying one of the augmentations (default: 0.5).
+        prob : float, default=0.5
+            Probability of applying one of the augmentations.
         """
         self.transforms = transforms
         self.prob = prob

@@ -105,7 +105,6 @@ class ParallelExtractor:
             for batch in dataloader:
                 if batch is None:
                     continue
-
                 yield batch
 
 

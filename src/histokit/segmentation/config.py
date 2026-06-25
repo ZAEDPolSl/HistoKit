@@ -17,7 +17,7 @@ CollectorConfig = dict[str, Any] | str
 
 
 @dataclass
-class BaseSegmentationConfig:
+class BaseAlgorithmConfig:
     saver: str | None = "hdf5"
     out_dir: str | Path | None = "./outputs"
     save_mag: float | None = 1.0
@@ -104,7 +104,7 @@ class BaseSegmentationConfig:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "BaseSegmentationConfig":
+    def from_dict(cls, data: dict) -> "BaseAlgorithmConfig":
         data = dict(data or {})
         data = cls._preprocess_dict(data)
 

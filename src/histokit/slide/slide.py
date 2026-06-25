@@ -793,7 +793,8 @@ class Slide:
             raise ValueError("Provide exactly one of mag or mpp")
 
         masks = [self.normalize_mask(mask) for mask in masks]
-        full_mask = merge_regions(masks, bboxes, self.get_full_slide_size(mag=mag_bbox, mpp=mpp_bbox))
+
+        full_mask = SpatialMask.merge_regions(masks, bboxes, self.get_full_slide_size(mag=mag_bbox, mpp=mpp_bbox))
 
         slide_size = self.get_full_slide_size(mag=mag, mpp=mpp)
 

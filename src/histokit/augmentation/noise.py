@@ -14,10 +14,10 @@ class GaussianBlur(Transform):
 
     Parameters
     ----------
-    sigma_range : tuple of float, optional
-        Range from which the Gaussian sigma value is sampled (default: (0.3, 2.0)).
-    prob : float, optional
-        Probability of applying the augmentation (default: 1.0).
+    sigma_range : tuple of float, default: (0.3, 2.0)
+        Range from which the Gaussian sigma value is sampled.
+    prob : float, (default: 1.0)
+        Probability of applying the augmentation.
     """
     def __init__(self, sigma_range=(0.3, 2.0), prob=1.0):
         """
@@ -25,9 +25,9 @@ class GaussianBlur(Transform):
 
         Parameters
         ----------
-        sigma_range : tuple of float, optional
+        sigma_range : tuple of float, default: (0.3, 2.0)
             Minimum and maximum sigma values used for Gaussian blur.
-        prob : float, optional
+        prob : float, (default: 1.0)
             Probability of applying the augmentation.
         """
         super().__init__(prob)
@@ -61,10 +61,10 @@ class MedianBlur(Transform):
 
     Parameters
     ----------
-    size_range : tuple of int, optional
-        Range from which the median blur kernel size is sampled (default: (3, 7)).
-    prob : float, optional
-        Probability of applying the transformation (default: 1.0).
+    size_range : tuple of int, default: (3, 7)
+        Range from which the median blur kernel size is sampled.
+    prob : float, (default: 1.0)
+        Probability of applying the transformation.
     """
     def __init__(self, size_range=(3, 7), prob=1.0):
         """
@@ -72,9 +72,9 @@ class MedianBlur(Transform):
 
         Parameters
         ----------
-        size_range : tuple of int, optional
+        size_range : tuple of int, default: (3, 7)
             Minimum and maximum kernel size values.
-        prob : float, optional
+        prob : float, (default: 1.0)
             Probability of applying the transform.
         """
         super().__init__(prob)
@@ -113,27 +113,27 @@ class MotionBlur(Transform):
 
     Parameters
     ----------
-    degree_range : tuple of int, optional
+    degree_range : tuple of int, default: (5, 15)
         Range from which the motion blur kernel size is sampled.
-        Higher values produce stronger blur, (default: (5, 15)).
-    angle_range : tuple of float, optional
-        Range of rotation angles in degrees used for the motion blur direction, default: (0, 360).
-    prob : float, optional
-        Probability of applying the transformation (default: 1.0).
+        Higher values produce stronger blur.
+    angle_range : tuple of float, default: (0, 360)
+        Range of rotation angles in degrees used for the motion blur direction.
+    prob : float, default: 1.0
+        Probability of applying the transformation.
     """
     def __init__(
         self,
         degree_range=(5, 15),
         angle_range=(0, 360),
-        prob=1.0,
-    ):
+        prob=1.0):
+
         super().__init__(prob)
         self.degree_range = degree_range
         self.angle_range = angle_range
 
     def apply(self, img: np.ndarray) -> np.ndarray:
         """
-        Initialize the motion blur transform.
+        Apply motion blur to the input image.
 
         Parameters
         ----------
@@ -176,13 +176,11 @@ class JPEGCompression(Transform):
 
     Parameters
     ----------
-    quality_range : tuple of int, optional
+    quality_range : tuple of int, default: (10, 50)
         Range from which the JPEG quality value is sampled.
         Values should usually be between 0 and 100.
-        Default is (10, 50).
-    prob : float, optional
+    prob : float, default: 1.0
         Probability of applying the transformation.
-        Default is 1.0.
     """
     def __init__(
         self,
@@ -193,6 +191,16 @@ class JPEGCompression(Transform):
         self.quality_range = quality_range
 
     def apply(self, img: np.ndarray) -> np.ndarray:
+        """
+        Apply JPEG compression to the input image.
+
+        Parameters
+        ----------
+        quality_range : tuple of int, default: (10, 50)
+            Range from which the JPEG quality value is sampled.
+        prob : float, default: 1.0
+            Probability of applying the transform.
+        """
         quality = random.randint(*self.quality_range)
 
         success, encoded = cv2.imencode(
@@ -216,11 +224,43 @@ class JPEGCompression(Transform):
     
 
 class SaltAndPepper(Transform):
+    """Randomly add salt-and-pepper noise to an image.
+
+    This transform randomly replaces a fraction of image pixels with either
+    white values, called salt, or black values, called pepper.
+
+    Parameters
+    ----------
+    amount_range : tuple[float, float], default=(0.01, 0.05)
+        Range used to sample the fraction of pixels affected by noise.
+        The sampled value is multiplied by the image area ``H * W`` to compute
+        the number of noisy pixels.
+    prob : float, default=1.0
+        Probability of applying the transform.
+
+    Notes
+    -----
+    The input image is expected to have pixel values in ``[0, 255]``.
+    The returned image has the same shape and dtype as the input image.
+    """
     def __init__(self, amount_range=(0.01, 0.05), prob=1.0):
         super().__init__(prob)
         self.amount_range = amount_range
 
     def apply(self, img: np.ndarray) -> np.ndarray:
+        """Apply salt-and-pepper noise to an image.
+
+        Parameters
+        ----------
+        img : np.ndarray
+            Input image with shape ``(H, W)`` or ``(H, W, C)``.
+
+        Returns
+        -------
+        np.ndarray
+            Image with randomly selected pixels replaced by 0 or 255. The shape
+            and dtype are the same as in ``img``.
+        """
         arr = img.copy()
         amount = random.uniform(*self.amount_range)
 
@@ -242,12 +282,48 @@ class SaltAndPepper(Transform):
 
 
 class GaussianNoise(Transform):
+    """Add random Gaussian noise to an image.
+
+    This transform samples a Gaussian noise distribution with random mean and
+    standard deviation, adds the noise to the input image, and clips the result
+    to the valid image intensity range ``[0, 255]``.
+
+    Parameters
+    ----------
+    mean_range : tuple[float, float], default=(0.0, 6.0)
+        Range used to sample the Gaussian noise mean. The value is sampled as
+        ``random.uniform(*mean_range)``.
+    std_range : tuple[float, float], default=(10.0, 30.0)
+        Range used to sample the Gaussian noise standard deviation. The value is
+        sampled as ``random.uniform(*std_range)``.
+    prob : float, default=1.0
+        Probability of applying the transform.
+
+    Notes
+    -----
+    The input image is expected to have pixel values in ``[0, 255]``.
+    The returned image has dtype ``np.uint8``.
+    """
     def __init__(self, mean_range=(0.0, 6.0), std_range=(10.0, 30.0), prob=1.0):
         super().__init__(prob)
         self.mean_range = mean_range
         self.std_range = std_range
 
     def apply(self, img: np.ndarray) -> np.ndarray:
+        """Apply Gaussian noise to an image.
+
+        Parameters
+        ----------
+        img : np.ndarray
+            Input image with shape ``(H, W)`` or ``(H, W, C)`` and pixel values
+            in ``[0, 255]``.
+
+        Returns
+        -------
+        np.ndarray
+            Image with added Gaussian noise. The output has the same shape as
+            ``img`` and dtype ``np.uint8``.
+        """
         mean = random.uniform(*self.mean_range)
         std = random.uniform(*self.std_range)
 

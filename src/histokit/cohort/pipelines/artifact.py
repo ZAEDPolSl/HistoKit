@@ -36,7 +36,7 @@ class ArtifactDetectionPipeline(BaseCohortPipeline):
             algorithm=tissue_algorithm,
         )
 
-    def load_tissue_mask(self, slide_path: Path):
+    def load_tissue_mask(self, slide_path: Path) -> dict | None:
         path = self.tissue_mask_path(slide_path)
 
         if path is None or not path.exists():
@@ -44,7 +44,7 @@ class ArtifactDetectionPipeline(BaseCohortPipeline):
 
         return self.result_saver().load(path)
 
-    def run_one(self, slide_path: Path):
+    def run_one(self, slide_path: Path) -> dict:
         slide = Slide(slide_path)
         basename = slide_path.stem
 

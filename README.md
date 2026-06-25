@@ -34,9 +34,10 @@ pip install openslide-bin
 ```
 
 If everything has been installed correctly, now it is possible to use functions from the HistoKit package after extracting files from a .zip archive.
-As a local pip package
 
-It is also possible to install the package from .zip archive with pip. To do that repeat the steps described in the previous section, but now you don’t need to extract the files. You just have to install histo_kit from your .zip file with the following command:
+### As a local pip package
+
+It is also possible to install the package from .zip archive with pip. To do that repeat the steps described in the previous section, but now you don’t need to extract the files. You just have to install HistoKit from your .zip file with the following command:
 
 ```bash
 pip install {path-to-histokit-archive}.zip

@@ -19,7 +19,7 @@ det_mag: 10.0
 vis_mag: 2.5
 
 # patches
-patch_size_model: 512
+patch_size_model: 512 
 patch_size: 512
 overlap: 0.9
 grid_offset: 0.5
