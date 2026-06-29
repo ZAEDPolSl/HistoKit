@@ -1,11 +1,11 @@
 # cohort.yaml
 
 slides:
-  input_dir: C:/Repos/Data/Compass/svs/
+  input_dir: C:/Repos/Data/Compass/svs_test/
   file_csv: null
   pattern: "*.svs"
 
-output_dir: C:/Repos/Data/Compass/Results/
+output_dir: C:/Repos/Data/Compass/Results_test/
 saver: hdf5
 
 logging:

@@ -1,0 +1,14 @@
+artifact_detection:
+  enabled: true
+
+  cases:
+    - name: constant
+      params:
+        blending_mode: [constant]
+        overlap: [0.25, 0.5, 0.75, 0.9]
+
+    - name: gaussian
+      params:
+        blending_mode: [gaussian]
+        overlap: [0.25, 0.5, 0.75, 0.9]
+        blending_sigma: [0.5, 1.0, 1.5, 2.0]

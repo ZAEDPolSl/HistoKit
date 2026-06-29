@@ -25,14 +25,14 @@ overlap: 0.9
 grid_offset: 0.5
 pad_value: 255
 
+# blending
+blending_mode: constant
+blending_sigma: 1.25
+
 # network
 encoder: timm-efficientnet-b0
 encoder_weights: imagenet
 classes: 8
-
-# blending
-blending_mode: constant
-blending_sigma: 1.25
 
 # outputs
 save_confidence_maps: true

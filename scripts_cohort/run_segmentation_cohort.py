@@ -80,16 +80,27 @@ def parse_args():
         help="Path to the cohort YAML configuration file.",
     )
 
+    parser.add_argument(
+        "-g",
+        "--grid-config",
+        type=Path,
+        required=False,
+        metavar="PATH",
+        help="Path to the grid search YAML configuration file.",
+    )
+
     return parser.parse_args()
 
 
 def main():
     args = parse_args()
-
     config = CohortConfig.from_yaml(args.config)
-
     runner = CohortRunner(config)
-    runner.run()
+
+    if args.grid_config is not None:
+        runner.run_grid_search(args.grid_config)
+    else:
+      runner.run()
 
 
 if __name__ == "__main__":
