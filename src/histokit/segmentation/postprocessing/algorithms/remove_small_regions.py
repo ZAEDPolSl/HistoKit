@@ -52,5 +52,5 @@ def remove_small_regions(mask, thr_area=None):
         else:
             thr_area = min(areas[idx == 1]) - 1
 
-    mask_res = morphology.remove_small_objects(mask.astype(bool), min_size=thr_area, connectivity=2)
+    mask_res = morphology.remove_small_objects(mask.astype(bool), max_size=thr_area, connectivity=2)
     return mask_res
