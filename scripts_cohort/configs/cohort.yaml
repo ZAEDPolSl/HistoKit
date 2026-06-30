@@ -5,7 +5,7 @@ slides:
   file_csv: null
   pattern: "*.svs"
 
-output_dir: C:/Repos/Data/Compass/Results_test/
+output_dir: C:/Repos/Data/Compass/Results_test_10x/
 saver: hdf5
 
 logging:
@@ -29,4 +29,4 @@ stages:
     parallel_workers: 1
     overwrite: false
     tissue_source:
-      algorithm: gamred
+      dir: C:/Repos/Data/Compass/Results_test_10x/tissue_detection/gamred/masks/

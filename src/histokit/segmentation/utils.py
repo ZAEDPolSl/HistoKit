@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def gaussian_window(h, w, sigma=None):
+def gaussian_window(h, w, sigma_factor=None):
     """
     Create a 2D Gaussian weighting window with values normalized to [0, 1].
 
@@ -15,8 +15,8 @@ def gaussian_window(h, w, sigma=None):
         Height of the window.
     w : int
         Width of the window.
-    sigma : float, optional
-        Standard deviation controlling the spread of the Gaussian.
+    sigma_factor : float, optional
+        Factor controlling the spread of the Gaussian.
         If ``None`` (default), the value is set to ``0.5 * max(h, w)``.
 
     Returns
@@ -38,8 +38,11 @@ def gaussian_window(h, w, sigma=None):
     >>> win.max()
     1.0
     """
-    if sigma is None:
+    if sigma_factor is None:
         sigma = 0.5 * max(h, w)
+    else:
+        sigma = sigma_factor * max(h, w)
+
 
     xv = np.linspace(-1, 1, w)
     yv = np.linspace(-1, 1, h)

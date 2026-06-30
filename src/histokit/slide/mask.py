@@ -237,6 +237,7 @@ class SpatialMask:
         first = regions[0]
         output_dtype = first.data.dtype
         output_kind = first.kind 
+        out_h, out_w = shape
 
         if first.data.ndim == 2:
             out_shape = shape
@@ -255,16 +256,29 @@ class SpatialMask:
             bbox = region.bbox.get_bbox_integer()
 
             x0, y0, x1, y1 = bbox.xyxy_int
-            roi = merged[y0:y1, x0:x1]
+
+            # there can be some offset due to rounding
+            dst_x0 = max(0, x0)
+            dst_y0 = max(0, y0)
+            dst_x1 = min(out_w, x1)
+            dst_y1 = min(out_h, y1)
+
+            src_x0 = dst_x0 - x0
+            src_y0 = dst_y0 - y0
+            src_x1 = src_x0 + (dst_x1 - dst_x0)
+            src_y1 = src_y0 + (dst_y1 - dst_y0)
+
+            roi = merged[dst_y0:dst_y1, dst_x0:dst_x1]
+            src = region.data[src_y0:src_y1, src_x0:src_x1]
 
             # add region to the output mask
             if region.data.ndim == 2:
-                idx = region.data != 0
-                roi[idx] = region.data[idx]
+                idx = src != 0
+                roi[idx] = src[idx]
 
             elif region.data.ndim == 3:
-                idx = np.any(region.data != 0, axis=2)
-                roi[idx, :] = region.data[idx, :]
+                idx = np.any(src != 0, axis=2)
+                roi[idx, :] = src[idx, :]
 
         # full bbox for the output mask
         output_bbox = BBox(
@@ -309,41 +323,15 @@ class SpatialMask:
         return masks, bboxes
     
     
-    def binarize(self, keep: int | tuple[int, ...] = 1) -> "SpatialMask":
-        
-        if self.data.ndim != 2:
-            raise ValueError(
-                f"mask must be 2-dimensional, got shape {self.data.shape}"
-            )
+    def binarize(self, keep: int | tuple[int, ...] = (1, 255)) -> "SpatialMask":
 
-        if self.data.dtype == bool:
-            return self
+        if self.data.ndim != 2:
+            raise ValueError(f"mask must be 2-dimensional, got shape {self.data.shape}" )
 
         if not isinstance(keep, tuple):
             keep = (keep,)
 
-        values = np.unique(self.data)
-
-        valid_binary = np.all(np.isin(values, [0, 1]))
-        valid_binary_uint8 = (
-            self.data.dtype == np.uint8
-            and np.all(np.isin(values, [0, 255]))
-        )
-
-        if not (valid_binary or valid_binary_uint8):
-            warnings.warn(
-                "mask is not bool, binary (0/1), or binary uint8 (0/255). "
-                f"Found values: {values.tolist()}. "
-                f"The mask will be converted to binary: values in {keep} "
-                "will remain foreground, all other values will be set to background.",
-                UserWarning,
-                stacklevel=2,
-            )
-
-            self.data = np.isin(self.data, keep)
-            return self
-
-        self.data = self.data > 0
+        self.data = np.isin(self.data, keep)
         return self
     
     def threshold(self, thr: float = 0.5) -> "SpatialMask":

@@ -89,19 +89,15 @@ class CohortRunner:
             print(f"Input directory: {self.config.input_dir}")
             print(f"Output directory: {self.config.output_dir}")
 
-            tissue_pipeline = TissueDetectionPipeline(
-                self.config.tissue_detection
-            )
+            tissue_pipeline = TissueDetectionPipeline(self.config.tissue_detection)
             tissue_pipeline.run()
 
         if self.config.artifact_detection is not None:
             artifact_grid = param_grid.get("artifact_detection", {})
-
             artifact_stage_config = deepcopy(self.config.artifact_detection)
 
-            base_grandqc_config_path = Path(artifact_stage_config.config_path)
 
-            with open(base_grandqc_config_path, "r", encoding="utf-8") as f:
+            with open(Path(artifact_stage_config.config_path), "r", encoding="utf-8") as f:
                 base_grandqc_config = yaml.safe_load(f)
 
             for case_name, params in self.iter_grid_cases(artifact_grid):
@@ -119,8 +115,6 @@ class CohortRunner:
                 output_dir = (
                     Path(self.config.output_dir)
                     / "grid_search"
-                    / "artifact_detection"
-                    / case_name
                     / run_name
                 )   
 

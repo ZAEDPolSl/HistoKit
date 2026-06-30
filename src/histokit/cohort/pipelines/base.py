@@ -132,35 +132,8 @@ class BaseCohortPipeline(ABC):
             / f"{slide_path.stem}{self.result_saver().extension}"
         )
 
-    def result_path(self, slide_path: Path, stage: str, 
-                    algorithm: str, result_dir_name: str | None = "masks") -> Path:
-        """Return path to a result from another pipeline stage.
-
-        This is useful when one stage depends on the output of a previous
-        stage, for example artifact detection depending on tissue masks.
-
-        Parameters
-        ----------
-        slide_path : pathlib.Path
-            Path to the input slide.
-        stage : str
-            Name of the stage whose result should be loaded.
-        algorithm : str
-            Algorithm name used by that stage.
-        result_dir_name : str or None, default="masks"
-            Optional subdirectory inside the stage directory.
-
-        Returns
-        -------
-        pathlib.Path
-            Path to the requested result file.
-        """
-        base_dir = (Path(self.config.output_dir) / stage / algorithm)
-
-        if result_dir_name is not None:
-            base_dir = base_dir / result_dir_name
-
-        return base_dir / f"{slide_path.stem}{self.result_saver().extension}"
+    def result_path(self, mask_dir: Path, slide_path: Path) -> Path:
+        return Path(mask_dir) / f"{slide_path.stem}{self.result_saver().extension}"
 
     def attach_output_collector(self, step_runner) -> object:
 

@@ -20,20 +20,19 @@ class ArtifactDetectionPipeline(BaseCohortPipeline):
             return None
 
         if isinstance(tissue_source, dict):
-            return tissue_source.get("algorithm")
+            return tissue_source.get("dir")
 
-        return getattr(tissue_source, "algorithm", None)
+        return getattr(tissue_source, "dir", None)
 
     def tissue_mask_path(self, slide_path: Path) -> Path | None:
-        tissue_algorithm = self.get_tissue_source_algorithm()
+        mask_dir = self.get_tissue_source_algorithm()
 
-        if tissue_algorithm is None:
+        if mask_dir is None:
             return None
 
         return self.result_path(
-            slide_path=slide_path,
-            stage="tissue_detection",
-            algorithm=tissue_algorithm,
+            mask_dir=mask_dir,
+            slide_path=slide_path
         )
 
     def load_tissue_mask(self, slide_path: Path) -> dict | None:

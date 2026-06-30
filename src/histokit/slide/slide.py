@@ -734,7 +734,6 @@ class Slide:
         pad_value: tuple[int, int, int] = (255, 255, 255),
     ) -> Image.Image:
 
-
         if not isinstance(mask, SpatialMask):
                 raise TypeError("mask must be a SpatialMask.")
 
@@ -753,7 +752,7 @@ class Slide:
             color_mode=color_mode,
         )
 
-        mask_out.binarize()
+        mask_out = mask_out.binarize()
 
         if mask_out.data.shape[:2] != region.size[::-1]:
             raise ValueError(

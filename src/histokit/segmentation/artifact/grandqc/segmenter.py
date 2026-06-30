@@ -53,7 +53,7 @@ class GrandQCSegmenter(Segmenter):
         self.weight_patch = get_weights(self.config.blending_mode,
                                    self.config.patch_size,
                                    self.config.patch_size,
-                                   sigma=self.config.blending_sigma)
+                                   sigma_factor=self.config.blending_sigma)
     
 
     def segment(self, 
@@ -70,7 +70,7 @@ class GrandQCSegmenter(Segmenter):
 
         if tissue_mask is None:
             # When there is no tissue mask provided, patches will be 
-            # extracted from the entire slide. 
+            # extracted from the entire slide.
 
             w, h = slide.get_size_at_mag(self.config.det_mag)
 
@@ -113,6 +113,7 @@ class GrandQCSegmenter(Segmenter):
             # mask loading
             bbox = BBox(bbox, mag=tissue_mask["mag_save"])
             mask = SpatialMask(data = mask, bbox = bbox, kind="label")
+
 
             region_np = np.array(slide.read_masked_object(
                 mask=mask,
@@ -206,14 +207,12 @@ class GrandQCSegmenter(Segmenter):
                 where=weights[:, :, None] != 0,
             )
 
-            # 5. Get the predicted mask by taking the argmax across classes
-            pred_mask = np.argmax(raw_mask, axis=2).astype(np.int8)
-
-            # 6. Set background pixels (pad_value) to class 0 in the predicted mask
+            # 5. Set background pixels (pad_value) to class 0 in the predicted mask
             bg = np.all(region_np == self.config.pad_value, axis=2)
-
             raw_mask[:, :, 0] = bg.astype(raw_mask.dtype)
-            pred_mask[bg] = 0
+
+            # 6. Get the predicted mask by taking the argmax across classes
+            pred_mask = np.argmax(raw_mask, axis=2).astype(np.int8)
 
             # 7. Scale the predicted mask and raw mask to the save magnification.            
             pred_mask = SpatialMask(pred_mask, 
@@ -238,8 +237,6 @@ class GrandQCSegmenter(Segmenter):
 
             if self.config.save_raw_mask:
                 result["raw_mask"].append(raw_mask.data)
-
-            
 
             # * Free memory
             del region_np

@@ -23,7 +23,7 @@ class LoggingConfig:
 
 @dataclass
 class SourceConfig:
-    algorithm: str
+    dir: str
 
 
 @dataclass
@@ -222,15 +222,15 @@ class CohortConfig:
         if isinstance(data, SourceConfig):
             return data
 
-        algorithm = data.get("algorithm")
+        dir = data.get("dir")
 
-        if algorithm is None:
+        if dir is None:
             raise ValueError(
-                f"Source config must contain 'algorithm'. Got: {data}"
+                f"Source config must contain 'dir'. Got: {data}"
             )
 
         return SourceConfig(
-            algorithm=algorithm,
+            dir=dir,
         )
     
     def _resolve_paths(self, base_dir: Path) -> None:
