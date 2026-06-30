@@ -89,7 +89,7 @@ def remove_pen(
 
     # Perform morphological operations
     if np.sum(mask):
-        mask = remove_small_objects(mask, min_size=disk_radius * 10)
+        mask = remove_small_objects(mask, max_size=disk_radius * 10)
         mask = closing(mask, strel)
         mask = opening(mask, strel)
         mask = binary_fill_holes(mask)
