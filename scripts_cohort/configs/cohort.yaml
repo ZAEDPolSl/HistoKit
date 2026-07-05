@@ -1,13 +1,11 @@
 # cohort.yaml
 
 slides:
-  input_dir: C:/Repos/Data/Compass/svs_test/
+  input_dir: C:/Repos/Data/GrandQC/png/
   file_csv: null
-  pattern: "*.svs"
+  pattern: "*.png"
   
-
-
-output_dir: C:/Repos/Data/Compass/Results_test_10x/
+output_dir: C:/Repos/Data/GrandQC/res/
 saver: hdf5
 
 logging:
@@ -18,7 +16,7 @@ logging:
 
 stages:
   tissue_detection:
-    enabled: true
+    enabled: false
     mag_l0: 10.0
     algorithm: gamred
     config_path: ./gamred.yaml
@@ -33,4 +31,4 @@ stages:
     parallel_workers: 1
     overwrite: false
     tissue_source:
-      dir: C:/Repos/Data/Compass/Results_test_10x/tissue_detection/gamred/masks/
+      dir: None

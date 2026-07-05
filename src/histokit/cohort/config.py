@@ -202,6 +202,7 @@ class CohortConfig:
             stage_name=stage_name,
             enabled=enabled,
             algorithm=data.get("algorithm"),
+            mag_l0=data.get("mag_l0", None),
             config_path=data.get("config_path"),
             parallel_workers=parallel_workers,
             overwrite=data.get("overwrite", False),

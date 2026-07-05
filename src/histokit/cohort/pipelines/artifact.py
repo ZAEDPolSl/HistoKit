@@ -44,6 +44,7 @@ class ArtifactDetectionPipeline(BaseCohortPipeline):
         return self.result_saver().load(path)
 
     def run_one(self, slide_path: Path) -> dict:
+        print(self.config)
         slide =Slide(slide_path, mag=self.config.mag_l0)
         basename = slide_path.stem
 

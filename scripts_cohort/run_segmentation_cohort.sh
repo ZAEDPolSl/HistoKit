@@ -1,5 +1,6 @@
 # for single run
-python run_cohort.py --config ./configs/cohort.yaml
+python run_segmentation_cohort.py --config ./configs/cohort.yaml
 
 # with grid search
-python run_cohort.py --config ./configs/cohort.yaml --grid-config ./configs/grandqc_grid.yaml
+cd scripts_cohort
+python run_segmentation_cohort.py --config ./configs/cohort.yaml --grid-config ./configs/grandqc_grid.yaml
