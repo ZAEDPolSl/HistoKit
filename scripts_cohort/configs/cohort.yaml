@@ -4,7 +4,7 @@ slides:
   input_dir: C:/Repos/Data/Compass/svs_test/
   file_csv: null
   pattern: "*.svs"
-  mag_l0: 10.0
+  
 
 
 output_dir: C:/Repos/Data/Compass/Results_test_10x/
@@ -19,6 +19,7 @@ logging:
 stages:
   tissue_detection:
     enabled: true
+    mag_l0: 10.0
     algorithm: gamred
     config_path: ./gamred.yaml
     parallel_workers: 1
@@ -27,6 +28,7 @@ stages:
   artifact_detection:
     enabled: true
     algorithm: grandqc
+    mag_l0: 10.0
     config_path: ./grandqc.yaml
     parallel_workers: 1
     overwrite: false

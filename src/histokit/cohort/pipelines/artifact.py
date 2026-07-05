@@ -44,7 +44,7 @@ class ArtifactDetectionPipeline(BaseCohortPipeline):
         return self.result_saver().load(path)
 
     def run_one(self, slide_path: Path) -> dict:
-        slide =Slide(slide_path, mag=self.config.slides.mag_l0)
+        slide =Slide(slide_path, mag=self.config.mag_l0)
         basename = slide_path.stem
 
         tissue_mask = self.load_tissue_mask(slide_path)
