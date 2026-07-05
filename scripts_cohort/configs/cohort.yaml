@@ -4,6 +4,8 @@ slides:
   input_dir: C:/Repos/Data/Compass/svs_test/
   file_csv: null
   pattern: "*.svs"
+  mag_l0: 10.0
+
 
 output_dir: C:/Repos/Data/Compass/Results_test_10x/
 saver: hdf5

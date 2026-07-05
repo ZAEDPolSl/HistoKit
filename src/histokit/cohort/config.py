@@ -11,6 +11,8 @@ class SlidesConfig:
     input_dir: str
     file_list: str | list[str] | None = None
     pattern: str = "*.svs"
+    mag_l0: float | None = None
+
 
 
 @dataclass
@@ -148,6 +150,7 @@ class CohortConfig:
             input_dir=data.get("input_dir", "./data/slides"),
             file_list=data.get("file_list"),
             pattern=data.get("pattern", "*.svs"),
+            mag_l0=data.get("mag_l0"),
         )
 
     @staticmethod

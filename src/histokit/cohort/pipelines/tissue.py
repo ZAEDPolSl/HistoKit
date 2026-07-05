@@ -13,7 +13,7 @@ class TissueDetectionPipeline(BaseCohortPipeline):
         return self.output_path(slide_path).exists()
 
     def run_one(self, slide_path: Path):
-        slide = Slide(slide_path)
+        slide = Slide(slide_path, mag_l0=self.config.slides.mag_l0)
         basename = slide_path.stem
 
         segmenter = build_segmenter(
