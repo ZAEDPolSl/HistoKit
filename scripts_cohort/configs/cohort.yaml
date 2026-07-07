@@ -1,11 +1,11 @@
 # cohort.yaml
 
 slides:
-  input_dir: C:/Repos/Data/GrandQC/png/
+  input_dir: C:/Repos/Data/Compass/svs/
   file_csv: null
-  pattern: "*.png"
+  pattern: "*.svs"
   
-output_dir: C:/Repos/Data/GrandQC/res/
+output_dir: C:/Repos/Data/Compass/results/
 saver: hdf5
 
 logging:
@@ -16,19 +16,9 @@ logging:
 
 stages:
   tissue_detection:
-    enabled: false
-    mag_l0: 10.0
-    algorithm: gamred
-    config_path: ./gamred.yaml
-    parallel_workers: 1
-    overwrite: false
-
-  artifact_detection:
     enabled: true
-    algorithm: grandqc
     mag_l0: 10.0
-    config_path: ./grandqc.yaml
+    algorithm: hethr
+    config_path: ./hethr.yaml
     parallel_workers: 1
     overwrite: false
-    tissue_source:
-      dir: None
