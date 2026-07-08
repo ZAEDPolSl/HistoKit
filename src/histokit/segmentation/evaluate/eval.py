@@ -35,6 +35,10 @@ def fdr(tp, fp):
 def calc_metrics(tp, tn, fp, fn):
     if tp + tn + fp + fn == 0:
         return {
+            "TP": tp,
+            "TN": tn,
+            "FP": fp,
+            "FN": fn,
             "DICE": None,
             "JACCARD": None,
             "PRECISION": None,
