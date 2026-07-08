@@ -1,43 +1,57 @@
 import numpy as np
 
-def vis_segmentation_results_binary(mask_gt, mask_pred) -> np.ndarray:
-    tp = mask_gt & mask_pred
-    fp = ~mask_gt & mask_pred
-    fn = mask_gt & ~mask_pred
-    tn = ~mask_gt & ~mask_pred
-    res = np.zeros((*mask_gt.shape, 3), dtype=np.uint8)
+def vis_segmentation_results_binary(
+    mask_gt,
+    mask_pred,
+    positive_class=[128, 128, 128]) -> np.ndarray:
 
-    res[tp] = [0, 255, 0]  # True Positive: Green
-    res[fp] = [255, 0, 0]  # False Positive: Red
-    res[fn] = [0, 0, 255]  # False Negative: Blue   
-    res[tn] = [0, 0, 0]  # True Negative: Black
+    positive_class = np.array(positive_class)
 
+    gt_positive = np.all(mask_gt == positive_class, axis=-1)
+    pred_positive = np.all(mask_pred == positive_class, axis=-1)
+
+    tp = gt_positive & pred_positive
+    fp = ~gt_positive & pred_positive
+    fn = gt_positive & ~pred_positive
+    tn = ~gt_positive & ~pred_positive
+
+    res = np.zeros_like(mask_gt, dtype=np.uint8)
+
+    res[tp] = [0, 255, 0]    # True Positive: Green
+    res[fp] = [255, 0, 0]    # False Positive: Red
+    res[fn] = [0, 0, 255]    # False Negative: Blue
+    res[tn] = [0, 0, 0]      # True Negative: Black
     return res
 
-def vis_segmentation_results_multiclass(mask_gt, mask_pred, tissue_class = 1, bg_class = 0) -> np.ndarray:
+def vis_segmentation_results_multiclass(mask_gt, mask_pred, tissue_class=[128, 128, 128], bg_class=[0, 0, 0]) -> np.ndarray:
+    tissue_class = np.array(tissue_class)
+    bg_class = np.array(bg_class)
 
-    # correctly assingned tissue - gray
-    tp_tissue = (mask_gt == tissue_class) & (mask_pred == tissue_class)
+    gt_tissue = np.all(mask_gt == tissue_class, axis=-1)
+    pred_tissue = np.all(mask_pred == tissue_class, axis=-1)
 
-    # correctly assingned bg - black
-    tp_bg = (mask_gt == bg_class) & (mask_pred == bg_class)
+    gt_bg = np.all(mask_gt == bg_class, axis=-1)
+    pred_bg = np.all(mask_pred == bg_class, axis=-1)
 
-    # correctly assingned artifact - green
-    tp_artifact = (mask_gt == mask_pred) & (mask_gt != tissue_class) & (mask_gt != bg_class)
+    same_class = np.all(mask_gt == mask_pred, axis=-1)
 
-    # missclassified artifact - yellow
-    miss_artifact = (mask_gt != mask_pred) & (mask_gt != tissue_class)
+    gt_artifact = ~gt_tissue & ~gt_bg
+    pred_artifact = ~pred_tissue & ~pred_bg
 
-    # incorrectly assigned tissue (where was bg or artifact but predicted as tissue) - red
-    fp_tissue = (mask_gt != tissue_class) & (mask_pred == tissue_class)
+    tp_tissue = gt_tissue & pred_tissue
+    tp_bg = gt_bg & pred_bg
+    tp_artifact = same_class & gt_artifact & pred_artifact
 
-    # Create an RGB image to visualize the results
-    res = np.zeros((*mask_gt.shape, 3), dtype=np.uint8)
+    miss_artifact = gt_artifact & pred_artifact & ~same_class
 
-    res[tp_tissue] = [128, 128, 128]  
-    res[tp_bg] = [0, 0, 0]  
-    res[tp_artifact] = [0, 255, 0]  
-    res[miss_artifact] = [255, 255, 0]  
-    res[fp_tissue] = [255, 0, 0] 
+    fp_tissue = ~gt_tissue & pred_tissue
+
+    res = np.zeros_like(mask_gt, dtype=np.uint8)
+
+    res[tp_tissue] = [128, 128, 128]   # correctly assigned tissue
+    res[tp_bg] = [0, 0, 0]             # correctly assigned background
+    res[tp_artifact] = [0, 255, 0]     # correctly assigned artifact
+    res[miss_artifact] = [255, 255, 0] # misclassified artifact
+    res[fp_tissue] = [255, 0, 0]       # incorrectly assigned tissue
 
     return res

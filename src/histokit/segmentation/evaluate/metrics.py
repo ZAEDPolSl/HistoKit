@@ -56,17 +56,40 @@ def calc_metrics(tp, tn, fp, fn):
         "FDR": fdr(tp, fp),
     }
 
-def calc_metrics_binary(gt_mas, pred_mask):
-    tp = np.sum((gt_mas == 1) & (pred_mask == 1))
-    tn = np.sum((gt_mas == 0) & (pred_mask == 0))
-    fp = np.sum((gt_mas == 0) & (pred_mask == 1))
-    fn = np.sum((gt_mas == 1) & (pred_mask == 0))
+def calc_metrics_binary(mask_gt, mask_pred, positive_class=[128, 128, 128]):
+    positive_class = np.array(positive_class)
+    gt_positive = np.all(mask_gt == positive_class, axis=-1)
+    pred_positive = np.all(mask_pred == positive_class, axis=-1)
+    tp = np.sum(gt_positive & pred_positive)
+    tn = np.sum(~gt_positive & ~pred_positive)
+    fp = np.sum(~gt_positive & pred_positive)
+    fn = np.sum(gt_positive & ~pred_positive)
     return calc_metrics(tp, tn, fp, fn)
 
-def calc_metrics_multiclass(gt_mask, pred_mask, num_classes):
-    metrics_per_class = {}
-    for class_id in range(num_classes):
-        gt_binary = (gt_mask == class_id).astype(int)
-        pred_binary = (pred_mask == class_id).astype(int)
-        metrics_per_class[class_id] = calc_metrics_binary(gt_binary, pred_binary)
-    return metrics_per_class
+
+def calc_metrics_multiclass(mask_gt, mask_pred, classes):
+    stats = {}
+
+    for class_name, color in classes.items():
+        pred_class = np.all(mask_pred == color, axis=-1)
+        gt_class = np.all(mask_gt == color, axis=-1)
+
+        tp = np.sum(pred_class & gt_class)
+        tn = np.sum(~pred_class & ~gt_class)
+        fp = np.sum(pred_class & ~gt_class)
+        fn = np.sum(~pred_class & gt_class)
+
+        metrics = calc_metrics(tp, tn, fp, fn)
+
+        stats[class_name] = {
+            "TP": tp,
+            "TN": tn,
+            "FP": fp,
+            "FN": fn,
+            "Precision": metrics["PRECISION"],
+            "Recall": metrics["RECALL"],
+            "F1": metrics["F1"],
+            "IoU": metrics["JACCARD"],
+            "Accuracy": metrics["ACCURACY"],
+        }
+    return stats
