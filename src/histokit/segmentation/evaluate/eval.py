@@ -71,28 +71,32 @@ def calc_metrics(tp, tn, fp, fn):
 def calc_metrics_binary(
     mask_gt,
     mask_pred,
-    positive_class,
-    ignore_mask=None):
-
+    positive_class=[128, 128, 128],
+    ignore_mask=None,
+):
     positive_class = np.array(positive_class)
 
     gt_positive = np.all(mask_gt == positive_class, axis=-1)
     pred_positive = np.all(mask_pred == positive_class, axis=-1)
 
-    if ignore_mask is None:
-        valid_mask = np.ones(gt_positive.shape, dtype=bool)
-    else:
-        valid_mask = ~ignore_mask
-
-    gt_positive = gt_positive[valid_mask]
-    pred_positive = pred_positive[valid_mask]
+    if ignore_mask is not None:
+        gt_positive = gt_positive[~ignore_mask]
+        pred_positive = pred_positive[~ignore_mask]
 
     tp = np.sum(gt_positive & pred_positive)
     tn = np.sum(~gt_positive & ~pred_positive)
     fp = np.sum(~gt_positive & pred_positive)
     fn = np.sum(gt_positive & ~pred_positive)
 
-    return calc_metrics(tp, tn, fp, fn)
+    metrics = calc_metrics(tp, tn, fp, fn)
+
+    return {
+        "TP": tp,
+        "TN": tn,
+        "FP": fp,
+        "FN": fn,
+        **metrics,
+    }
 
 
 def calc_metrics_multiclass(
@@ -101,8 +105,8 @@ def calc_metrics_multiclass(
     classes,
     tissue_class=[128, 128, 128],
     bg_class=[0, 0, 0],
-    ignore_bg_artifact_confusion=True):
-
+    ignore_bg_artifact_confusion=True,
+):
     stats = {}
 
     tissue_class = np.array(tissue_class)
@@ -123,32 +127,27 @@ def calc_metrics_multiclass(
         ignore_mask = None
 
     for class_name, color in classes.items():
-        metrics = calc_metrics_binary(
+        stats[class_name] = calc_metrics_binary(
             mask_gt=mask_gt,
             mask_pred=mask_pred,
             positive_class=color,
             ignore_mask=ignore_mask,
         )
 
-        stats[class_name] = {
-            "TP": metrics["TP"],
-            "TN": metrics["TN"],
-            "FP": metrics["FP"],
-            "FN": metrics["FN"],
-            "Precision": metrics["PRECISION"],
-            "Recall": metrics["RECALL"],
-            "F1": metrics["F1"],
-            "FDR": metrics["FDR"],
-            "DICE": metrics["DICE"],
-            "Jaccard": metrics["JACCARD"],
-        }
     return stats
 
 
-def evaluate_rgb_mask(mask_gt, mask_pred, mask_basename, vis_dir, method="HistoKit (no postprocessing)", 
-                      tissue_class=[128, 128, 128], bg_class=[0, 0, 0], multiclass = True, class_dict = None):
-
-    # Visualisation
+def evaluate_rgb_mask(
+    mask_gt,
+    mask_pred,
+    mask_basename,
+    vis_dir,
+    method,
+    tissue_class=[128, 128, 128],
+    bg_class=[0, 0, 0],
+    multiclass=True,
+    class_dict=None,
+):
     img_vis = vis_segmentation_results_multiclass(
         mask_gt=mask_gt,
         mask_pred=mask_pred,
@@ -159,8 +158,6 @@ def evaluate_rgb_mask(mask_gt, mask_pred, mask_basename, vis_dir, method="HistoK
     out_path = os.path.join(vis_dir, mask_basename)
     Image.fromarray(img_vis).save(out_path)
 
-    # Binary metrics: tissue = positive class
-    #                 bg & art = negative class
     binary_metrics = calc_metrics_binary(
         mask_gt=mask_gt,
         mask_pred=mask_pred,
@@ -174,21 +171,28 @@ def evaluate_rgb_mask(mask_gt, mask_pred, mask_basename, vis_dir, method="HistoK
         **binary_metrics,
     }
 
-    if multiclass and class_dict is not None:
-        # Multiclass metrics: one-vs-rest for each RGB class
+    res_dict_multiclass = None
+
+    if multiclass:
+        if class_dict is None:
+            raise ValueError("class_dict cannot be None when multiclass=True")
+
+        multiclass_metrics = calc_metrics_multiclass(
+            mask_gt=mask_gt,
+            mask_pred=mask_pred,
+            classes=class_dict,
+            tissue_class=tissue_class,
+            bg_class=bg_class,
+            ignore_bg_artifact_confusion=True,
+        )
+
         res_dict_multiclass = {
             "Method": method,
             "Mode": mask_basename,
             "Image": mask_basename,
         }
 
-        for class_name, class_rgb in class_dict.items():
-            class_metrics = calc_metrics_binary(
-                mask_gt=mask_gt,
-                mask_pred=mask_pred,
-                positive_class=class_rgb,
-            )
-
+        for class_name, class_metrics in multiclass_metrics.items():
             for metric_name, metric_value in class_metrics.items():
                 res_dict_multiclass[f"{class_name}_{metric_name}"] = metric_value
 
