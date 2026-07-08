@@ -49,6 +49,10 @@ def calc_metrics(tp, tn, fp, fn):
     precision_val = precision(tp, fp)
     recall_val = recall(tp, fn)
     return {
+        "TP": tp,
+        "TN": tn,
+        "FP": fp,
+        "FN": fn,
         "DICE": dice(tp, fp, fn),
         "JACCARD": jaccard(tp, fp, fn),
         "PRECISION": precision_val,
@@ -121,7 +125,7 @@ def calc_metrics_multiclass(
             positive_class=color,
             ignore_mask=ignore_mask,
         )
-        
+
         stats[class_name] = {
             "TP": metrics["TP"],
             "TN": metrics["TN"],
