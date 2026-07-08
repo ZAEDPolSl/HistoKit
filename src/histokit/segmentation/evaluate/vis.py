@@ -44,8 +44,8 @@ def vis_segmentation_results_multiclass(mask_gt, mask_pred, tissue_class=[128, 1
 
     miss_artifact = gt_artifact & pred_artifact & ~same_class
 
-    fp_tissue = ~gt_tissue & pred_tissue
-    fn_tissue = gt_tissue & ~pred_tissue
+    fp_artifact = gt_tissue & pred_artifact
+    fn_artifact = gt_artifact & pred_tissue
 
     res = np.zeros_like(mask_gt, dtype=np.uint8)
 
@@ -53,7 +53,7 @@ def vis_segmentation_results_multiclass(mask_gt, mask_pred, tissue_class=[128, 1
     res[tp_bg] = [0, 0, 0]             # correctly assigned background
     res[tp_artifact] = [0, 255, 0]     # correctly assigned artifact
     res[miss_artifact] = [255, 165, 0] # misclassified artifact
-    res[fp_tissue] = [255, 0, 0]       # incorrectly assigned tissue
-    res[fn_tissue] = [0, 0, 255]       # missed tissue
+    res[fp_artifact] = [255, 0, 0]          # incorrectly assigned artifact
+    res[fn_artifact] = [0, 0, 255]       # missed artifact
 
     return res
