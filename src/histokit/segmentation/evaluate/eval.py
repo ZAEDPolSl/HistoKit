@@ -60,42 +60,76 @@ def calc_metrics(tp, tn, fp, fn):
         "FDR": fdr(tp, fp),
     }
 
-def calc_metrics_binary(mask_gt, mask_pred, positive_class=[128, 128, 128]):
+def calc_metrics_binary(
+    mask_gt,
+    mask_pred,
+    positive_class,
+    ignore_mask=None):
+
     positive_class = np.array(positive_class)
+
     gt_positive = np.all(mask_gt == positive_class, axis=-1)
     pred_positive = np.all(mask_pred == positive_class, axis=-1)
+
+    if ignore_mask is None:
+        valid_mask = np.ones(gt_positive.shape, dtype=bool)
+    else:
+        valid_mask = ~ignore_mask
+
+    gt_positive = gt_positive[valid_mask]
+    pred_positive = pred_positive[valid_mask]
+
     tp = np.sum(gt_positive & pred_positive)
     tn = np.sum(~gt_positive & ~pred_positive)
     fp = np.sum(~gt_positive & pred_positive)
     fn = np.sum(gt_positive & ~pred_positive)
+
     return calc_metrics(tp, tn, fp, fn)
 
 
-def calc_metrics_multiclass(mask_gt, mask_pred, classes):
+def calc_metrics_multiclass(
+    mask_gt,
+    mask_pred,
+    classes,
+    tissue_class=[128, 128, 128],
+    bg_class=[0, 0, 0],
+    ignore_bg_artifact_confusion=True):
+
     stats = {}
 
+    tissue_class = np.array(tissue_class)
+    bg_class = np.array(bg_class)
+
+    gt_tissue = np.all(mask_gt == tissue_class, axis=-1)
+    pred_tissue = np.all(mask_pred == tissue_class, axis=-1)
+
+    gt_bg = np.all(mask_gt == bg_class, axis=-1)
+    pred_bg = np.all(mask_pred == bg_class, axis=-1)
+
+    gt_artifact = ~gt_tissue & ~gt_bg
+    pred_artifact = ~pred_tissue & ~pred_bg
+
+    if ignore_bg_artifact_confusion:
+        ignore_mask = (gt_bg & pred_artifact) | (gt_artifact & pred_bg)
+    else:
+        ignore_mask = None
+
     for class_name, color in classes.items():
-        pred_class = np.all(mask_pred == color, axis=-1)
-        gt_class = np.all(mask_gt == color, axis=-1)
-
-        tp = np.sum(pred_class & gt_class)
-        tn = np.sum(~pred_class & ~gt_class)
-        fp = np.sum(pred_class & ~gt_class)
-        fn = np.sum(~pred_class & gt_class)
-
-        metrics = calc_metrics(tp, tn, fp, fn)
-
+        metrics = calc_metrics_binary(
+            mask_gt=mask_gt,
+            mask_pred=mask_pred,
+            positive_class=color,
+            ignore_mask=ignore_mask,
+        )
+        
         stats[class_name] = {
-            "TP": tp,
-            "TN": tn,
-            "FP": fp,
-            "FN": fn,
+            "TP": metrics["TP"],
+            "TN": metrics["TN"],
+            "FP": metrics["FP"],
+            "FN": metrics["FN"],
             "Precision": metrics["PRECISION"],
             "Recall": metrics["RECALL"],
             "F1": metrics["F1"],
-            "Accuracy": metrics["ACCURACY"],
-            "Specificity": metrics["SPECIFICITY"],
-            "NPV": metrics["NPV"],
             "FDR": metrics["FDR"],
             "DICE": metrics["DICE"],
             "Jaccard": metrics["JACCARD"],
