@@ -1,3 +1,7 @@
+import os
+from PIL import Image
+from torch import classes
+from .vis import vis_segmentation_results_multiclass
 import numpy as np
 
 
@@ -89,7 +93,61 @@ def calc_metrics_multiclass(mask_gt, mask_pred, classes):
             "Precision": metrics["PRECISION"],
             "Recall": metrics["RECALL"],
             "F1": metrics["F1"],
-            "IoU": metrics["JACCARD"],
             "Accuracy": metrics["ACCURACY"],
+            "Specificity": metrics["SPECIFICITY"],
+            "NPV": metrics["NPV"],
+            "FDR": metrics["FDR"],
+            "DICE": metrics["DICE"],
+            "Jaccard": metrics["JACCARD"],
         }
     return stats
+
+
+def evaluate_rgb_mask(mask_gt, mask_pred, mask_basename, vis_dir, method="HistoKit (no postprocessing)", 
+                      tissue_class=[128, 128, 128], bg_class=[0, 0, 0], multiclass = True, class_dict = None):
+
+    # Visualisation
+    img_vis = vis_segmentation_results_multiclass(
+        mask_gt=mask_gt,
+        mask_pred=mask_pred,
+        tissue_class=tissue_class,
+        bg_class=bg_class,
+    )
+
+    out_path = os.path.join(vis_dir, mask_basename)
+    Image.fromarray(img_vis).save(out_path)
+
+    # Binary metrics: tissue = positive class
+    #                 bg & art = negative class
+    binary_metrics = calc_metrics_binary(
+        mask_gt=mask_gt,
+        mask_pred=mask_pred,
+        positive_class=tissue_class,
+    )
+
+    res_dict_binary = {
+        "Method": method,
+        "Mode": mask_basename,
+        "Image": mask_basename,
+        **binary_metrics,
+    }
+
+    if multiclass and class_dict is not None:
+        # Multiclass metrics: one-vs-rest for each RGB class
+        res_dict_multiclass = {
+            "Method": method,
+            "Mode": mask_basename,
+            "Image": mask_basename,
+        }
+
+        for class_name, class_rgb in class_dict.items():
+            class_metrics = calc_metrics_binary(
+                mask_gt=mask_gt,
+                mask_pred=mask_pred,
+                positive_class=class_rgb,
+            )
+
+            for metric_name, metric_value in class_metrics.items():
+                res_dict_multiclass[f"{class_name}_{metric_name}"] = metric_value
+
+    return res_dict_binary, res_dict_multiclass
