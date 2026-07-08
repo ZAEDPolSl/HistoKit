@@ -215,3 +215,6 @@ outputs/
 settings.json
 test_18.png
 svs/
+Statistical Analysis/Data/HistoKit (no postprocessing)/binary_metrics.csv
+.gitignore
+Statistical Analysis/Data/HistoKit (no postprocessing)/multiclass_metrics.csv

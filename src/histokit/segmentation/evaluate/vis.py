@@ -1,3 +1,5 @@
+from tkinter import Image
+
 import numpy as np
 
 def vis_segmentation_results_binary(
@@ -23,7 +25,12 @@ def vis_segmentation_results_binary(
     res[tn] = [0, 0, 0]      # True Negative: Black
     return res
 
-def vis_segmentation_results_multiclass(mask_gt, mask_pred, tissue_class=[128, 128, 128], bg_class=[0, 0, 0]) -> np.ndarray:
+def vis_segmentation_results_multiclass(mask_gt, mask_pred, tissue_class=[128, 128, 128], bg_class=[0, 0, 0], decrease_factor=1.0) -> np.ndarray:
+
+    if decrease_factor != 1.0:
+        mask_gt = np.array(Image.fromarray(mask_gt).resize((int(mask_gt.shape[1] * decrease_factor), int(mask_gt.shape[0] * decrease_factor)), Image.NEAREST))
+        mask_pred = np.array(Image.fromarray(mask_pred).resize((int(mask_pred.shape[1] * decrease_factor), int(mask_pred.shape[0] * decrease_factor)), Image.NEAREST))
+
     tissue_class = np.array(tissue_class)
     bg_class = np.array(bg_class)
 
