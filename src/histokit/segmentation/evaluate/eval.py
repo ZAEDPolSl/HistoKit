@@ -6,31 +6,31 @@ import numpy as np
 
 
 def dice(tp, fp, fn):
-    return 2 * tp / (2 * tp + fp + fn) if (2 * tp + fp + fn) > 0 else 0.0
+    return 2 * tp / (2 * tp + fp + fn) if (2 * tp + fp + fn) > 0 else None
 
 def jaccard(tp, fp, fn):
-    return tp / (tp + fp + fn) if (tp + fp + fn) > 0 else 0.0
+    return tp / (tp + fp + fn) if (tp + fp + fn) > 0 else None
 
 def precision(tp, fp):
-    return tp / (tp + fp) if (tp + fp) > 0 else 0.0
+    return tp / (tp + fp) if (tp + fp) > 0 else None
 
 def recall(tp, fn):
-    return tp / (tp + fn) if (tp + fn) > 0 else 0.0
+    return tp / (tp + fn) if (tp + fn) > 0 else None
 
 def accuracy(tp, tn, fp, fn):
-    return (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else 0.0
+    return (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else None
 
 def f1_score(precision, recall):
-    return 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0.0
+    return 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else None
 
 def specificity(tn, fp):
-    return tn/(tn+fp) if (tn+fp)>0 else 0.0
+    return tn/(tn+fp) if (tn+fp)>0 else None
 
 def npv(tn, fn):
-    return tn / (tn + fn) if (tn + fn) > 0 else 0.0
+    return tn / (tn + fn) if (tn + fn) > 0 else None
 
 def fdr(tp, fp):
-    return fp / (tp + fp) if (tp + fp) > 0 else 0.0
+    return fp / (tp + fp) if (tp + fp) > 0 else None
 
 def calc_metrics(tp, tn, fp, fn):
     if tp + tn + fp + fn == 0:
