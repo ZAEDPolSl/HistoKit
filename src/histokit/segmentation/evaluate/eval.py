@@ -21,6 +21,8 @@ def accuracy(tp, tn, fp, fn):
     return (tp + tn) / (tp + tn + fp + fn) if (tp + tn + fp + fn) > 0 else None
 
 def f1_score(precision, recall):
+    if precision is None or recall is None:
+        return None
     return 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else None
 
 def specificity(tn, fp):
