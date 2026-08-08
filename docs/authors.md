@@ -2,10 +2,7 @@
 
 TODO: Add project authors and contributors.
 
-## Main author
+## Authors
 
 - Julia Merta
-
-## Contributors
-
-TODO: Add contributors.
+- Michał Marczyk

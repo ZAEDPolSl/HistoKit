@@ -1,13 +1,15 @@
 # hethr.yaml
 
+algorithm_name: HeThr
+
 # output
 saver: hdf5
 out_dir: ./outputs/
-save_mag: 5.0
+save_mag: 10.0
 
 # magnification settings
 vis_mag: 1.0
-tissdet_mag: 1.0
+tissdet_mag: 10.0
 blur_kernel_width: 0
 nbins: 256
 
@@ -17,3 +19,4 @@ collectors:
   - name: SegmentationOverlayCollector
   - name: MaskCollector
 
+postprocess_steps: []

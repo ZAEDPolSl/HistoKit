@@ -30,7 +30,7 @@ pip install -r requirements.txt
 Then OpenSlide library needs to be installed with:
 
 ```bash
-pip install openslide-bin
+pip install openslide-python
 ```
 
 If everything has been installed correctly, now it is possible to use functions from the HistoKit package after extracting files from a .zip archive.

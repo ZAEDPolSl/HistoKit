@@ -341,6 +341,28 @@ class Slide:
         height = round(self.level_dimensions[0][1] * scale_factor)
         return (width, height)
 
+    def get_size_at_mpp(self, mpp: float) -> Optional[tuple]:
+            """
+            Get the dimensions of the slide at a given microns per pixel.
+
+            Uses the reference constants to convert from MPP to magnification, then
+            calculates the size based on the level 0 dimensions and magnification.
+    
+            Parameters
+            ----------
+            mpp : float
+                Microns per pixel for which to compute the size.
+    
+            Returns
+            -------
+            tuple of int or None
+                (width, height) at the specified microns per pixel, or ``None`` if reference values are not set.
+            """
+            scale_factor = self.mpp / mpp if self.mpp is not None else 1
+            width = round(self.level_dimensions[0][0] * scale_factor)
+            height = round(self.level_dimensions[0][1] * scale_factor)
+            return (width, height)
+
     def get_mpp_at_mag(self, mag: float) -> Optional[float]:
         """
         Get the microns per pixel corresponding to a given magnification.

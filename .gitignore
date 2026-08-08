@@ -219,3 +219,10 @@ Statistical Analysis/Data/HistoKit (no postprocessing)/binary_metrics.csv
 .gitignore
 Statistical Analysis/Data/HistoKit (no postprocessing)/multiclass_metrics.csv
 .Rproj.user
+.idea/inspectionProfiles/Project_Default.xml
+.idea/inspectionProfiles/profiles_settings.xml
+.idea/vcs.xml
+.idea/modules.xml
+.idea/misc.xml
+.idea/HistoKit.iml
+.idea/copilot.data.migration.ask2agent.xml

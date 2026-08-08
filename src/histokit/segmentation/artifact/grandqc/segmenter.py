@@ -114,7 +114,6 @@ class GrandQCSegmenter(Segmenter):
             bbox = BBox(bbox, mag=tissue_mask["mag_save"])
             mask = SpatialMask(data = mask, bbox = bbox, kind="label")
 
-
             region_np = np.array(slide.read_masked_object(
                 mask=mask,
                 mag=self.config.det_mag,

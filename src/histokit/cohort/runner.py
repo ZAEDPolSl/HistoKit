@@ -130,9 +130,7 @@ class CohortRunner:
 
                 print("")
                 print(f"=> Running artifact detection grid search: {case_name}")
-                print(f"Params: {params}")
-                print(f"GrandQC config: {temp_config_path}")
-                print(f"Output directory: {output_dir}")
+                print(f"Parameters: {params}")
 
                 artifact_pipeline = ArtifactDetectionPipeline(stage_config)
                 artifact_pipeline.run()
