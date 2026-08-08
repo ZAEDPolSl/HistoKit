@@ -3,15 +3,15 @@
 # output
 saver: hdf5
 out_dir: ./outputs/
-save_mag: 5.0
+save_mag: 10.0
 
 # model
-model_path: C:/Repos/HistoKit/models/GrandQC_MPP1.pth
+model_path: /mnt/warehouse/jmerta/Projects/HE/HistoKit - versions/HistoKit/HistoKit/models/GrandQC_MPP1.pth
 
 # inference
 device: cuda:0
-batch_size: 16
-num_workers: 2
+batch_size: 128
+num_workers: 6
 
 # magnification
 grandqc_mpp: 1.0
@@ -21,7 +21,7 @@ vis_mag: 2.5
 # patches
 patch_size_model: 512 
 patch_size: 512
-overlap: 0.9
+overlap: 0.75
 grid_offset: 0.5
 pad_value: 255
 

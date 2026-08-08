@@ -23,6 +23,10 @@ from ...postprocessing.step import (
 @dataclass
 class HeThrConfig(BaseAlgorithmConfig):
     algorithm_name: ClassVar[str] = "HeThr"
+    vis_mag: float = 1.0
+    tissdet_mag: float = 2.5
+    blur_kernel_width: int = 0
+    nbins: int = 256
 
     collector_registry: ClassVar[dict[str, type]] = {
         "ThumbnailCollector": ThumbnailCollector,
@@ -38,11 +42,6 @@ class HeThrConfig(BaseAlgorithmConfig):
         {"name": "MaskCollector"},
     ]
 
-    vis_mag: float = 1.0
-    tissdet_mag: float = 2.5
-    blur_kernel_width: int = 0
-    nbins: int = 256
-    
     postprocess_steps: list[PostProcessStep] = field(
         default_factory=lambda: [
         ]
