@@ -1,0 +1,33 @@
+# cohort.yaml
+
+slides:
+  input_dir: /mnt/warehouse/Projects/HE/Data/Artifacts Segmentation/GrandQC Test Dataset/PreprocessedDataset/Prostate/10x/tissue/
+  file_csv: null
+  pattern: "*.png"
+  
+output_dir: /mnt/warehouse/Projects/HE/Data/Artifacts Segmentation/GrandQC Test Dataset/PreprocessedDataset/Prostate/10x/Results/Histokit_30_06_2026/
+saver: hdf5
+
+logging:
+  enabled: true
+  log_dir: ./outputs/logs
+  processed_file: processed.csv
+  errors_file: errors.csv
+
+stages:
+  tissue_detection:
+    enabled: false
+    mag_l0: 10.0
+    algorithm: gamred
+    config_path: ./gamred.yaml
+    parallel_workers: 2
+    overwrite: false
+
+  artifact_detection:
+    enabled: true
+    algorithm: grandqc
+    config_path: ./grandqc.yaml
+    parallel_workers: 1
+    overwrite: false
+    tissue_source:
+      dir: 

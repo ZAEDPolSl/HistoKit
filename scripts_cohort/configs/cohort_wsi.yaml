@@ -1,0 +1,32 @@
+# cohort.yaml
+
+slides:
+  input_dir: /mnt/warehouse/Projects/HE/Data/Artifacts Segmentation/TCGA_CompassNMD/svs/
+  file_csv: null
+  pattern: "*.svs"
+
+output_dir: /mnt/warehouse/Projects/HE/Data/Artifacts Segmentation/TCGA_CompassNMD/Results/Histokit_08_08_2026_x4/
+saver: hdf5
+
+logging:
+  enabled: true
+  log_dir: ./outputs/logs
+  processed_file: processed.csv
+  errors_file: errors.csv
+
+stages:
+  tissue_detection:
+    enabled: true
+    algorithm: gamred
+    config_path: ./gamred.yaml
+    parallel_workers: 4
+    overwrite: false
+
+  artifact_detection:
+    enabled: true
+    algorithm: grandqc
+    config_path: ./grandqc.yaml
+    parallel_workers: 1
+    overwrite: false
+    tissue_source:
+      dir: /mnt/warehouse/Projects/HE/Data/Artifacts Segmentation/TCGA_CompassNMD/Results/Histokit_08_08_2026_x4/tissue_detection/gamred/masks/
