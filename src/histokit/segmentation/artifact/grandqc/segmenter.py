@@ -18,6 +18,13 @@ from ...utils import get_weights
 import segmentation_models_pytorch as smp
 from ....savers.base import Saver
 
+# If you use GrandQC or benchmark in your research, please cite the following paper:
+# Weng Z. et al. "GrandQC: a comprehensive solution to quality control problem in digital pathology"
+# Nature Communications (2024). https://doi.org/10.1038/s41467-024-54769-y
+# For more information visit: https://github.com/cpath-ukk/grandqc
+# Note: GrandQC is distributed under a non-commercial license, and that use is subject to the terms of the original GrandQC license: 
+# https://github.com/cpath-ukk/grandqc?tab=License-1-ov-file
+# Non Comemercial, Academic Use Only!
 
 class GrandQCSegmenter(Segmenter):
 
