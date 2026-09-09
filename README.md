@@ -100,6 +100,8 @@ If you use the **GrandQC-based artifact segmentation model**, GrandQC itself, or
 > **Nature Communications** 15, 10685 (2024).
 > DOI: https://doi.org/10.1038/s41467-024-54769-y
 
+We would like to thank GrandQC Authors for making their implementation and model weights publicly available.
+
 ```bibtex
 @article{Weng2024GrandQC,
   author  = {Weng, Z. and Seper, A. and Pryalukhin, A. and others},
