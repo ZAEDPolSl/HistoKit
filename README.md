@@ -50,7 +50,7 @@ pip install {path-to-histokit-archive}.zip
 ## References
 
 > [!IMPORTANT]
-> **If you use **HistoKit** in your research, according to the license, you must cite the following publications**
+> **If you use **HistoKit** in your research, according to the license, you must cite the following publications.**
 > **HistoKit is provided for non-commercial, academic use only.**
 > Any use of HistoKit components is subject to the terms of the original license. Please review it before using these components.
 > The authors assume no responsibility for any issues with running the software, implementation errors, or other problems related to its operation.
