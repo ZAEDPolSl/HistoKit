@@ -49,13 +49,14 @@ pip install {path-to-histokit-archive}.zip
 
 ## References
 
-If you use **HistoKit** in your research, please cite the relevant publications below.
-
-### HistoKit
+> [!IMPORTANT]
+> **If you use **HistoKit** in your research, according to the license, you must cite the following publications**
+> **HistoKit is provided for non-commercial, academic use only.**
+> Any use of HistoKit components is subject to the terms of the original license. Please review it before using these components.
+> The authors assume no responsibility for any issues with running the software, implementation errors, or other problems related to its operation.
 
 #### HistoKit 1.0.0
 
-The original publication describing the first version of HistoKit:
 
 ```bibtex
 @inproceedings{Merta2026HistoKit,
@@ -92,10 +93,7 @@ If you use the tissue segmentation post-processing methods included in HistoKit,
 }
 ```
 
-> [!IMPORTANT]
-> **HistoKit is provided for non-commercial, academic use only.**
-> Any use of HistoKit components is subject to the terms of the original license. Please review it before using these components.
-> The authors assume no responsibility for any issues with running the software, implementation errors, or other problems related to its operation.
+
 
 ### GrandQC-based Artifact Segmentation
 
