@@ -94,9 +94,8 @@ If you use the tissue segmentation post-processing methods included in HistoKit,
 
 > [!IMPORTANT]
 > **HistoKit is provided for non-commercial, academic use only.**
-> Any use of HistoKit components is subject to the terms of the original HistoKit license. Please review the HistoKit license before using these components.
+> Any use of HistoKit components is subject to the terms of the original license. Please review it before using these components.
 > The authors assume no responsibility for any issues with running the software, implementation errors, or other problems related to its operation.
-> 
 
 ### GrandQC-based Artifact Segmentation
 
