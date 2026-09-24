@@ -92,9 +92,15 @@ If you use the tissue segmentation post-processing methods included in HistoKit,
 }
 ```
 
+> [!IMPORTANT]
+> **HistoKit is provided for non-commercial, academic use only.**
+> Any use of HistoKit components is subject to the terms of the original HistoKit license. Please review the HistoKit license before using these components.
+> The authors assume no responsibility for any issues with running the software, implementation errors, or other problems related to its operation.
+> 
+
 ### GrandQC-based Artifact Segmentation
 
-If you use the **GrandQC-based artifact segmentation model**, GrandQC itself, or the associated benchmark in your research, please cite the original GrandQC publication:
+If you use the **GrandQC-based artifact segmentation model**, GrandQC itself, or the associated benchmark in your research, you must cite the original GrandQC publication:
 
 > Weng, Z. et al. *GrandQC: A comprehensive solution to quality control problem in digital pathology*.
 > **Nature Communications** 15, 10685 (2024).
