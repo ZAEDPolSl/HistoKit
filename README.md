@@ -12,11 +12,6 @@ It provides a toolkit for common operations in digital pathology workflows.
 - **Artifact detection** — uses the **GrandQC** deep learning model.
 - **Patch extraction** — tiles slides into patches at customizable magnification and stride.
 - **Augmentation & Stain Normalisation** — applies common augmentation methods and stain normalisation techniques (using staintools library).
-
-## In Development
-- **Feature extraction** — extracts representations using foundation models.
-- **Visualization** — explore high-dimensional features using **UMAP**.
-- **Classification with Multiple Instance Learning** — classification using various MIL models.
   
 ## Installation
 ### From remote repository
