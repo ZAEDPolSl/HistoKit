@@ -49,6 +49,14 @@ pip install {path-to-histokit-archive}.zip
 >
 > **HistoKit is provided for non-commercial use only.**
 >
+> Under the **CC BY-NC-ND 4.0** license, you may:
+> - Use HistoKit for **non-commercial purposes**, including academic research.
+> - Use HistoKit **as provided, without modification**.
+> - Include the **unmodified HistoKit as a separate component or dependency** in a non-commercial research tool, subject to the license terms.
+> - Share or redistribute the **original, unmodified version** with proper attribution and license information.
+> - Modify HistoKit for **private/internal use**, provided that the modified version is **not distributed**.
+> - Publish research results produced using HistoKit, with the requested citations.
+>
 > Any use of HistoKit is subject to the terms of the **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)** license. Please review the license before using or redistributing the software.
 >
 > HistoKit is provided **"as is"**, without warranties of any kind. The authors assume no responsibility for errors, software failures, implementation issues, or other problems arising from its use.
@@ -57,7 +65,7 @@ pip install {path-to-histokit-archive}.zip
 >
 > **Third-party components:** The GrandQC model and its associated components are distributed under their own license and are subject to the terms of that license.
 
-#### HistoKit 1.0.0
+#### HistoKit 1.0.1
 
 
 ```bibtex
