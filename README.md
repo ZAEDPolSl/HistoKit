@@ -52,7 +52,7 @@ pip install {path-to-histokit-archive}.zip
 > Under the **CC BY-NC-ND 4.0** license, you may:
 > - Use HistoKit for **non-commercial purposes**, including academic research.
 > - Use HistoKit **as provided, without modification**.
-> - Include the **unmodified HistoKit as a separate component or dependency** in a non-commercial research tool, subject to the license terms.
+> - Include the **unmodified HistoKit as a separate component or dependency** in a non-commercial research project, subject to the license terms.
 > - Share or redistribute the **original, unmodified version** with proper attribution and license information.
 > - Modify HistoKit for **private/internal use**, provided that the modified version is **not distributed**.
 > - Publish research results produced using HistoKit, with the requested citations.
