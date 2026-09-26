@@ -49,6 +49,8 @@ pip install {path-to-histokit-archive}.zip
 > **HistoKit is provided for non-commercial, academic use only.**
 > Any use of HistoKit components is subject to the terms of the original license. Please review it before using these components.
 > The authors assume no responsibility for any issues with running the software, implementation errors, or other problems related to its operation.
+> Helpful info about the license: https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en
+> GrandQC model and associated components are distributed under their own license.
 
 #### HistoKit 1.0.0
 
