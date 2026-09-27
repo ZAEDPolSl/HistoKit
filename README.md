@@ -11,7 +11,7 @@ It provides a toolkit for common operations in digital pathology workflows.
 - **Tissue detection** — identifies tissue regions within whole-slide images.
 - **Artifact detection** — uses the **GrandQC** deep learning model.
 - **Patch extraction** — tiles slides into patches at customizable magnification and stride.
-- **Augmentation & Stain Normalisation** — applies common augmentation methods and stain normalisation techniques (using staintools library).
+- **Augmentation & Stain Normalisation** — applies common augmentation methods and stain normalisation techniques.
   
 ## Installation
 ### From remote repository
