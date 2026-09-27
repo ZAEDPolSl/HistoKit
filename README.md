@@ -137,4 +137,53 @@ For more information about GrandQC, see the original repository:
 
 > [!IMPORTANT]
 > **GrandQC is provided for non-commercial, academic use only.**
-> Any use of GrandQC-based components is subject to the terms of the original GrandQC license. Please review the GrandQC license before using these components.
+
+### Stain Normalization
+#### Macenko normalization
+
+```bibtex
+@inproceedings{Macenko2009,
+  author    = {Macenko, Marc and Niethammer, Marc and Marron, J. S. and Borland, David and Woosley, John T. and Guan, Xiaojun and Schmitt, Charles and Thomas, Nancy E.},
+  title     = {A method for normalizing histology slides for quantitative analysis},
+  booktitle = {2009 IEEE International Symposium on Biomedical Imaging: From Nano to Macro},
+  pages     = {1107--1110},
+  year      = {2009},
+  doi       = {10.1109/ISBI.2009.5193250}
+}
+```
+
+#### Vahadane normalization
+
+```bibtex
+@article{Vahadane2016,
+  author  = {Vahadane, Abhishek and Peng, Tingying and Sethi, Alok and Albarqouni, Shadi and Wang, Lichao and Baust, Maximilian and Steiger, Katja and Schlitter, Anna Melissa and Esposito, Irene and Navab, Nassir},
+  title   = {Structure-Preserving Color Normalization and Sparse Stain Separation for Histological Images},
+  journal = {IEEE Transactions on Medical Imaging},
+  volume  = {35},
+  number  = {8},
+  pages   = {1962--1971},
+  year    = {2016},
+  doi     = {10.1109/TMI.2016.2529665}
+}
+```
+
+#### Reinhard normalization
+
+```bibtex
+@article{Reinhard2001,
+  author  = {Reinhard, Erik and Adhikhmin, Michael and Gooch, Bruce and Shirley, Peter},
+  title   = {Color transfer between images},
+  journal = {IEEE Computer Graphics and Applications},
+  volume  = {21},
+  number  = {5},
+  pages   = {34--41},
+  year    = {2001},
+  doi     = {10.1109/38.946629}
+}
+```
+
+#### StainTools acknowledgement
+
+We thank **Peter Byfield** for making **StainTools** publicly available and for providing an open-source implementation of stain normalization methods for histopathology images.
+> **StainTools repository:** https://github.com/Peter554/StainTools  
+
