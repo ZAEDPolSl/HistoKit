@@ -16,7 +16,13 @@ It provides a toolkit for common operations in digital pathology workflows.
 ## Installation
 ### From remote repository
 
-The first way to use HistoKit is to download the source code from a remote repository. It is recommended to create a virtual environment with Anaconda or Venv. Then it is necessary to install the required dependencies from the requirements.txt file. Which can be done with the following command:
+The first way to use HistoKit is to download the source code from a remote repository. It is recommended to create a virtual environment with Anaconda or Venv. 
+
+```
+conda create -n histokit python=3.12
+```
+
+Then it is necessary to install the required dependencies from the requirements.txt file. Which can be done with the following command:
 
 ```bash
 pip install -r requirements.txt
@@ -28,11 +34,11 @@ Then OpenSlide library needs to be installed with:
 pip install openslide-python
 ```
 
-If everything has been installed correctly, now it is possible to use functions from the HistoKit package after extracting files from a .zip archive.
+If everything is installed correctly, you can now use functions from the HistoKit package after extracting files from a .zip archive.
 
 ### As a local pip package
 
-It is also possible to install the package from .zip archive with pip. To do that repeat the steps described in the previous section, but now you don’t need to extract the files. You just have to install HistoKit from your .zip file with the following command:
+You can also install the package from a .zip archive with pip. To do that, repeat the steps described in the previous section, but now you don’t need to extract the files. You just have to install HistoKit from your .zip file with the following command:
 
 ```bash
 pip install {path-to-histokit-archive}.zip
