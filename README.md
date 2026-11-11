@@ -31,6 +31,7 @@ pip install -r requirements.txt
 Then OpenSlide library needs to be installed with:
 
 ```bash
+pip install openslide-bin
 pip install openslide-python
 ```
 
