@@ -35,6 +35,15 @@ pip install openslide-bin
 pip install openslide-python
 ```
 
+To use the modified GrandQC artifact segmentation pipeline, download model weights from the GrandQC repository and update the configuration file `grandqc.yaml`
+
+```bash
+model_path: {Your Filepath}/GrandQC_MPP{MPP}.pth
+grandqc_mpp: {MPP}
+det_mag: {MAG}
+```
+
+
 If everything is installed correctly, you can now use functions from the HistoKit package after extracting files from a .zip archive.
 
 ### As a local pip package
