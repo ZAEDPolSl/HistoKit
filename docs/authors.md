@@ -6,7 +6,7 @@
 
 - :material-domain: **Department:** Department of Data Science and Engineering
 - :material-school: **Institution:** Silesian University of Technology, Gliwice, Poland
-- :material-email-outline: **Email:** [julia.merta@polsl.pl](julia.merta@polsl.pl)
+- :material-email-outline: **Email:** [julia.merta@polsl.pl](mailto:julia.merta@polsl.pl)
 - :simple-orcid: **ORCID:** [0009-0005-8999-5036](https://orcid.org/0009-0005-8999-5036)
 
 ### Michał Marczyk
@@ -15,7 +15,7 @@
 
 - :material-domain: **Department:** Department of Data Science and Engineering
 - :material-school: **Institution:** Silesian University of Technology, Gliwice, Poland
-- :material-email-outline: **Email:** [michal.marczyk@polsl.pl](michal.marczyk@polsl.pl)
+- :material-email-outline: **Email:** [michal.marczyk@polsl.pl](mailto:michal.marczyk@polsl.pl)
 - :simple-orcid: **ORCID:** [0000-0003-2508-5736](https://orcid.org/0000-0003-2508-5736)
 ---
 
