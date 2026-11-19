@@ -179,6 +179,7 @@ class BaseCohortPipeline(ABC):
             slide_paths = self.collect_slides()
 
         slide_paths = self.filter_slides(slide_paths)
+        print(f"Found {len(slide_paths)} slides")
         slide_paths = self.sort_slides(slide_paths)
 
         logger = CohortLogger(Path(self.config.output_dir) / "logs")

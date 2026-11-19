@@ -1,7 +1,8 @@
-# Contact
+## Contact & Support
 
-E-mail: julia.merta@polsl.pl
+For questions about HistoKit, technical support, research collaboration, or licensing inquiries, please contact the project authors.
 
-## Issues
-
-Please report bugs and feature requests via GitHub Issues.
+- :material-bug-outline: **Bug Reports:** [GitHub Issues](https://github.com/your-org/HistoKit/issues)
+- :material-lightbulb-outline: **Feature Requests:** [GitHub Issues](https://github.com/your-org/HistoKit/issues)
+- :material-account-group-outline: **Research Collaboration:** Contact the project authors
+- :material-license: **Licensing & Permissions:** Contact the project authors

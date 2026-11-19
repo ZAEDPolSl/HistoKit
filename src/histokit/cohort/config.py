@@ -64,6 +64,7 @@ class CohortConfig:
     tissue_detection: StageConfig | None = None
     artifact_detection: StageConfig | None = None
     statistics: StageConfig | None = None
+    geojson: StageConfig | None = None
 
     @property
     def input_dir(self) -> str:
@@ -133,6 +134,12 @@ class CohortConfig:
             **common_stage_kwargs,
         )
 
+        geojson = cls._build_stage_config(
+            stages.get("geojson"),
+            stage_name="geojson",
+            **common_stage_kwargs,
+        )
+
         return cls(
             slides=slides,
             output_dir=output_dir,
@@ -141,6 +148,7 @@ class CohortConfig:
             tissue_detection=tissue_detection,
             artifact_detection=artifact_detection,
             statistics=statistics,
+            geojson=geojson
         )
 
     @staticmethod
@@ -248,6 +256,7 @@ class CohortConfig:
             self.tissue_detection,
             self.artifact_detection,
             self.statistics,
+            self.geojson,
         ]:
             if stage is None:
                 continue

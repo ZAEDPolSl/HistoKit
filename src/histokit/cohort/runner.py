@@ -6,40 +6,52 @@ import re
 import yaml
 
 from .config import CohortConfig
-from .pipelines.tissue import TissueDetectionPipeline
-from .pipelines.artifact import ArtifactDetectionPipeline
-
+from .pipelines.geojson import GeojsonPipeline
+from .pipelines.stats import StatsPipeline
+from .pipelines.tissue import TissueSegmentationPipeline
+from .pipelines.artifact import ArtifactSegmentationPipeline
+import logging
 
 class CohortRunner:
     def __init__(self, config: CohortConfig):
         self.config = config
+        self.logger = logging.getLogger(__name__)
+
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(message)s",
+        )
 
     def run(self):
         if self.config.tissue_detection is not None:
-            print("=> Running tissue detection pipeline...")
-            print(f"Input directory: {self.config.input_dir}")
-            print(f"Output directory: {self.config.output_dir}")
-            tissue_pipeline = TissueDetectionPipeline(
-                self.config.tissue_detection
-            )
+            self.logger.info("Running tissue segmentation pipeline...")
+            tissue_pipeline = TissueSegmentationPipeline(self.config.tissue_detection)
             tissue_pipeline.run()
+            tissue_src = tissue_pipeline.result_dir()
 
         if self.config.artifact_detection is not None:
-            print("=> Running artifact detection pipeline...")
-            print(f"Input directory: {self.config.input_dir}")
-            print(f"Output directory: {self.config.output_dir}")
-            artifact_pipeline = ArtifactDetectionPipeline(
+            self.logger.info("=> Running artifact segmentation pipeline...")
+            artifact_pipeline = ArtifactSegmentationPipeline(
                 self.config.artifact_detection
             )
+
+            artifact_pipeline.set_tissue_src_from_pipeline(tissue_src)
             artifact_pipeline.run()
+            art_src = artifact_pipeline.result_dir()
+
 
         if self.config.statistics is not None:
-            print("=> Calculating statistics...")
-            print(f"Input directory: {self.config.input_dir}")
-            print(f"Output directory: {self.config.output_dir}")
-            raise NotImplementedError(
-                "Statistics pipeline is not implemented yet."
-            )
+            self.logger.info("=> Calculating statistics...")
+            stats = StatsPipeline(self.config.statistics)
+            #stats.set_art_src_from_pipeline(art_src)
+            stats.run()
+
+        if self.config.geojson is not None:
+            self.logger.info("=> Converting to geojson...")
+
+            geojson = GeojsonPipeline(self.config.geojson)
+            #geojson.set_art_src_from_pipeline(art_src)
+            geojson.run()
         
     @staticmethod
     def load_grid_search_config(path_or_dict):
@@ -89,7 +101,7 @@ class CohortRunner:
             print(f"Input directory: {self.config.input_dir}")
             print(f"Output directory: {self.config.output_dir}")
 
-            tissue_pipeline = TissueDetectionPipeline(self.config.tissue_detection)
+            tissue_pipeline = TissueSegmentationPipeline(self.config.tissue_detection)
             tissue_pipeline.run()
 
         if self.config.artifact_detection is not None:
@@ -132,7 +144,7 @@ class CohortRunner:
                 print(f"=> Running artifact detection grid search: {case_name}")
                 print(f"Parameters: {params}")
 
-                artifact_pipeline = ArtifactDetectionPipeline(stage_config)
+                artifact_pipeline = ArtifactSegmentationPipeline(stage_config)
                 artifact_pipeline.run()
 
 

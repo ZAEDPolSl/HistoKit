@@ -1,7 +1,6 @@
 import os
 import time
 from typing import Dict
-from histokit.slide.bbox import BBox
 from histokit.slide.mask import SpatialMask
 import numpy as np
 from ...base import Segmenter

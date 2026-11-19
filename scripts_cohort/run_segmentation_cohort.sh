@@ -1,5 +1,5 @@
 # for single run
-python run_segmentation_cohort.py --config ./configs/cohort.yaml
+python run_segmentation_cohort.py --config ./configs/cohort_wsi.yaml
 
 # with grid search
 cd scripts_cohort

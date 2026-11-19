@@ -1,5 +1,6 @@
 import math
 import os
+import sys
 import time
 import warnings
 from PIL import Image
@@ -17,6 +18,20 @@ from ...base import Segmenter
 from ...utils import get_weights
 import segmentation_models_pytorch as smp
 from ....savers.base import Saver
+
+import sys
+import importlib
+
+import warnings
+
+warnings.filterwarnings(
+    "ignore",
+    category=FutureWarning,
+    module=r"torch\.jit\._script"
+)
+
+
+
 
 # If you use GrandQC or benchmark in your research, please cite the following paper:
 # Weng Z. et al. "GrandQC: a comprehensive solution to quality control problem in digital pathology"

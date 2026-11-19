@@ -1,7 +1,5 @@
 # API reference
 
-# API reference
-
 ## Augmentation
 
 ::: histokit.augmentation

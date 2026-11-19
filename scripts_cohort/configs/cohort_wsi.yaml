@@ -1,11 +1,11 @@
 # cohort.yaml
 
 slides:
-  input_dir: /mnt/warehouse/Projects/HE/Data/Artifacts Segmentation/TCGA_CompassNMD/svs/
+  input_dir: C:/Users/julia/Desktop/svs/
   file_csv: null
   pattern: "*.svs"
 
-output_dir: /mnt/warehouse/Projects/HE/Data/Artifacts Segmentation/TCGA_CompassNMD/Results/Histokit_08_08_2026_x4/
+output_dir: C:/Users/julia/Desktop/HistoKit_10_10_2025/
 saver: hdf5
 
 logging:
@@ -16,17 +16,33 @@ logging:
 
 stages:
   tissue_detection:
-    enabled: true
+    enabled: false
     algorithm: gamred
     config_path: ./gamred.yaml
     parallel_workers: 4
     overwrite: false
 
   artifact_detection:
-    enabled: true
+    enabled: false
     algorithm: grandqc
     config_path: ./grandqc.yaml
     parallel_workers: 1
     overwrite: false
     tissue_source:
-      dir: /mnt/warehouse/Projects/HE/Data/Artifacts Segmentation/TCGA_CompassNMD/Results/Histokit_08_08_2026_x4/tissue_detection/gamred/masks/
+      dir: None
+
+  statistics:
+    algorithm: stats
+    config_path: ./stats.yaml
+    enabled: false
+    parallel_workers: 1
+    artifact_source:
+      dir:   C:/Users/julia/Desktop/HistoKit_10_10_2025/artifact_detection/grandqc/masks/
+
+  geojson:
+    algorithm: geojson
+    config_path: ./geojson.yaml
+    enabled: true
+    parallel_workers: 3
+    artifact_source:
+      dir:  C:/Users/julia/Desktop/HistoKit_10_10_2025/artifact_detection/grandqc/masks/

@@ -1,0 +1,3 @@
+remove_holes: True
+include_classes: [1]
+min_area: 100

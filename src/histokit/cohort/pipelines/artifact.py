@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 from .base import BaseCohortPipeline
@@ -5,10 +6,14 @@ from ..builder import build_segmenter
 from ...slide.slide import Slide
 
 
-class ArtifactDetectionPipeline(BaseCohortPipeline):
-    stage_name = "artifact_detection"
-    result_subdir = "artifact_detection"
+
+class ArtifactSegmentationPipeline(BaseCohortPipeline):
+    stage_name = "artifact_segmentation"
+    result_subdir = "artifact_segmentation"
     result_dir_name = "masks"
+
+    def set_tissue_src_from_pipeline(self, tissue_src):
+        self.tissue_src = tissue_src
 
     def output_exists(self, slide_path: Path) -> bool:
         return self.output_path(slide_path).exists()
@@ -17,7 +22,7 @@ class ArtifactDetectionPipeline(BaseCohortPipeline):
         tissue_source = getattr(self.config, "tissue_source", None)
 
         if tissue_source is None:
-            return None
+            return self.tissue_src
 
         if isinstance(tissue_source, dict):
             return tissue_source.get("dir")
