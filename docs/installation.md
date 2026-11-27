@@ -100,7 +100,9 @@ Check the installed package information:
 python -m pip show histokit
 ```
 
-## External models### GrandQC
+## External models
+
+### GrandQC
 
 GrandQC provides deep learning-based artifact segmentation for whole-slide images (WSIs).
 
@@ -123,15 +125,15 @@ The following model resolutions are available:
 
 | Resolution (µm/px) | Magnification |
 | :----------------- | :------------ |
-| MPP 1.0            | 10×           |
+| MPP 1.0            | ~10×          |
 | MPP 1.5            | ~7.5×         |
-| MPP 2.0            | 5×            |
+| MPP 2.0            | ~5×           |
 
 !!! tip "Model selection"
 
-    According to the original publication, higher magnification (lower MPP)
+    According to the article, higher magnification (lower MPP)
     provides more precise artifact segmentation, while lower magnification
-    offers faster processing with a minor reduction in accuracy.
+    offers faster processing with a minor reduction in artifact segmentation quality.
 
 #### Configuration
 

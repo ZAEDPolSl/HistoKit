@@ -43,6 +43,20 @@ If you use the tissue segmentation methods implemented in HistoKit, please also 
 }
 ```
 
+```bibtex
+    @article{Marczyk2020GaMRed,
+      author  = {Marczyk, Michal and Jaksik, Roman and Polanski, Andrzej and Polanska, Joanna},
+      title   = {{GaMRed}-Adaptive Filtering of High-Throughput Biological Data},
+      journal = {IEEE/ACM Transactions on Computational Biology and Bioinformatics},
+      year    = {2020},
+      volume  = {17},
+      number  = {1},
+      pages   = {149--157},
+      doi     = {10.1109/TCBB.2018.2858825},
+      url     = {https://doi.org/10.1109/TCBB.2018.2858825}
+    }
+```
+
 ## GrandQC-based Artifact Segmentation
 
 If you use the GrandQC-based artifact segmentation functionality included in HistoKit, please cite the original GrandQC publication:

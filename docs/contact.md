@@ -4,5 +4,5 @@ For questions about HistoKit, technical support, research collaboration, or lice
 
 - :material-bug-outline: **Bug Reports:** [GitHub Issues](https://github.com/your-org/HistoKit/issues)
 - :material-lightbulb-outline: **Feature Requests:** [GitHub Issues](https://github.com/your-org/HistoKit/issues)
-- :material-account-group-outline: **Research Collaboration:** Contact the project authors
-- :material-license: **Licensing & Permissions:** Contact the project authors
+- :material-account-group-outline: **Research Collaboration:** julia.merta@polsl.pl
+- :material-license: **Licensing & Permissions:** julia.merta@polsl.pl
