@@ -1,89 +1,154 @@
-# HistoKit
+<h1 align="center">HistoKit</h1>
 
-HistoKit is a Python package for processing Whole Slide Images (WSI).  
-It provides a toolkit for common operations in digital pathology workflows.
+<p align="center">
+  <strong>A Python toolkit for computational pathology and whole-slide image processing</strong>
+</p>
 
-<img width="1461" height="821" alt="obraz" src="https://github.com/user-attachments/assets/5987b387-7b6d-4a5e-9a8d-bff75968955e" />
+<p align="center">
+  <a href="https://zaedpolsl.github.io/HistoKit/">
+    <img src="https://img.shields.io/badge/Documentation-HistoKit-6750A4?style=flat-square&logo=materialformkdocs&logoColor=white" alt="Documentation">
+  </a>
+  <a href="https://www.python.org/">
+    <img src="https://img.shields.io/badge/Python-3.10-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
+  </a>
+  <a href="https://github.com/ZAEDPolSl/HistoKit/actions/workflows/docs.yml">
+    <img src="https://img.shields.io/github/actions/workflow/status/ZAEDPolSl/HistoKit/docs.yml?style=flat-square&label=docs" alt="Documentation status">
+  </a>
+  <a href="https://doi.org/10.5220/0000222000004070">
+    <img src="https://img.shields.io/badge/DOI-10.5220%2F0000222000004070-blue?style=flat-square" alt="DOI">
+  </a>
+</p>
 
+<p align="center">
+  <a href="#-quick-start">Quick Start</a> •
+  <a href="#-features">Features</a> •
+  <a href="https://zaedpolsl.github.io/HistoKit/">Documentation</a> •
+  <a href="#-citation">Citation</a>
+</p>
 
-## Features
+---
 
-- **Tissue detection** — identifies tissue regions within whole-slide images.
-- **Artifact detection** — uses the **GrandQC** deep learning model.
-- **Patch extraction** — tiles slides into patches at customizable magnification and stride.
-- **Augmentation & Stain Normalisation** — applies common augmentation methods and stain normalisation techniques.
-  
-## Installation
-### From remote repository
+**HistoKit** is a Python package designed to simplify whole-slide image
+(WSI) processing in digital and computational pathology research.
 
-The first way to use HistoKit is to download the source code from a remote repository. It is recommended to create a virtual environment with Anaconda or Venv. 
+It integrates tissue detection, artifact detection, patch extraction,
+stain normalization, and image augmentation into a unified toolkit,
+supporting histopathological image analysis and deep learning workflows.
 
-```
-conda create -n histokit python=3.12
-```
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5987b387-7b6d-4a5e-9a8d-bff75968955e" alt="HistoKit workflow overview" width="100%">
+</p>
 
-Then it is necessary to install the required dependencies from the requirements.txt file. Which can be done with the following command:
+## ✨ Features
+
+| Feature | Description |
+| :--- | :--- |
+| 🔬 **Tissue detection** | Identify tissue regions within whole-slide images and separate them from the background. |
+| 🧹 **Artifact detection** | Detect histological artifacts using GrandQC-based deep learning segmentation. |
+| 🧩 **Patch extraction** | Extract image patches with configurable size, magnification, and stride. |
+| 🎨 **Stain normalization** | Reduce staining variability using Macenko, Vahadane, and Reinhard normalization methods. |
+| 🔄 **Image augmentation** | Apply common image transformations for histopathological image analysis and deep learning workflows. |
+
+## 🚀 Quick Start
+
+### 1. Clone the repository
 
 ```bash
-pip install -r requirements.txt
+git clone https://github.com/ZAEDPolSl/HistoKit.git
+cd HistoKit
 ```
 
-Then OpenSlide library needs to be installed with:
+### 2. Create a Python environment
+
+We recommend using a dedicated Conda environment.
 
 ```bash
-pip install openslide-bin
-pip install openslide-python
+conda create -n histokit python=3.10 -y
+conda activate histokit
 ```
 
-To use the modified GrandQC artifact segmentation pipeline, download model weights from the GrandQC repository and update the configuration file `grandqc.yaml`
+### 3. Install HistoKit
+
+Install the required dependencies and the OpenSlide library:
 
 ```bash
-model_path: {Your Filepath}/GrandQC_MPP{MPP}.pth
-grandqc_mpp: {MPP}
-det_mag: {MAG}
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install openslide-bin openslide-python
 ```
 
-
-If everything is installed correctly, you can now use functions from the HistoKit package after extracting files from a .zip archive.
-
-### As a local pip package
-
-You can also install the package from a .zip archive with pip. To do that, repeat the steps described in the previous section, but now you don’t need to extract the files. You just have to install HistoKit from your .zip file with the following command:
+Install HistoKit as a Python package:
 
 ```bash
-pip install {path-to-histokit-archive}.zip
+python -m pip install .
 ```
 
-## Documentation and Examples
+Alternatively, HistoKit can be installed from a downloaded ZIP archive.
 
-[HistoKit Documentation](https://zaedpolsl.github.io/HistoKit)
+📖 For detailed installation instructions, alternative installation
+methods, and configuration options, see the
+[Installation Guide](https://zaedpolsl.github.io/HistoKit/installation/).
 
-## References
+### 🧠 Optional: GrandQC Artifact Segmentation
 
-> [!IMPORTANT]
-> **If you use HistoKit in your research, please cite the publications listed below.**
->
-> **HistoKit is provided for non-commercial use only.**
->
-> Under the **CC BY-NC-ND 4.0** license, you may:
-> - Use HistoKit for **non-commercial purposes**, including academic research.
-> - Use HistoKit **as provided, without modification**.
-> - Include the **unmodified HistoKit as a separate component or dependency** in a non-commercial research project, subject to the license terms. HistoKit must remain clearly identified as third-party software, with clear attribution to the original authors and the applicable license information. Examples:
->   - use the original, unmodified HistoKit as a Python dependency imported by your own software, with clear attribution to the original HistoKit authors;
->   - install and use the original, unmodified HistoKit within a non-commercial research pipeline or container, with clear attribution to the original HistoKit authors.
-> - Share or redistribute the **original, unmodified version** with proper attribution and license information.
-> - Modify HistoKit for **private/internal use**, provided that the modified version is **not distributed**.
-> - Publish research results produced using HistoKit, with the requested citations.
->
-> Any use of HistoKit is subject to the terms of the **Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International (CC BY-NC-ND 4.0)** license. Please review the license before using or redistributing the software.
->
-> HistoKit is provided **"as is"**, without warranties of any kind. The authors assume no responsibility for errors, software failures, implementation issues, or other problems arising from its use.
->
-> For more information about the license: https://creativecommons.org/licenses/by-nc-nd/4.0/deed.en
->
-> **Third-party components:** The GrandQC model and its associated components are distributed under their own license and are subject to the terms of that license.
+HistoKit integrates GrandQC for deep learning-based artifact segmentation
+in whole-slide images.
 
-#### Cite the first version of HistoKit (v1.0.0)
+This functionality requires pretrained model weights and additional
+configuration.
+
+- 📥 [Download pretrained GrandQC models from Zenodo](https://zenodo.org/records/14041538)
+- ⚙️ [Model installation and configuration](https://zaedpolsl.github.io/HistoKit/installation/)
+- 📄 [GrandQC paper](https://doi.org/10.1038/s41467-024-54769-y)
+- 💻 [Original GrandQC repository](https://github.com/cpath-ukk/grandqc)
+- 📜 [GrandQC license](https://github.com/cpath-ukk/grandqc?tab=License-1-ov-file)
+
+GrandQC is a third-party model intended for academic, non-commercial use only.
+It is distributed under its own license. Please refer to the original
+repository and license for detailed terms of use.
+
+If you use GrandQC-based artifact segmentation in HistoKit,
+please also cite the original GrandQC publication:
+
+> Weng, Z. et al. (2024).  
+> **GrandQC: A comprehensive solution to quality control problem in digital pathology.**  
+> Nature Communications, 15, 10685.
+
+## 📚 Documentation
+
+The HistoKit documentation provides detailed installation instructions,
+configuration options, practical examples, tutorials, API reference,
+and scientific references.
+
+<p align="center">
+  <a href="https://zaedpolsl.github.io/HistoKit/">
+    <img src="https://img.shields.io/badge/Explore%20the%20Documentation-6750A4?style=for-the-badge&logo=materialformkdocs&logoColor=white" alt="Explore the Documentation">
+  </a>
+</p>
+
+| Resource | Description |
+| :--- | :--- |
+| 🚀 [Installation Guide](https://zaedpolsl.github.io/HistoKit/installation/) | Environment setup, dependencies, and model configuration. |
+| 🎓 [Tutorials and Examples](https://zaedpolsl.github.io/HistoKit/examples/) | Practical examples and image processing workflows. |
+| ⚙️ [API Reference](https://zaedpolsl.github.io/HistoKit/api/) | Python modules, classes, and functions. |
+| 📝 [Citations](https://zaedpolsl.github.io/HistoKit/citations/) | Scientific references and method-specific citations. |
+| 📄 [License](https://zaedpolsl.github.io/HistoKit/license/) | Terms of use and third-party licensing information. |
+
+## 📝 Citation
+
+If you use HistoKit in your research, please cite our original publication:
+
+> Merta, J., & Marczyk, M. (2026).  
+> **HistoKit: Fast and Accurate Tissue and Artifact Detection and Data Processing for Whole Slide Histopathological Imaging.**  
+> Proceedings of the 19th International Joint Conference on Biomedical
+> Engineering Systems and Technologies (BIOSTEC 2026).
+
+[![DOI](https://img.shields.io/badge/DOI-10.5220%2F0000222000004070-blue?style=flat-square)](https://doi.org/10.5220/0000222000004070)
+
+<details>
+<summary>📋 BibTeX citation</summary>
+
+<br>
 
 ```bibtex
 @inproceedings{Merta2026HistoKit,
@@ -101,105 +166,52 @@ pip install {path-to-histokit-archive}.zip
 }
 ```
 
-#### Cite Tissue Segmentation Post-processing
+</details>
 
-If you use the tissue segmentation post-processing methods included in HistoKit, please cite:
+For additional citations associated with individual methods, including
+tissue segmentation post-processing, GrandQC, and stain normalization,
+please refer to the
+[full citation guide](https://zaedpolsl.github.io/HistoKit/citations/).
 
-```bibtex
-@inproceedings{Marczyk2025PostProcessing,
-  author    = {Marczyk, M. and Wrobel, A. and Merta, J. and Polanska, J.},
-  title     = {Post-Processing of Thresholding or Deep Learning Methods for Enhanced Tissue Segmentation of Whole-Slide Histopathological Images},
-  booktitle = {Proceedings of the 18th International Joint Conference on Biomedical Engineering Systems and Technologies (BIOIMAGING 2025), Volume 1},
-  pages     = {229--238},
-  publisher = {SciTePress},
-  year      = {2025},
-  isbn      = {978-989-758-731-3},
-  doi       = {10.5220/0013174700003911},
-  url       = {https://doi.org/10.5220/0013174700003911},
-  note      = {GitHub: https://github.com/ZAEDPolSl/WSI_TissueSeg}
-}
-```
+## 🙏 Acknowledgements
 
+We gratefully acknowledge the authors of the following projects for
+making their implementations and resources publicly available:
 
+- [GrandQC](https://github.com/cpath-ukk/grandqc) — deep learning-based
+  quality control and artifact segmentation in digital pathology.
+- [StainTools](https://github.com/Peter554/StainTools) — stain normalization
+  methods for histopathological images.
 
-### GrandQC-based Artifact Segmentation
+## 💬 Contact & Feedback
 
-If you use the **GrandQC-based artifact segmentation model**, GrandQC itself, or the associated benchmark in your research, you must cite the original GrandQC publication:
+We welcome feedback, questions, and suggestions from the research community.
 
-> Weng, Z. et al. *GrandQC: A comprehensive solution to quality control problem in digital pathology*.
-> **Nature Communications** 15, 10685 (2024).
-> DOI: https://doi.org/10.1038/s41467-024-54769-y
+- 🐛 [Report an issue](https://github.com/ZAEDPolSl/HistoKit/issues)
+- 💡 [Suggest a feature](https://github.com/ZAEDPolSl/HistoKit/issues/new)
 
-We would like to thank GrandQC Authors for making their implementation and model weights publicly available.
+If you find HistoKit useful in your research, consider giving this repository a ⭐.
 
-```bibtex
-@article{Weng2024GrandQC,
-  author  = {Weng, Z. and Seper, A. and Pryalukhin, A. and others},
-  title   = {GrandQC: A comprehensive solution to quality control problem in digital pathology},
-  journal = {Nature Communications},
-  volume  = {15},
-  pages   = {10685},
-  year    = {2024},
-  doi     = {10.1038/s41467-024-54769-y},
-  url     = {https://doi.org/10.1038/s41467-024-54769-y},
-  note    = {GitHub: https://github.com/cpath-ukk/grandqc}
-}
-```
+## 📄 License
 
-For more information about GrandQC, see the original repository:
+HistoKit is available for non-commercial use under the
+[Creative Commons Attribution-NonCommercial-NoDerivatives 4.0 International
+(CC BY-NC-ND 4.0)](https://creativecommons.org/licenses/by-nc-nd/4.0/) license.
 
-* **GrandQC repository:** https://github.com/cpath-ukk/grandqc
-* **GrandQC license:** https://github.com/cpath-ukk/grandqc?tab=License-1-ov-file
+For detailed terms of use, permitted applications, and third-party
+licensing information, please refer to the
+[License documentation](https://zaedpolsl.github.io/HistoKit/license/).
 
-> [!IMPORTANT]
-> **GrandQC is provided for non-commercial, academic use only.**
+---
 
-### Stain Normalization
-#### Macenko normalization
+<p align="center">
+  <strong>HistoKit</strong><br>
+  <sub>Developed for digital and computational pathology research.</sub>
+</p>
 
-```bibtex
-@inproceedings{Macenko2009,
-  author    = {Macenko, Marc and Niethammer, Marc and Marron, J. S. and Borland, David and Woosley, John T. and Guan, Xiaojun and Schmitt, Charles and Thomas, Nancy E.},
-  title     = {A method for normalizing histology slides for quantitative analysis},
-  booktitle = {2009 IEEE International Symposium on Biomedical Imaging: From Nano to Macro},
-  pages     = {1107--1110},
-  year      = {2009},
-  doi       = {10.1109/ISBI.2009.5193250}
-}
-```
-
-#### Vahadane normalization
-
-```bibtex
-@article{Vahadane2016,
-  author  = {Vahadane, Abhishek and Peng, Tingying and Sethi, Alok and Albarqouni, Shadi and Wang, Lichao and Baust, Maximilian and Steiger, Katja and Schlitter, Anna Melissa and Esposito, Irene and Navab, Nassir},
-  title   = {Structure-Preserving Color Normalization and Sparse Stain Separation for Histological Images},
-  journal = {IEEE Transactions on Medical Imaging},
-  volume  = {35},
-  number  = {8},
-  pages   = {1962--1971},
-  year    = {2016},
-  doi     = {10.1109/TMI.2016.2529665}
-}
-```
-
-#### Reinhard normalization
-
-```bibtex
-@article{Reinhard2001,
-  author  = {Reinhard, Erik and Adhikhmin, Michael and Gooch, Bruce and Shirley, Peter},
-  title   = {Color transfer between images},
-  journal = {IEEE Computer Graphics and Applications},
-  volume  = {21},
-  number  = {5},
-  pages   = {34--41},
-  year    = {2001},
-  doi     = {10.1109/38.946629}
-}
-```
-
-#### StainTools acknowledgement
-
-We thank **Peter Byfield** for making **StainTools** publicly available and for providing an open-source implementation of stain normalization methods for histopathology images.
-> **StainTools repository:** https://github.com/Peter554/StainTools  
+<p align="center">
+  <a href="https://zaedpolsl.github.io/HistoKit/">Documentation</a> •
+  <a href="https://github.com/ZAEDPolSl/HistoKit">GitHub</a> •
+  <a href="https://doi.org/10.5220/0000222000004070">Publication</a>
+</p>
 
