@@ -1,6 +1,6 @@
-### GaMRed-based Tissue Detection
+### GaMRed-based Tissue Segmentation
 
-HistoKit implements a tissue detection method based on the **GaMRed algorithm** (Marczyk et al., 2020), which combines Gaussian Mixture Model (GMM) decomposition of color intensity distributions with adaptive thresholding and morphological post-processing. The method was selected for its robustness to inter-slide color variability and effective refinement of tissue segmentation masks.
+HistoKit implements a tissue segmentation method based on the **GaMRed algorithm** (Marczyk et al., 2020), which combines Gaussian Mixture Model (GMM) decomposition of color intensity distributions with adaptive thresholding and morphological post-processing. The method was selected for its robustness to inter-slide color variability and effective refinement of tissue segmentation masks.
 
 #### Segmentation algorithm
 
@@ -103,7 +103,7 @@ collectors:
 | Parameter | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `vis_mag` | `float` | `2.5` | Magnification used to generate visualization outputs. |
-| `tissdet_mag` | `float` | `4` | Magnification at which tissue detection and mask post-processing are performed. |
+| `tissdet_mag` | `float` | `4` | Magnification at which tissue segmentation and mask post-processing are performed. |
 
 !!! note "Processing magnification"
 

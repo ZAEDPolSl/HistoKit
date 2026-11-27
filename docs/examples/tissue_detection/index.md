@@ -1,11 +1,11 @@
-# Tissue detection
+# Tissue Segmentation
 
-Tissue detection is a fundamental step in whole-slide image (WSI)
+Tissue segmentation is a fundamental step in whole-slide image (WSI)
 processing. Its primary objective is to distinguish tissue regions
 from the slide background, enabling subsequent image analysis to
 focus on relevant areas.
 
-By excluding background regions, tissue detection reduces computational
+By excluding background regions, tissue segmentation reduces computational
 cost, improves patch extraction efficiency, and supports downstream
 computational pathology workflows.
 
@@ -28,7 +28,7 @@ HistoKit provides configurable tissue detection pipelines supporting:
 
 ## Choosing a method
 
-The choice of tissue detection method and its configuration depends on
+The choice of tissue segmentation method and its configuration depends on
 the characteristics of the input slides, including staining variability,
 tissue morphology, image resolution, and the presence of artifacts.
 
