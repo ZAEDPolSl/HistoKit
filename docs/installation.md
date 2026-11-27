@@ -100,6 +100,58 @@ Check the installed package information:
 python -m pip show histokit
 ```
 
+## External models### GrandQC
+
+GrandQC provides deep learning-based artifact segmentation for whole-slide images (WSIs).
+
+!!! warning "License and citation requirements"
+
+    GrandQC is available for academic research and non-commercial use only.
+    See [license.md](./license.md) for licensing details.
+
+    If you use GrandQC, please cite the original publication:
+
+    [:material-format-quote-close: Weng et al. (2024). GrandQC: A comprehensive solution to quality control problem in digital pathology. Nature Communications, 15, 10685.](https://doi.org/10.1038/s41467-024-54769-y)
+
+#### Model download
+
+To use GrandQC-based artifact segmentation, download the pretrained model weights from the external repository:
+
+[:material-download: Download GrandQC models from Zenodo](https://zenodo.org/records/14041538)
+
+The following model resolutions are available:
+
+| Resolution (µm/px) | Magnification |
+| :----------------- | :------------ |
+| MPP 1.0            | 10×           |
+| MPP 1.5            | ~7.5×         |
+| MPP 2.0            | 5×            |
+
+!!! tip "Model selection"
+
+    According to the original publication, higher magnification (lower MPP)
+    provides more precise artifact segmentation, while lower magnification
+    offers faster processing with a minor reduction in accuracy.
+
+#### Configuration
+
+After downloading the selected model, update the `model_path` parameter
+in the `config/grandqc.yaml` configuration file to point to the downloaded
+model weights.
+
+```yaml title="config/grandqc.yaml" hl_lines="7"
+# output
+saver: hdf5
+out_dir: ./outputs/
+save_mag: 10.0
+
+# model
+model_path: /path/to/models/GrandQC_MPP1.pth
+```
+
+Replace the example `model_path` with the actual path to your downloaded model file.
+
+
 ## Troubleshooting
 
 ### HistoKit Cannot Be Imported
